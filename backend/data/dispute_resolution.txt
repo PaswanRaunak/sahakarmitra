@@ -1,0 +1,20 @@
+Maharashtra Cooperative Societies Act, 1960: Dispute Resolution and Appeals
+
+Section 91: Disputes referred to the Registrar
+(1) If any dispute concerning the business of a society arises among members, or between a member and the society, or its committee, or between the society or its committee and any past committee member or the heirs of a deceased committee member, such dispute shall be referred to the Registrar for decision.
+(2) The dispute may relate to:
+(a) the recovery of any sum due by a member;
+(b) the recovery of possession of any property belonging to the society;
+(c) the removal of an office-bearer or committee member;
+(d) any matter arising out of the interpretation of the by-laws of the society.
+
+Section 92: Decision of the Registrar
+The Registrar shall, after giving the parties a reasonable opportunity of being heard, decide the dispute and may make such orders as he deems necessary for the disposal of the dispute.
+The decision of the Registrar shall be enforceable as if it were a decree of a civil court and shall be final, subject to an appeal to the Co-operative Appellate Court constituted under section 96.
+
+Section 96: Appeal to the Co-operative Appellate Court
+Any party aggrieved by the decision of the Registrar under section 92 may, within sixty days from the date of the communication of the decision, prefer an appeal to the Co-operative Appellate Court.
+The Co-operative Appellate Court may, after notice to the parties, confirm, set aside, or modify the decision of the Registrar and shall pass such orders as it deems fit.
+
+Section 101: Recovery of losses
+Where, in the course of an audit or inquiry or inspection, it is found that any loss has been caused to the society by an office-bearer or committee member or employee thereof, the Registrar may, after giving such person a reasonable opportunity of being heard, assess the loss and direct the person to make good the loss within such time as may be specified.
