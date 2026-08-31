@@ -40,16 +40,18 @@
 
 ```mermaid
 graph TD
-    A[User Browser / React 18 + Vite] -->|POST /api/chat/stream| B[Express Backend API :5000]
-    B -->|1. Document / OCR Parsing| C[pdf-parse & Tesseract OCR]
-    B -->|2. Generate Query Vector| D[@xenova/transformers / all-MiniLM-L6-v2]
-    D -->|3. Top-3 Vector Search| E[(ChromaDB :8000 sahakarmitra_laws)]
-    E -->|4. Statutory Law Chunks| B
-    B -->|5. Multi-Provider Fallback| F{LLM Engine}
-    F -->|Priority 1| G[Groq API / openai/gpt-oss-120b]
-    F -->|Priority 2| H[OpenRouter API / openrouter/free]
-    F -->|Priority 3| I[Ollama Local / llama3]
-    G & H & I -->|6. SSE Token Stream| A
+    A["User Browser / React 18 + Vite"] -->|"POST /api/chat/stream"| B["Express Backend API :5000"]
+    B -->|"1. Document / OCR Parsing"| C["pdf-parse & Tesseract OCR"]
+    B -->|"2. Generate Query Vector"| D["@xenova/transformers / all-MiniLM-L6-v2"]
+    D -->|"3. Top-3 Vector Search"| E[("ChromaDB :8000 sahakarmitra_laws")]
+    E -->|"4. Statutory Law Chunks"| B
+    B -->|"5. Multi-Provider Fallback"| F{"LLM Engine"}
+    F -->|"Priority 1"| G["Groq API / openai/gpt-oss-120b"]
+    F -->|"Priority 2"| H["OpenRouter API / openrouter/free"]
+    F -->|"Priority 3"| I["Ollama Local / llama3"]
+    G -->|"6. SSE Token Stream"| A
+    H -->|"6. SSE Token Stream"| A
+    I -->|"6. SSE Token Stream"| A
 ```
 
 ---
