@@ -5,100 +5,246 @@ import { makeT }    from '../i18n.js';
 
 /**
  * Format markdown text strings into rich HTML components:
+ * - Headings: # ## ### -> Styled Typography Headings
  * - Bold text: **text** -> <strong>
- * - Numbered steps: 1. **Heading** - Text -> Numbered list
+ * - Bracket Badges: [ Tag1 | Tag2 ] -> Styled Tag Pills
+ * - Lists: 1. Numbered or - Bulleted -> Styled Lists
+ * - Tables: | Col1 | Col2 | -> Styled Tailwind HTML Tables
+ * - Blockquotes: > quote -> Styled Callout Box
  * - Section references: (Section X) -> Clean inline SVG badge
  */
 function renderFormattedContent(text) {
   if (!text) return null;
 
-  // Split text into paragraphs by blank lines or single linebreaks
-  const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+  // Split into block paragraphs separated by empty lines
+  const rawParagraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
 
-  return paragraphs.map((para, pIdx) => {
-    const lines = para.split('\n').filter(l => l.trim().length > 0);
+  return rawParagraphs.map((block, bIdx) => {
+    const lines = block.split('\n').filter(l => l.trim().length > 0);
+    const firstLine = lines[0].trim();
 
-    // Check if lines are part of a numbered list e.g. "1. **Title** - Content"
-    const isNumbered = lines.length > 1 && lines.every(line => /^\d+\.\s+/.test(line.trim()));
-    const isBulleted = lines.length > 1 && lines.every(line => /^[-*•]\s+/.test(line.trim()));
+    // 1. Horizontal Rule (--- or ___ or ***)
+    if (/^(---|___|\*\*\*)$/.test(firstLine)) {
+      return <hr key={bIdx} className="my-4 border-t border-stone-200" />;
+    }
 
-    if (isNumbered) {
+    // 2. Headings (# Heading, ## Heading, ### Heading, #### Heading)
+    if (/^#{1,6}\s+/.test(firstLine)) {
+      const match = firstLine.match(/^(#{1,6})\s+(.*)/);
+      const level = match[1].length;
+      const title = match[2];
+
+      if (level <= 2) {
+        return (
+          <h2 key={bIdx} className="text-base sm:text-lg font-black text-stone-900 mt-5 mb-2.5 pb-1 border-b border-amber-200/60 flex items-center gap-2">
+            <span className="w-2 h-4 bg-[#a03612] rounded-full inline-block"></span>
+            <span>{parseInlineFormatting(title)}</span>
+          </h2>
+        );
+      } else if (level === 3) {
+        return (
+          <h3 key={bIdx} className="text-sm sm:text-base font-bold text-[#a03612] mt-4 mb-2 flex items-center gap-2">
+            <span>{parseInlineFormatting(title)}</span>
+          </h3>
+        );
+      } else {
+        return (
+          <h4 key={bIdx} className="text-xs sm:text-sm font-bold text-stone-800 mt-3 mb-1.5 uppercase tracking-wider">
+            {parseInlineFormatting(title)}
+          </h4>
+        );
+      }
+    }
+
+    // 3. Markdown Tables (| Col 1 | Col 2 |)
+    const isTable = lines.length >= 2 && lines.every(l => l.trim().startsWith('|') && l.trim().endsWith('|'));
+    if (isTable) {
+      const rows = lines.map(line =>
+        line.split('|').map(cell => cell.trim()).filter((cell, idx, arr) => idx > 0 && idx < arr.length - 1)
+      );
+      const headerRow = rows[0];
+      const dataRows = rows.slice(2).filter(row => row.length > 0);
+
       return (
-        <ol key={pIdx} className="space-y-3 my-3 pl-1">
-          {lines.map((line, lIdx) => {
-            const match = line.match(/^(\d+)\.\s+(.*)/);
-            const num = match ? match[1] : lIdx + 1;
-            const content = match ? match[2] : line;
-            return (
-              <li key={lIdx} className="flex items-start gap-3 text-xs sm:text-sm leading-relaxed text-stone-800 animate-slide-up" style={{ animationDelay: `${lIdx * 0.05}s` }}>
-                <span className="w-5 h-5 rounded-full bg-amber-100 text-[#a03612] font-bold text-[11px] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">
-                  {num}
-                </span>
-                <span className="flex-1">{parseInlineFormatting(content)}</span>
-              </li>
-            );
-          })}
-        </ol>
+        <div key={bIdx} className="my-4 overflow-x-auto rounded-xl border border-stone-200/90 shadow-xs bg-white">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="bg-amber-50/90 border-b border-stone-200 text-stone-900 font-bold">
+                {headerRow.map((cell, cIdx) => (
+                  <th key={cIdx} className="px-3 py-2 border-r last:border-r-0 border-stone-200/70">
+                    {parseInlineFormatting(cell)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {dataRows.map((row, rIdx) => (
+                <tr key={rIdx} className="border-b last:border-b-0 border-stone-100 hover:bg-stone-50/80 transition">
+                  {row.map((cell, cIdx) => (
+                    <td key={cIdx} className="px-3 py-2 border-r last:border-r-0 border-stone-100 text-stone-700 leading-relaxed">
+                      {parseInlineFormatting(cell)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       );
     }
 
-    if (isBulleted) {
+    // 4. Blockquotes (> text)
+    if (lines.every(l => l.trim().startsWith('>'))) {
+      const quoteText = lines.map(l => l.replace(/^>\s*/, '')).join(' ');
       return (
-        <ul key={pIdx} className="space-y-2 my-2.5 pl-1">
-          {lines.map((line, lIdx) => {
-            const content = line.replace(/^[-*•]\s+/, '');
-            return (
-              <li key={lIdx} className="flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed text-stone-800 animate-slide-up" style={{ animationDelay: `${lIdx * 0.05}s` }}>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#a03612] flex-shrink-0 mt-2"></span>
-                <span className="flex-1">{parseInlineFormatting(content)}</span>
-              </li>
-            );
-          })}
-        </ul>
+        <blockquote key={bIdx} className="my-3 pl-4 py-2 border-l-4 border-[#a03612] bg-amber-50/50 rounded-r-xl text-xs sm:text-sm text-stone-800 italic">
+          {parseInlineFormatting(quoteText)}
+        </blockquote>
       );
     }
 
-    // Standard Paragraph
+    // 5. Line-by-Line Processing (Lists, bullet points, headers, paragraphs)
+    const processedElements = [];
+    let currentList = null;
+
+    lines.forEach((line, lIdx) => {
+      const trimmed = line.trim();
+
+      // Numbered List Item
+      const numMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
+      if (numMatch) {
+        if (currentList?.type !== 'ol') {
+          currentList = { type: 'ol', items: [] };
+          processedElements.push(currentList);
+        }
+        currentList.items.push({ num: numMatch[1], content: numMatch[2] });
+        return;
+      }
+
+      // Bullet List Item
+      const bulletMatch = trimmed.match(/^[-*•]\s+(.*)/);
+      if (bulletMatch) {
+        if (currentList?.type !== 'ul') {
+          currentList = { type: 'ul', items: [] };
+          processedElements.push(currentList);
+        }
+        currentList.items.push({ content: bulletMatch[1] });
+        return;
+      }
+
+      // Heading embedded in line
+      if (/^#{1,6}\s+/.test(trimmed)) {
+        currentList = null;
+        const match = trimmed.match(/^(#{1,6})\s+(.*)/);
+        processedElements.push({ type: 'heading', level: match[1].length, title: match[2] });
+        return;
+      }
+
+      // Standard text line
+      currentList = null;
+      processedElements.push({ type: 'text', content: line });
+    });
+
     return (
-      <p key={pIdx} className="mb-3 last:mb-0 text-xs sm:text-sm leading-relaxed text-stone-800">
-        {lines.map((line, lIdx) => (
-          <React.Fragment key={lIdx}>
-            {parseInlineFormatting(line)}
-            {lIdx < lines.length - 1 && <br />}
-          </React.Fragment>
-        ))}
-      </p>
+      <div key={bIdx} className="mb-3.5 last:mb-0 space-y-2">
+        {processedElements.map((item, iIdx) => {
+          if (item.type === 'ol') {
+            return (
+              <ol key={iIdx} className="space-y-2.5 my-2.5 pl-1">
+                {item.items.map((it, idx) => (
+                  <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed text-stone-800">
+                    <span className="w-5 h-5 rounded-full bg-amber-100/90 text-[#a03612] font-bold text-[11px] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs border border-amber-200/60">
+                      {it.num}
+                    </span>
+                    <span className="flex-1">{parseInlineFormatting(it.content)}</span>
+                  </li>
+                ))}
+              </ol>
+            );
+          }
+
+          if (item.type === 'ul') {
+            return (
+              <ul key={iIdx} className="space-y-2 my-2 pl-1">
+                {item.items.map((it, idx) => (
+                  <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed text-stone-800">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#a03612] flex-shrink-0 mt-2"></span>
+                    <span className="flex-1">{parseInlineFormatting(it.content)}</span>
+                  </li>
+                ))}
+              </ul>
+            );
+          }
+
+          if (item.type === 'heading') {
+            return (
+              <h4 key={iIdx} className="text-xs sm:text-sm font-bold text-[#a03612] mt-3 mb-1 uppercase tracking-wider">
+                {parseInlineFormatting(item.title)}
+              </h4>
+            );
+          }
+
+          return (
+            <p key={iIdx} className="text-xs sm:text-sm leading-relaxed text-stone-800">
+              {parseInlineFormatting(item.content)}
+            </p>
+          );
+        })}
+      </div>
     );
   });
 }
 
 /**
- * Parse inline **bold** syntax and (Section X) legal tags
+ * Parse inline **bold** syntax, [ Tag1 | Tag2 ] pills, and (Section X) legal tags
  */
 function parseInlineFormatting(str) {
   if (!str) return '';
 
-  // Split by ** bold syntax
-  const parts = str.split(/(\*\*.*?\*\*)/g);
+  // Check if line matches bracketed tags e.g. "[ Issue | Relevant Provision | Description ]"
+  const bracketMatch = str.match(/^\[\s*(.*?)\s*\]$/);
+  if (bracketMatch && bracketMatch[1].includes('|')) {
+    const tags = bracketMatch[1].split('|').map(t => t.trim());
+    return (
+      <span className="inline-flex flex-wrap gap-1.5 my-1.5">
+        {tags.map((tag, idx) => (
+          <span
+            key={idx}
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border shadow-xs flex items-center gap-1 ${
+              idx === 0
+                ? 'bg-amber-100/90 text-[#a03612] border-amber-300/80'
+                : idx === 1
+                ? 'bg-teal-50 text-[#2d6a68] border-teal-200'
+                : 'bg-stone-100 text-stone-700 border-stone-200'
+            }`}
+          >
+            {tag}
+          </span>
+        ))}
+      </span>
+    );
+  }
+
+  // Parse bold **text** and code `text`
+  const parts = str.split(/(\*\*.*?\*\*|`.*?`)/g);
 
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      const inner = part.slice(2, -2);
-      return (
-        <strong key={i} className="font-bold text-stone-900">
-          {inner}
-        </strong>
-      );
+      return <strong key={i} className="font-bold text-stone-900">{part.slice(2, -2)}</strong>;
     }
 
-    // Highlight (Section X) or (Sections X and Y) references
+    if (part.startsWith('`') && part.endsWith('`')) {
+      return <code key={i} className="bg-stone-100 text-[#a03612] px-1.5 py-0.5 rounded font-mono text-[11px] border border-stone-200">{part.slice(1, -1)}</code>;
+    }
+
+    // Highlight (Section X) legal tags
     const sectionRegex = /(\(Section[s]?\s+[0-9A-Z\s,()&a-z-]+\))/gi;
     const sectionParts = part.split(sectionRegex);
 
     return sectionParts.map((secPart, j) => {
       if (/^\(Section[s]?\s+[0-9A-Z\s,()&a-z-]+\)$/i.test(secPart)) {
         return (
-          <span key={j} className="inline-flex items-center gap-1 font-semibold text-[#2d6a68] bg-teal-50/90 px-2 py-0.5 mx-0.5 rounded-md border border-teal-200/80 text-[11px] font-mono shadow-xs transform hover:scale-105 transition">
+          <span key={j} className="inline-flex items-center gap-1 font-semibold text-[#2d6a68] bg-teal-50 px-2 py-0.5 mx-0.5 rounded-md border border-teal-200/80 text-[11px] font-mono shadow-xs">
             <svg className="w-3 h-3 text-[#2d6a68]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -204,19 +350,16 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
                     );
                   }
 
-                  // Non-image document badge
                   return (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-xs backdrop-blur-sm shadow-xs"
+                      className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-white text-xs shadow-xs"
                     >
-                      <div className="w-6 h-6 rounded-lg bg-amber-400 text-stone-950 font-bold text-[9px] flex items-center justify-center uppercase tracking-tight">
-                        {att.name?.split('.').pop() || 'DOC'}
-                      </div>
-                      <div className="truncate max-w-[160px]">
-                        <p className="font-semibold text-white truncate text-[11px]">{att.name}</p>
-                        {att.size && <p className="text-[9px] text-white/70">{formatFileSize(att.size)}</p>}
-                      </div>
+                      <svg className="w-4 h-4 text-amber-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span className="font-semibold truncate max-w-[160px]">{att.name}</span>
+                      {att.size && <span className="text-[10px] text-white/70">({formatFileSize(att.size)})</span>}
                     </div>
                   );
                 })}
@@ -224,133 +367,118 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
             </div>
           )}
 
-          {/* User Message Text */}
-          {isUser ? (
-            message.text && (
-              <div className="text-xs sm:text-sm leading-relaxed font-medium">
-                {message.text}
-              </div>
-            )
-          ) : (
-            /* Bot Formatted Rich Text Response */
-            <div className="space-y-1">
+          {/* Message Text with Rich HTML Formatting */}
+          {message.text && (
+            <div className="prose prose-stone max-w-none">
               {renderFormattedContent(message.text)}
-              {/* Streaming caret */}
-              {message.streaming && (
-                <span className="inline-block w-2 h-4 bg-[#a03612] animate-pulse rounded-sm align-middle" aria-hidden="true" />
-              )}
             </div>
           )}
 
-          {/* Sources & Citations Section */}
-          {!isUser && message.sources && message.sources.length > 0 && (
+          {/* Streaming indicator */}
+          {message.streaming && (
+            <div className="flex items-center gap-1.5 mt-2 text-xs font-semibold text-[#a03612] animate-pulse">
+              <div className="w-2 h-2 rounded-full bg-[#a03612] animate-ping" />
+              <span>Generating legal answer...</span>
+            </div>
+          )}
+
+          {/* Citations section */}
+          {!isUser && Array.isArray(message.sources) && message.sources.length > 0 && (
             <div className="mt-4 pt-3 border-t border-stone-200/80 space-y-2">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-[#a03612] flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5 text-[#a03612]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#a03612]">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
                 <span>{t('sourcesHeading')}</span>
               </div>
+
               <div className="space-y-2">
-                {message.sources.map((src, i) => (
-                  <CitationCard key={i} source={src} index={i} language={language} />
+                {message.sources.map((src, index) => (
+                  <CitationCard key={index} source={src} index={index + 1} language={language} />
                 ))}
               </div>
             </div>
           )}
 
-          {/* Message actions: copy / feedback / regenerate / retry */}
-          {!isUser && !isError && message.text && !message.streaming && (
-            <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center flex-wrap gap-x-3 gap-y-1.5 text-[11px] text-stone-500">
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="inline-flex items-center gap-1 hover:text-[#a03612] transition font-semibold"
-                title={t('copyAnswer')}
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                {copied ? t('copied') : t('copyAnswer')}
-              </button>
-
-              {isLastBot && onRegenerate && (
-                <button
-                  type="button"
-                  onClick={() => onRegenerate(message)}
-                  className="inline-flex items-center gap-1 hover:text-[#a03612] transition font-semibold"
-                  title={t('regenerate')}
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  {t('regenerate')}
-                </button>
-              )}
-
-              <span className="inline-flex items-center gap-2 ml-auto">
-                {feedback ? (
-                  <span className="text-emerald-700 font-semibold flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-                    </svg>
-                    {t('thanksFeedback')}
-                  </span>
-                ) : (
-                  <>
-                    <span className="text-stone-400">{t('wasHelpful')}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleFeedback('up')}
-                      className="p-1 rounded hover:bg-emerald-50 hover:text-emerald-700 transition"
-                      title="👍"
-                      aria-label="Helpful"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleFeedback('down')}
-                      className="p-1 rounded hover:bg-rose-50 hover:text-rose-700 transition rotate-180"
-                      title="👎"
-                      aria-label="Not helpful"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                      </svg>
-                    </button>
-                  </>
-                )}
-              </span>
-            </div>
-          )}
-
-          {/* Error actions: retry */}
+          {/* Error actions: Retry */}
           {isError && onRetry && message.retryText && (
-            <div className="mt-3 pt-2.5 border-t border-rose-200/70">
+            <div className="mt-3 pt-2 border-t border-rose-200/80 flex items-center justify-between">
+              <span className="text-[11px] text-rose-700 font-medium">Failed to reach AI service</span>
               <button
-                type="button"
                 onClick={() => onRetry(message)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-rose-200 hover:bg-rose-100 text-rose-800 rounded-full text-[11px] font-bold transition"
+                className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center gap-1"
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                {t('retry')}
+                <span>{t('retry')}</span>
               </button>
             </div>
           )}
+
+          {/* Bot Action Bar: Copy + Regenerate + Feedback */}
+          {!isUser && !isError && !message.streaming && (
+            <div className="mt-3 pt-2 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-500 font-medium">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleCopy}
+                  className="flex items-center gap-1 hover:text-stone-800 transition"
+                  title={t('copyAnswer')}
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 012-2v-8a2 2 0 01-2-2h-8a2 2 0 01-2 2v8a2 2 0 012 2z" />
+                  </svg>
+                  <span>{copied ? t('copied') : t('copyAnswer')}</span>
+                </button>
+
+                {isLastBot && onRegenerate && (
+                  <button
+                    onClick={() => onRegenerate(message)}
+                    className="flex items-center gap-1 hover:text-stone-800 transition"
+                    title={t('regenerate')}
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>{t('regenerate')}</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Thumbs Up / Down Feedback */}
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-stone-400 hidden sm:inline">{t('wasHelpful')}</span>
+                <button
+                  onClick={() => handleFeedback('up')}
+                  className={`p-1 rounded hover:bg-stone-100 transition ${feedback === 'up' ? 'text-emerald-600 font-bold scale-110' : 'text-stone-400'}`}
+                  title="Helpful"
+                  aria-label="Helpful"
+                >
+                  <svg className="w-3.5 h-3.5" fill={feedback === 'up' ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => handleFeedback('down')}
+                  className={`p-1 rounded hover:bg-stone-100 transition ${feedback === 'down' ? 'text-rose-600 font-bold scale-110' : 'text-stone-400'}`}
+                  title="Not helpful"
+                  aria-label="Not helpful"
+                >
+                  <svg className="w-3.5 h-3.5" fill={feedback === 'down' ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v5a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-9h2a2 2 0 012 2v6a2 2 0 01-2 2h-2" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
 
-      {/* Lightbox Preview Modal */}
+      {/* Image Preview Lightbox Modal */}
       {previewImage && (
         <ImageModal
-          src={previewImage.data}
-          name={previewImage.name}
-          alt={previewImage.name}
+          image={previewImage}
           onClose={() => setPreviewImage(null)}
         />
       )}
