@@ -13,7 +13,8 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());                                  // allow the Vite dev server (5173) to call us
-app.use(express.json({ limit: '1mb' }));          // parse JSON bodies (chat messages)
+app.use(express.json({ limit: '25mb' }));         // parse JSON bodies (chat messages & attachments)
+app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
 // Health-check endpoint — handy for curl/Postman smoke tests
 app.get('/api/health', (req, res) => {

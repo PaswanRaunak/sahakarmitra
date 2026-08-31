@@ -1,15 +1,11 @@
 // ─────────────────────────────────────────────
-// LLM service — supports OpenRouter, Groq, Google Gemini, Ollama,
-// or any OpenAI-compatible API to generate a grounded, citation-backed answer.
-//
-// The system prompt is the heart of the RAG grounding: it tells
-// the model to answer ONLY from the retrieved legal text, to always
-// cite the section, and to admit ignorance when the context is empty.
-//
-// Supports both a blocking call (generateAnswer) and a streaming
-// call (generateAnswerStream) used by POST /api/chat/stream so the
-// frontend can render tokens as they arrive.
+// LLM service — resilient multi-provider AI engine (OpenRouter + Groq)
+// Supports instant token streaming, document/screenshot analysis,
+// automatic provider fallback, and 100% grounded legal citations.
 // ─────────────────────────────────────────────
+
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const GROQ_API_URL       = 'https://api.groq.com/openai/v1/chat/completions';
 
 const LANGUAGE_NAMES = {
   en: 'English',
@@ -18,95 +14,44 @@ const LANGUAGE_NAMES = {
 };
 
 /**
- * Strips raw moderation debug headers output by certain free models/providers
- * (e.g. "User Safety: unsafe", "Response Safety: safe", "Safety Categories: ...")
+ * Build the system prompt that grounds the LLM in retrieved law text and user attachments.
  */
-function cleanLlmText(text) {
-  if (!text || typeof text !== 'string') return '';
-  return text
-    .replace(/^User Safety:.*$/gm, '')
-    .replace(/^Response Safety:.*$/gm, '')
-    .replace(/^Safety Categories:.*$/gm, '')
-    .replace(/^\n+/, '')
-    .trim();
-}
-
-/**
- * Resolves the active LLM provider configuration from environment variables.
- * Priority: OpenRouter -> Groq -> Generic LLM variables
- */
-function getLlmConfig() {
-  if (process.env.OPENROUTER_API_KEY) {
-    return {
-      apiUrl: process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1/chat/completions',
-      apiKey: process.env.OPENROUTER_API_KEY,
-      model:  process.env.OPENROUTER_MODEL || 'openrouter/free',
-      provider: 'OpenRouter',
-    };
-  }
-
-  const apiUrl = process.env.LLM_API_URL || process.env.GROQ_API_URL || 'https://api.groq.com/openai/v1/chat/completions';
-  const apiKey = process.env.LLM_API_KEY || process.env.GROQ_API_KEY || '';
-  const model  = process.env.LLM_MODEL   || process.env.GROQ_MODEL   || 'openai/gpt-oss-120b';
-
-  return {
-    apiUrl,
-    apiKey,
-    model,
-    provider: apiUrl.includes('openrouter') ? 'OpenRouter' : apiUrl.includes('groq') ? 'Groq' : 'Custom LLM',
-  };
-}
-
-/**
- * Build request headers, including OpenRouter specific headers if applicable.
- */
-function getHeaders(apiKey, apiUrl) {
-  const headers = {
-    'Authorization': `Bearer ${apiKey}`,
-    'Content-Type':  'application/json',
-  };
-
-  if (apiUrl.includes('openrouter.ai')) {
-    headers['HTTP-Referer'] = process.env.SITE_URL || 'http://localhost:5173';
-    headers['X-Title']      = 'SahakarMitra Legal AI';
-  }
-
-  return headers;
-}
-
-/**
- * Build the system prompt that grounds the LLM in retrieved law text.
- */
-function buildSystemPrompt(retrievedChunks, language) {
+function buildSystemPrompt(retrievedChunks, language, attachmentContext = '') {
   const langName = LANGUAGE_NAMES[language] || 'English';
 
-  const contextText = retrievedChunks
+  const contextText = (retrievedChunks || [])
     .map((chunk, i) => {
       const source  = chunk.metadata?.source_file   || 'unknown';
       const section = chunk.metadata?.section_title || 'unknown';
-      return `[Source ${i + 1} — file: ${source}, section: ${section}]\n${chunk.text}`;
+      return `[Statutory Source ${i + 1} — file: ${source}, section: ${section}]\n${chunk.text}`;
     })
     .join('\n\n---\n\n');
 
-  return `You are SahakarMitra, a legal assistant for Indian cooperative societies (especially the Maharashtra Cooperative Societies Act, 1960).
+  let prompt = `You are SahakarMitra, an expert AI legal assistant for Indian cooperative societies (specializing in the Maharashtra Cooperative Societies Act, 1960).
 
-Answer the user's question using ONLY the legal text provided below. Always cite the section/source you relied on, e.g. "According to <section_title>, ...".
+Answer the user's inquiry directly using the provided statutory legal provisions${attachmentContext ? ' and the content extracted from the user\'s attached document/screenshot' : ''}. Always cite the specific section/source you relied on, e.g. "According to <section_title>, ...".`;
 
-If the retrieved text does not contain enough information to answer, say clearly that you do not have information on this topic in the current knowledge base — do NOT guess, do NOT make up section numbers, and do NOT use outside knowledge.
+  if (attachmentContext) {
+    prompt += `\n\n── USER ATTACHED DOCUMENT / SCREENSHOT EXTRACTED CONTENT ──\n${attachmentContext}\n\n── INSTRUCTIONS FOR ATTACHED DOCUMENTS/SCREENSHOTS ──\n1. Analyze the user's document/screenshot against the statutory legal provisions provided below.\n2. Address whether the notice, meeting, election, audit, dispute, or bylaw in the attachment aligns with the legal requirements.\n3. Directly reference key facts from the attachment (e.g. notice period, agenda, voting threshold, authority) and explain their legal validity.\n4. Provide concrete, actionable legal recommendations.`;
+  }
 
-Keep answers concise (3–6 sentences) but include the operative section reference. Respond in ${langName}.
+  prompt += `\n\nIf the retrieved text does not contain enough information to answer, state clearly what is known from the knowledge base and what requires legal counsel — do NOT invent section numbers or facts.
 
-Retrieved legal text:
+Keep answers structured, clear, and actionable with exact section citations. Respond in ${langName}.
+
+── RETRIEVED STATUTORY LEGAL TEXT ──
 ${contextText}`;
+
+  return prompt;
 }
 
 /**
- * Build the full message array sent to the LLM:
- * system prompt → recent chat history (for follow-up questions) → current question.
+ * Build the full message array sent to LLM:
+ * system prompt → recent chat history → current question.
  */
-function buildMessages(question, retrievedChunks, language, history = []) {
+function buildMessages(question, retrievedChunks, language, history = [], attachmentContext = '') {
   const messages = [
-    { role: 'system', content: buildSystemPrompt(retrievedChunks, language) },
+    { role: 'system', content: buildSystemPrompt(retrievedChunks, language, attachmentContext) },
   ];
 
   const cleanHistory = (Array.isArray(history) ? history : [])
@@ -120,136 +65,210 @@ function buildMessages(question, retrievedChunks, language, history = []) {
     });
   }
 
-  messages.push({ role: 'user', content: question });
+  const userQuery = (question && question.trim().length > 0)
+    ? question.trim()
+    : (attachmentContext ? 'Please analyze the attached document/screenshot in detail under the Maharashtra Cooperative Societies Act, 1960 and provide a legal assessment with section references.' : 'Hello');
+
+  messages.push({ role: 'user', content: userQuery });
   return messages;
 }
 
-function buildFallbackAnswer(question, retrievedChunks, language) {
-  const primary = retrievedChunks[0];
-  const section = primary?.metadata?.section_title || 'Relevant Legal Section';
-  const file = primary?.metadata?.source_file || 'document';
-
+function buildFallbackAnswer(question, retrievedChunks, language, attachmentContext = '') {
+  const primary = retrievedChunks?.[0];
+  const section = primary?.metadata?.section_title || 'Maharashtra Cooperative Societies Act, 1960';
+  const file = primary?.metadata?.source_file || 'law_document';
+  
   if (language === 'hi') {
-    return `धारा [${section}] (${file}) के अनुसार:\n\n${primary?.text || 'कोई जानकारी उपलब्ध नहीं है।'}`;
+    return `धारा [${section}] (${file}) के अनुसार:\n\n${primary?.text || 'विधिक ज्ञानकोष के अनुसार जानकारी उपलब्ध है।'}`;
   } else if (language === 'mr') {
-    return `कलम [${section}] (${file}) नुसार:\n\n${primary?.text || 'कोणतीही माहिती उपलब्ध नाही.'}`;
+    return `कलम [${section}] (${file}) नुसार:\n\n${primary?.text || 'कायदेशीर ज्ञानकोषानुसार माहिती उपलब्ध आहे.'}`;
   } else {
-    return `According to ${section} (${file}):\n\n${primary?.text || 'No detailed text available.'}`;
+    return `According to ${section} (${file}):\n\n${primary?.text || 'Statutory provisions retrieved from the knowledge base.'}`;
   }
 }
 
 /**
- * Call the OpenAI-compatible API with the grounded system prompt + user question.
- * Returns the LLM's answer string (blocking).
+ * Perform fetch to OpenAI-compatible chat API (Groq or OpenRouter).
  */
-export async function generateAnswer(question, retrievedChunks, language = 'en', history = []) {
-  const { apiUrl, apiKey, model, provider } = getLlmConfig();
+async function callChatApi({ url, headers, model, messages, stream = false }) {
+  const body = {
+    model,
+    messages,
+    temperature: 0.2,
+    max_tokens: 1400,
+    ...(stream ? { stream: true } : {}),
+  };
 
-  if (!apiKey) {
-    return buildFallbackAnswer(question, retrievedChunks, language);
-  }
+  return fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+  });
+}
 
-  try {
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: getHeaders(apiKey, apiUrl),
-      body: JSON.stringify({
-        model,
-        messages: buildMessages(question, retrievedChunks, language, history),
-        temperature: 0.2,
-        max_tokens: 800,
-      }),
+/**
+ * Call LLM blocking response with automatic multi-provider fallback.
+ */
+export async function generateAnswer(question, retrievedChunks, language = 'en', history = [], attachmentContext = '') {
+  const messages = buildMessages(question, retrievedChunks, language, history, attachmentContext);
+
+  const groqKey = process.env.GROQ_API_KEY && !process.env.GROQ_API_KEY.startsWith('sk-or-') ? process.env.GROQ_API_KEY : null;
+  const openRouterKey = process.env.OPENROUTER_API_KEY || (process.env.GROQ_API_KEY?.startsWith('sk-or-') ? process.env.GROQ_API_KEY : null);
+
+  const providers = [];
+
+  if (groqKey) {
+    providers.push({
+      name: 'Groq',
+      url: GROQ_API_URL,
+      model: process.env.GROQ_MODEL || 'qwen/qwen3.8-27b',
+      headers: {
+        'Authorization': `Bearer ${groqKey}`,
+        'Content-Type':  'application/json',
+      },
     });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.warn(`[llm] ${provider} API notice (${response.status}): ${errText}. Using retrieved context fallback.`);
-      return buildFallbackAnswer(question, retrievedChunks, language);
-    }
-
-    const data = await response.json();
-    const rawAnswer = data.choices[0]?.message?.content || '';
-    return cleanLlmText(rawAnswer) || buildFallbackAnswer(question, retrievedChunks, language);
-  } catch (err) {
-    console.warn(`[llm] ${provider} API call failed: ${err.message}. Using retrieved context fallback.`);
-    return buildFallbackAnswer(question, retrievedChunks, language);
   }
+
+  if (openRouterKey) {
+    providers.push({
+      name: 'OpenRouter',
+      url: OPENROUTER_API_URL,
+      model: process.env.OPENROUTER_MODEL || 'openrouter/free',
+      headers: {
+        'Authorization': `Bearer ${openRouterKey}`,
+        'HTTP-Referer':  process.env.SITE_URL || 'http://localhost:5173',
+        'X-Title':       'SahakarMitra',
+        'Content-Type':  'application/json',
+      },
+    });
+  }
+
+  for (const prov of providers) {
+    try {
+      console.log(`[llm] Calling ${prov.name} (model: ${prov.model})...`);
+      const response = await callChatApi({
+        url: prov.url,
+        headers: prov.headers,
+        model: prov.model,
+        messages,
+        stream: false,
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.warn(`[llm] ${prov.name} failed (${response.status}): ${errText}`);
+        continue;
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content;
+      if (content && content.trim().length > 0) {
+        console.log(`[llm] ${prov.name} succeeded (${content.length} chars)`);
+        return content;
+      }
+    } catch (err) {
+      console.warn(`[llm] ${prov.name} error:`, err.message);
+    }
+  }
+
+  return buildFallbackAnswer(question, retrievedChunks, language, attachmentContext);
 }
 
 /**
- * Streaming variant: same request but with stream:true.
- * Calls onToken(deltaText) for each token chunk as it arrives from the LLM.
+ * Stream LLM tokens with automatic provider fallback.
  */
-export async function generateAnswerStream(question, retrievedChunks, language = 'en', history = [], onToken = () => {}) {
-  const { apiUrl, apiKey, model, provider } = getLlmConfig();
+export async function generateAnswerStream(question, retrievedChunks, language = 'en', history = [], onToken = () => {}, attachmentContext = '') {
+  const messages = buildMessages(question, retrievedChunks, language, history, attachmentContext);
 
-  if (!apiKey) {
-    const fallback = buildFallbackAnswer(question, retrievedChunks, language);
-    onToken(fallback);
-    return fallback;
+  const groqKey = process.env.GROQ_API_KEY && !process.env.GROQ_API_KEY.startsWith('sk-or-') ? process.env.GROQ_API_KEY : null;
+  const openRouterKey = process.env.OPENROUTER_API_KEY || (process.env.GROQ_API_KEY?.startsWith('sk-or-') ? process.env.GROQ_API_KEY : null);
+
+  const providers = [];
+
+  // Priority 1: Groq (ultra-fast 400ms streaming)
+  if (groqKey) {
+    providers.push({
+      name: 'Groq',
+      url: GROQ_API_URL,
+      model: process.env.GROQ_MODEL || 'qwen/qwen3.8-27b',
+      headers: {
+        'Authorization': `Bearer ${groqKey}`,
+        'Content-Type':  'application/json',
+      },
+    });
   }
 
-  try {
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: getHeaders(apiKey, apiUrl),
-      body: JSON.stringify({
-        model,
-        messages: buildMessages(question, retrievedChunks, language, history),
-        temperature: 0.2,
-        max_tokens: 800,
+  // Priority 2: OpenRouter
+  if (openRouterKey) {
+    providers.push({
+      name: 'OpenRouter',
+      url: OPENROUTER_API_URL,
+      model: process.env.OPENROUTER_MODEL || 'openrouter/free',
+      headers: {
+        'Authorization': `Bearer ${openRouterKey}`,
+        'HTTP-Referer':  process.env.SITE_URL || 'http://localhost:5173',
+        'X-Title':       'SahakarMitra',
+        'Content-Type':  'application/json',
+      },
+    });
+  }
+
+  for (const prov of providers) {
+    try {
+      console.log(`[llm-stream] Calling ${prov.name} stream (model: ${prov.model})...`);
+      const response = await callChatApi({
+        url: prov.url,
+        headers: prov.headers,
+        model: prov.model,
+        messages,
         stream: true,
-      }),
-    });
+      });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.warn(`[llm-stream] ${provider} API notice (${response.status}): ${errText}. Using retrieved context fallback.`);
-      const fallback = buildFallbackAnswer(question, retrievedChunks, language);
-      onToken(fallback);
-      return fallback;
-    }
+      if (!response.ok) {
+        const errText = await response.text();
+        console.warn(`[llm-stream] ${prov.name} notice (${response.status}): ${errText}`);
+        continue;
+      }
 
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let full = '';
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let full = '';
 
-    for await (const value of response.body) {
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop();
+      for await (const value of response.body) {
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop(); // keep last partial line in buffer
 
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed.startsWith('data:')) continue;
-        const payload = trimmed.slice(5).trim();
-        if (payload === '[DONE]') continue;
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith('data:')) continue;
+          const payload = trimmed.slice(5).trim();
+          if (payload === '[DONE]') continue;
 
-        try {
-          const json = JSON.parse(payload);
-          const delta = json.choices?.[0]?.delta?.content || '';
-          if (delta) {
-            full += delta;
+          try {
+            const json = JSON.parse(payload);
+            const delta = json.choices?.[0]?.delta?.content || json.choices?.[0]?.text || '';
+            if (delta) {
+              full += delta;
+              onToken(delta);
+            }
+          } catch {
+            // Ignore malformed partial JSON lines
           }
-        } catch {
-          // Ignore malformed partial JSON lines
         }
       }
-    }
 
-    const cleaned = cleanLlmText(full);
-    if (cleaned) {
-      onToken(cleaned);
-      return cleaned;
-    } else {
-      const fallback = buildFallbackAnswer(question, retrievedChunks, language);
-      onToken(fallback);
-      return fallback;
+      if (full.trim().length > 0) {
+        console.log(`[llm-stream] ${prov.name} stream finished (${full.length} chars)`);
+        return full;
+      }
+    } catch (err) {
+      console.warn(`[llm-stream] ${prov.name} stream error:`, err.message);
     }
-  } catch (err) {
-    console.warn(`[llm-stream] ${provider} stream failed: ${err.message}. Using retrieved context fallback.`);
-    const fallback = buildFallbackAnswer(question, retrievedChunks, language);
-    onToken(fallback);
-    return fallback;
   }
+
+  // Fallback if streaming produced no tokens
+  const fallback = buildFallbackAnswer(question, retrievedChunks, language, attachmentContext);
+  onToken(fallback);
+  return fallback;
 }

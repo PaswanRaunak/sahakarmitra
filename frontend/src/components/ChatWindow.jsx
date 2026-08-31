@@ -1,7 +1,17 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import MessageBubble from './MessageBubble.jsx';
 import ExampleChips   from './ExampleChips.jsx';
+import ImageModal     from './ImageModal.jsx';
 import { makeT, FOLLOW_UPS } from '../i18n.js';
+
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+
+function formatBytes(bytes) {
+  if (!bytes) return '';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
 
 export default function ChatWindow({
   messages,
@@ -17,12 +27,19 @@ export default function ChatWindow({
 }) {
   const scrollRef = useRef(null);
   const textareaRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const imageInputRef = useRef(null);
+  const dragCounterRef = useRef(0);
+
   const [isNearBottom, setIsNearBottom] = useState(true);
+  const [attachments, setAttachments] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [fileError, setFileError] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+
   const t = makeT(language);
 
-  // Auto-scroll only when the user is already reading the bottom of the
-  // conversation — never yank them back if they scrolled up to re-read
-  // a citation while the answer streams in.
+  // Auto-scroll only when user is near bottom
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -38,7 +55,7 @@ export default function ChatWindow({
     }
   }, [messages, loading, isNearBottom]);
 
-  // Auto-grow the textarea up to ~5 rows as the user types.
+  // Auto-grow textarea
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
@@ -46,20 +63,131 @@ export default function ChatWindow({
     el.style.height = Math.min(el.scrollHeight, 132) + 'px';
   }, [input]);
 
+  // Read file as base64 data URL
+  const readFileAsDataUrl = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Process selected or dropped files
+  const processFiles = async (fileList, isScreenshotHint = false) => {
+    setFileError(null);
+    const validFiles = [];
+
+    for (const file of fileList) {
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        setFileError(`${file.name}: ${t('fileTooLarge')}`);
+        continue;
+      }
+
+      try {
+        const dataUrl = await readFileAsDataUrl(file);
+        const isImage = file.type.startsWith('image/') || isScreenshotHint;
+        validFiles.push({
+          id: `att-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          name: file.name || (isImage ? `Screenshot_${new Date().toLocaleTimeString().replace(/:/g, '-')}.png` : 'document'),
+          type: file.type || (isImage ? 'image/png' : 'application/octet-stream'),
+          size: file.size,
+          data: dataUrl,
+          isImage,
+        });
+      } catch (err) {
+        console.warn('Error reading file:', err);
+      }
+    }
+
+    if (validFiles.length > 0) {
+      setAttachments(prev => [...prev, ...validFiles]);
+      textareaRef.current?.focus();
+    }
+  };
+
+  const handleFileInputChange = (e, isScreenshot = false) => {
+    if (e.target.files && e.target.files.length > 0) {
+      processFiles(Array.from(e.target.files), isScreenshot);
+      e.target.value = '';
+    }
+  };
+
+  const removeAttachment = (id) => {
+    setAttachments(prev => prev.filter(a => a.id !== id));
+  };
+
+  // Clipboard paste listener: handles screenshots pasted via Ctrl+V / Cmd+V
+  useEffect(() => {
+    function handlePaste(e) {
+      if (!e.clipboardData || !e.clipboardData.items) return;
+
+      const imageItems = Array.from(e.clipboardData.items).filter(
+        item => item.type && item.type.startsWith('image/')
+      );
+
+      if (imageItems.length > 0) {
+        e.preventDefault();
+        const files = imageItems.map(item => item.getAsFile()).filter(Boolean);
+        processFiles(files, true);
+      }
+    }
+
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, []);
+
+  // Drag and drop handlers
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current += 1;
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current -= 1;
+    if (dragCounterRef.current <= 0) {
+      setIsDragging(false);
+      dragCounterRef.current = 0;
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    dragCounterRef.current = 0;
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processFiles(Array.from(e.dataTransfer.files));
+    }
+  };
+
   function handleSubmit(e) {
     e.preventDefault();
-    if (input.trim()) {
-      onSend(input);
+    if (input.trim() || attachments.length > 0) {
+      onSend(input, attachments);
+      setAttachments([]);
       setIsNearBottom(true);
     }
   }
 
-  // Enter sends, Shift+Enter inserts a newline.
   function handleKeyDown(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (input.trim()) {
-        onSend(input);
+      if (input.trim() || attachments.length > 0) {
+        onSend(input, attachments);
+        setAttachments([]);
         setIsNearBottom(true);
       }
     }
@@ -70,7 +198,43 @@ export default function ChatWindow({
   const showFollowUps = !loading && isLastBotAnswer && !lastMsg.streaming;
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-[#faf8f5] relative">
+    <div
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      className="flex-1 flex flex-col min-h-0 bg-[#faf8f5] relative"
+    >
+      {/* Hidden File Inputs */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={(e) => handleFileInputChange(e, false)}
+        accept=".pdf,.txt,.doc,.docx,.csv,.md,.json"
+        multiple
+        className="hidden"
+      />
+      <input
+        type="file"
+        ref={imageInputRef}
+        onChange={(e) => handleFileInputChange(e, true)}
+        accept="image/*,.png,.jpg,.jpeg,.webp,.bmp"
+        multiple
+        className="hidden"
+      />
+
+      {/* Drag & Drop Overlay */}
+      {isDragging && (
+        <div className="absolute inset-0 z-40 bg-[#1e4e4d]/85 backdrop-blur-md flex flex-col items-center justify-center border-4 border-dashed border-amber-300 rounded-2xl m-3 text-white transition-all animate-fade-in">
+          <div className="p-4 bg-amber-400/20 rounded-full mb-3 animate-bounce">
+            <svg className="w-12 h-12 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold">{t('dropzoneText')}</h3>
+          <p className="text-xs text-white/80 mt-1">PDF, DOCX, TXT, PNG, JPG (up to 10MB)</p>
+        </div>
+      )}
 
       {/* ── Scrollable Messages Area ─────────────────────────── */}
       <main ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto p-4 sm:p-6">
@@ -78,7 +242,7 @@ export default function ChatWindow({
 
           {/* Welcome Screen */}
           {messages.length === 0 && (
-            <div className="text-center py-12 px-4 space-y-4 max-w-xl mx-auto my-auto animate-fade-in">
+            <div className="text-center py-10 px-4 space-y-4 max-w-xl mx-auto my-auto animate-fade-in">
               <img
                 src="/logo.jpg"
                 alt="SahakarMitra Logo"
@@ -94,12 +258,12 @@ export default function ChatWindow({
 
               {/* 4 Quick Example Chips (2x2 Grid) */}
               {showExamples && (
-                <ExampleChips questions={exampleQuestions} onSelect={onSend} />
+                <ExampleChips questions={exampleQuestions} onSelect={(q) => onSend(q, [])} />
               )}
             </div>
           )}
 
-          {/* Active Messages List — stable per-message ids as keys */}
+          {/* Active Messages List */}
           {messages.map((msg, i) => (
             <MessageBubble
               key={msg.id || i}
@@ -111,7 +275,7 @@ export default function ChatWindow({
             />
           ))}
 
-          {/* Loading Indicator (shown until the first streamed token arrives) */}
+          {/* Loading Indicator */}
           {loading && !messages.some((m) => m.streaming) && (
             <div className="flex items-center gap-3 text-stone-600 bg-white border border-stone-200/90 p-4 rounded-2xl w-fit text-xs shadow-soft animate-pulse-glow">
               <div className="flex items-center gap-1">
@@ -123,7 +287,7 @@ export default function ChatWindow({
             </div>
           )}
 
-          {/* Follow-up suggestions under the latest answer */}
+          {/* Follow-up suggestions */}
           {showFollowUps && (
             <div className="space-y-2 animate-fade-in">
               <p className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
@@ -134,7 +298,7 @@ export default function ChatWindow({
                   <button
                     key={q}
                     type="button"
-                    onClick={() => { onSend(q); setIsNearBottom(true); }}
+                    onClick={() => { onSend(q, []); setIsNearBottom(true); }}
                     className="px-3.5 py-2 bg-white hover:bg-amber-50 border border-stone-200/90 hover:border-amber-200 rounded-full text-xs font-semibold text-stone-700 hover:text-[#a03612] shadow-soft transition text-left"
                   >
                     {q}
@@ -146,7 +310,7 @@ export default function ChatWindow({
         </div>
       </main>
 
-      {/* Jump-to-latest pill when the user scrolled up during a stream */}
+      {/* Jump-to-latest pill */}
       {!isNearBottom && messages.length > 0 && (
         <button
           type="button"
@@ -160,25 +324,116 @@ export default function ChatWindow({
         </button>
       )}
 
-      {/* ── Bottom Pill Input Area ───────────────────────────── */}
+      {/* ── Bottom Pill Input Area with Attachments ────────────────── */}
       <div className="p-4 sm:p-6 flex-shrink-0 bg-[#faf8f5]">
         <div className="max-w-3xl mx-auto space-y-2">
 
+          {/* File Error Notification */}
+          {fileError && (
+            <div className="flex items-center justify-between px-4 py-2 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs animate-fade-in">
+              <span>{fileError}</span>
+              <button type="button" onClick={() => setFileError(null)} className="font-bold ml-2">×</button>
+            </div>
+          )}
+
+          {/* Staged Attachments Preview Tray */}
+          {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-2 p-3 bg-stone-100/90 border border-stone-200 rounded-2xl animate-slide-up shadow-inner">
+              {attachments.map((att) => (
+                <div
+                  key={att.id}
+                  className="group relative flex items-center gap-2 p-1.5 bg-white border border-stone-200/90 rounded-xl shadow-xs hover:border-stone-400 transition"
+                >
+                  {att.isImage ? (
+                    <div
+                      onClick={() => setPreviewImage(att)}
+                      className="cursor-pointer flex items-center gap-2"
+                      title={t('previewImage')}
+                    >
+                      <img
+                        src={att.data}
+                        alt={att.name}
+                        className="w-9 h-9 object-cover rounded-lg border border-stone-200"
+                      />
+                      <div className="truncate max-w-[120px] pr-1">
+                        <p className="text-[11px] font-semibold text-stone-800 truncate">{att.name}</p>
+                        <p className="text-[9px] text-stone-500">{formatBytes(att.size)}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 pr-1">
+                      <div className="w-8 h-8 rounded-lg bg-amber-100 text-[#a03612] font-bold text-[9px] flex items-center justify-center uppercase tracking-tight">
+                        {att.name?.split('.').pop() || 'DOC'}
+                      </div>
+                      <div className="truncate max-w-[130px]">
+                        <p className="text-[11px] font-semibold text-stone-800 truncate">{att.name}</p>
+                        <p className="text-[9px] text-stone-500">{formatBytes(att.size)}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Remove Button */}
+                  <button
+                    type="button"
+                    onClick={() => removeAttachment(att.id)}
+                    className="w-5 h-5 flex items-center justify-center rounded-full bg-stone-200 hover:bg-rose-500 hover:text-white text-stone-600 transition text-xs font-bold"
+                    title={t('removeAttachment')}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Main Input Form */}
           <form onSubmit={handleSubmit} className="relative flex items-end">
+            
+            {/* Attachment Action Buttons (Left) */}
+            <div className="absolute left-3 bottom-3 flex items-center gap-1.5 z-10">
+              {/* Paperclip Button for Documents */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                title={t('attachFile')}
+                className="p-2 text-stone-400 hover:text-[#1e4e4d] hover:bg-stone-100 rounded-full transition"
+                aria-label={t('attachFile')}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                </svg>
+              </button>
+
+              {/* Camera / Image Button for Screenshots */}
+              <button
+                type="button"
+                onClick={() => imageInputRef.current?.click()}
+                title={t('attachScreenshot')}
+                className="p-2 text-stone-400 hover:text-[#a03612] hover:bg-amber-50 rounded-full transition"
+                aria-label={t('attachScreenshot')}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Input Textarea */}
             <textarea
               ref={textareaRef}
               rows={1}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={t('chatPlaceholder')}
+              placeholder={attachments.length > 0 ? (language === 'hi' ? 'संलग्न फ़ाइल के बारे में पूछें...' : language === 'mr' ? 'संलग्न फाइलबाबत विचारा...' : 'Ask question about attached file/screenshot...') : t('chatPlaceholder')}
               aria-label={t('chatPlaceholder')}
-              className="w-full pl-6 pr-16 py-4 bg-white border border-stone-200 rounded-3xl text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#a03612] focus:border-transparent shadow-card transition duration-200 resize-none leading-relaxed"
+              className="w-full pl-24 pr-16 py-4 bg-white border border-stone-200 rounded-3xl text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#a03612] focus:border-transparent shadow-card transition duration-200 resize-none leading-relaxed"
             />
 
+            {/* Send Button (Right) */}
             <button
               type="submit"
-              disabled={loading || !input.trim()}
+              disabled={loading || (!input.trim() && attachments.length === 0)}
               aria-label={t('chatPlaceholder')}
               title={t('chatPlaceholder')}
               className="absolute right-2 bottom-2 p-2.5 bg-[#a03612] hover:bg-[#882c0e] text-white rounded-full transition shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed"
@@ -190,11 +445,21 @@ export default function ChatWindow({
           </form>
 
           <p className="text-center text-[11px] text-stone-400 font-normal">
-            {t('chatDisclaimer')}
+            {t('pasteScreenshotHint')} • {t('chatDisclaimer')}
           </p>
 
         </div>
       </div>
+
+      {/* Lightbox Preview Modal for Staged Attachments */}
+      {previewImage && (
+        <ImageModal
+          src={previewImage.data}
+          name={previewImage.name}
+          alt={previewImage.name}
+          onClose={() => setPreviewImage(null)}
+        />
+      )}
 
     </div>
   );
