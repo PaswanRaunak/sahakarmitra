@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────
-// LLM service — calls the Groq API (OpenAI-compatible)
-// to generate a grounded, citation-backed answer.
+// LLM service — supports OpenRouter, Groq, Google Gemini, Ollama,
+// or any OpenAI-compatible API to generate a grounded, citation-backed answer.
 //
 // The system prompt is the heart of the RAG grounding: it tells
 // the model to answer ONLY from the retrieved legal text, to always
@@ -11,17 +11,53 @@
 // frontend can render tokens as they arrive.
 // ─────────────────────────────────────────────
 
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-
 const LANGUAGE_NAMES = {
   en: 'English',
   hi: 'Hindi (Devanagari script)',
   mr: 'Marathi (Devanagari script)',
 };
 
-// Single source of truth for the model id. Override via GROQ_MODEL in .env.
-function getModel() {
-  return process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
+/**
+ * Resolves the active LLM provider configuration from environment variables.
+ * Priority: OpenRouter -> Groq -> Generic LLM variables
+ */
+function getLlmConfig() {
+  if (process.env.OPENROUTER_API_KEY) {
+    return {
+      apiUrl: process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1/chat/completions',
+      apiKey: process.env.OPENROUTER_API_KEY,
+      model:  process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-lite-preview-02-05:free',
+      provider: 'OpenRouter',
+    };
+  }
+
+  const apiUrl = process.env.LLM_API_URL || process.env.GROQ_API_URL || 'https://api.groq.com/openai/v1/chat/completions';
+  const apiKey = process.env.LLM_API_KEY || process.env.GROQ_API_KEY || '';
+  const model  = process.env.LLM_MODEL   || process.env.GROQ_MODEL   || 'llama-3.3-70b-versatile';
+
+  return {
+    apiUrl,
+    apiKey,
+    model,
+    provider: apiUrl.includes('openrouter') ? 'OpenRouter' : apiUrl.includes('groq') ? 'Groq' : 'Custom LLM',
+  };
+}
+
+/**
+ * Build request headers, including OpenRouter specific headers if applicable.
+ */
+function getHeaders(apiKey, apiUrl) {
+  const headers = {
+    'Authorization': `Bearer ${apiKey}`,
+    'Content-Type':  'application/json',
+  };
+
+  if (apiUrl.includes('openrouter.ai')) {
+    headers['HTTP-Referer'] = process.env.SITE_URL || 'http://localhost:5173';
+    headers['X-Title']      = 'SahakarMitra Legal AI';
+  }
+
+  return headers;
 }
 
 /**
@@ -52,9 +88,8 @@ ${contextText}`;
 }
 
 /**
- * Build the full message array sent to Groq:
+ * Build the full message array sent to the LLM:
  * system prompt → recent chat history (for follow-up questions) → current question.
- * History is the previous turns of this session, NOT including the current question.
  */
 function buildMessages(question, retrievedChunks, language, history = []) {
   const messages = [
@@ -63,12 +98,12 @@ function buildMessages(question, retrievedChunks, language, history = []) {
 
   const cleanHistory = (Array.isArray(history) ? history : [])
     .filter((m) => m && (m.role === 'user' || m.role === 'bot') && typeof m.text === 'string' && m.text.trim().length > 0)
-    .slice(-6); // keep the last 6 turns to stay well within the context window
+    .slice(-6);
 
   for (const m of cleanHistory) {
     messages.push({
       role: m.role === 'user' ? 'user' : 'assistant',
-      content: m.text.slice(0, 800), // cap each historical turn
+      content: m.text.slice(0, 800),
     });
   }
 
@@ -80,7 +115,7 @@ function buildFallbackAnswer(question, retrievedChunks, language) {
   const primary = retrievedChunks[0];
   const section = primary?.metadata?.section_title || 'Relevant Legal Section';
   const file = primary?.metadata?.source_file || 'document';
-  
+
   if (language === 'hi') {
     return `धारा [${section}] (${file}) के अनुसार:\n\n${primary?.text || 'कोई जानकारी उपलब्ध नहीं है।'}`;
   } else if (language === 'mr') {
@@ -91,64 +126,61 @@ function buildFallbackAnswer(question, retrievedChunks, language) {
 }
 
 /**
- * Call the Groq API with the grounded system prompt + user question.
+ * Call the OpenAI-compatible API with the grounded system prompt + user question.
  * Returns the LLM's answer string (blocking).
  */
 export async function generateAnswer(question, retrievedChunks, language = 'en', history = []) {
-  if (!process.env.GROQ_API_KEY) {
+  const { apiUrl, apiKey, model, provider } = getLlmConfig();
+
+  if (!apiKey) {
     return buildFallbackAnswer(question, retrievedChunks, language);
   }
 
   try {
-    const response = await fetch(GROQ_API_URL, {
+    const response = await fetch(apiUrl, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-        'Content-Type':  'application/json',
-      },
+      headers: getHeaders(apiKey, apiUrl),
       body: JSON.stringify({
-        model: getModel(),
+        model,
         messages: buildMessages(question, retrievedChunks, language, history),
-        temperature: 0.2,   // low temp → less hallucination
+        temperature: 0.2,
         max_tokens: 800,
       }),
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      console.warn(`[llm] Groq API notice (${response.status}): ${errText}. Using retrieved context fallback.`);
+      console.warn(`[llm] ${provider} API notice (${response.status}): ${errText}. Using retrieved context fallback.`);
       return buildFallbackAnswer(question, retrievedChunks, language);
     }
 
     const data = await response.json();
     return data.choices[0].message.content;
   } catch (err) {
-    console.warn(`[llm] Groq API call failed: ${err.message}. Using retrieved context fallback.`);
+    console.warn(`[llm] ${provider} API call failed: ${err.message}. Using retrieved context fallback.`);
     return buildFallbackAnswer(question, retrievedChunks, language);
   }
 }
 
 /**
  * Streaming variant: same request but with stream:true.
- * Calls onToken(deltaText) for each token chunk as it arrives from Groq.
- * Resolves with the full concatenated answer.
+ * Calls onToken(deltaText) for each token chunk as it arrives from the LLM.
  */
 export async function generateAnswerStream(question, retrievedChunks, language = 'en', history = [], onToken = () => {}) {
-  if (!process.env.GROQ_API_KEY) {
+  const { apiUrl, apiKey, model, provider } = getLlmConfig();
+
+  if (!apiKey) {
     const fallback = buildFallbackAnswer(question, retrievedChunks, language);
     onToken(fallback);
     return fallback;
   }
 
   try {
-    const response = await fetch(GROQ_API_URL, {
+    const response = await fetch(apiUrl, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-        'Content-Type':  'application/json',
-      },
+      headers: getHeaders(apiKey, apiUrl),
       body: JSON.stringify({
-        model: getModel(),
+        model,
         messages: buildMessages(question, retrievedChunks, language, history),
         temperature: 0.2,
         max_tokens: 800,
@@ -158,13 +190,12 @@ export async function generateAnswerStream(question, retrievedChunks, language =
 
     if (!response.ok) {
       const errText = await response.text();
-      console.warn(`[llm-stream] Groq API notice (${response.status}): ${errText}. Using retrieved context fallback.`);
+      console.warn(`[llm-stream] ${provider} API notice (${response.status}): ${errText}. Using retrieved context fallback.`);
       const fallback = buildFallbackAnswer(question, retrievedChunks, language);
       onToken(fallback);
       return fallback;
     }
 
-    // Groq streams Server-Sent Events: lines of "data: {json}" ending with "data: [DONE]".
     const decoder = new TextDecoder();
     let buffer = '';
     let full = '';
@@ -172,7 +203,7 @@ export async function generateAnswerStream(question, retrievedChunks, language =
     for await (const value of response.body) {
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
-      buffer = lines.pop(); // keep the (possibly incomplete) last line in the buffer
+      buffer = lines.pop();
 
       for (const line of lines) {
         const trimmed = line.trim();
@@ -195,7 +226,7 @@ export async function generateAnswerStream(question, retrievedChunks, language =
 
     return full;
   } catch (err) {
-    console.warn(`[llm-stream] Groq stream failed: ${err.message}. Using retrieved context fallback.`);
+    console.warn(`[llm-stream] ${provider} stream failed: ${err.message}. Using retrieved context fallback.`);
     const fallback = buildFallbackAnswer(question, retrievedChunks, language);
     onToken(fallback);
     return fallback;
