@@ -18,6 +18,20 @@ const LANGUAGE_NAMES = {
 };
 
 /**
+ * Strips raw moderation debug headers output by certain free models/providers
+ * (e.g. "User Safety: unsafe", "Response Safety: safe", "Safety Categories: ...")
+ */
+function cleanLlmText(text) {
+  if (!text || typeof text !== 'string') return '';
+  return text
+    .replace(/^User Safety:.*$/gm, '')
+    .replace(/^Response Safety:.*$/gm, '')
+    .replace(/^Safety Categories:.*$/gm, '')
+    .replace(/^\n+/, '')
+    .trim();
+}
+
+/**
  * Resolves the active LLM provider configuration from environment variables.
  * Priority: OpenRouter -> Groq -> Generic LLM variables
  */
@@ -26,14 +40,14 @@ function getLlmConfig() {
     return {
       apiUrl: process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1/chat/completions',
       apiKey: process.env.OPENROUTER_API_KEY,
-      model:  process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-lite-preview-02-05:free',
+      model:  process.env.OPENROUTER_MODEL || 'openrouter/free',
       provider: 'OpenRouter',
     };
   }
 
   const apiUrl = process.env.LLM_API_URL || process.env.GROQ_API_URL || 'https://api.groq.com/openai/v1/chat/completions';
   const apiKey = process.env.LLM_API_KEY || process.env.GROQ_API_KEY || '';
-  const model  = process.env.LLM_MODEL   || process.env.GROQ_MODEL   || 'llama-3.3-70b-versatile';
+  const model  = process.env.LLM_MODEL   || process.env.GROQ_MODEL   || 'openai/gpt-oss-120b';
 
   return {
     apiUrl,
@@ -66,7 +80,6 @@ function getHeaders(apiKey, apiUrl) {
 function buildSystemPrompt(retrievedChunks, language) {
   const langName = LANGUAGE_NAMES[language] || 'English';
 
-  // Format each chunk with a clear [Source N] tag + section heading
   const contextText = retrievedChunks
     .map((chunk, i) => {
       const source  = chunk.metadata?.source_file   || 'unknown';
@@ -155,7 +168,8 @@ export async function generateAnswer(question, retrievedChunks, language = 'en',
     }
 
     const data = await response.json();
-    return data.choices[0].message.content;
+    const rawAnswer = data.choices[0]?.message?.content || '';
+    return cleanLlmText(rawAnswer) || buildFallbackAnswer(question, retrievedChunks, language);
   } catch (err) {
     console.warn(`[llm] ${provider} API call failed: ${err.message}. Using retrieved context fallback.`);
     return buildFallbackAnswer(question, retrievedChunks, language);
@@ -216,7 +230,6 @@ export async function generateAnswerStream(question, retrievedChunks, language =
           const delta = json.choices?.[0]?.delta?.content || '';
           if (delta) {
             full += delta;
-            onToken(delta);
           }
         } catch {
           // Ignore malformed partial JSON lines
@@ -224,7 +237,15 @@ export async function generateAnswerStream(question, retrievedChunks, language =
       }
     }
 
-    return full;
+    const cleaned = cleanLlmText(full);
+    if (cleaned) {
+      onToken(cleaned);
+      return cleaned;
+    } else {
+      const fallback = buildFallbackAnswer(question, retrievedChunks, language);
+      onToken(fallback);
+      return fallback;
+    }
   } catch (err) {
     console.warn(`[llm-stream] ${provider} stream failed: ${err.message}. Using retrieved context fallback.`);
     const fallback = buildFallbackAnswer(question, retrievedChunks, language);
