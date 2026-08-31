@@ -16,8 +16,21 @@ import { makeT }    from '../i18n.js';
 function renderFormattedContent(text) {
   if (!text) return null;
 
+  // Pre-process text:
+  // 1. Replace raw <br>, <br/>, <br /> string tags with real line breaks (\n)
+  let normalizedText = text.replace(/<br\s*\/?>/gi, '\n');
+
+  // 2. Normalize pseudo-table pipes e.g. "| 2. Heading | Description |" into clean structured sections
+  normalizedText = normalizedText.replace(/\|\s*(\d+\.\s+[^|\n]+?)\s*\|\s*([^|\n]+?)\s*\|/g, (match, p1, p2) => {
+    return `\n\n### ${p1.trim()}\n${p2.trim()}\n\n`;
+  });
+  normalizedText = normalizedText.replace(/\|\s*([^|\n]+?)\s*\|\s*([^|\n]+?)\s*\|/g, (match, p1, p2) => {
+    if (p1.startsWith('-') || p1.startsWith('|') || p1.toLowerCase().includes('source') || p1.toLowerCase().includes('file')) return match;
+    return `\n\n### ${p1.trim()}\n${p2.trim()}\n\n`;
+  });
+
   // Split into block paragraphs separated by empty lines
-  const rawParagraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+  const rawParagraphs = normalizedText.split(/\n\s*\n/).filter(p => p.trim().length > 0);
 
   return rawParagraphs.map((block, bIdx) => {
     const lines = block.split('\n').filter(l => l.trim().length > 0);

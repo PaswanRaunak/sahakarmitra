@@ -37,7 +37,7 @@ Answer the user's inquiry directly using the provided statutory legal provisions
 
   prompt += `\n\nIf the retrieved text does not contain enough information to answer, state clearly what is known from the knowledge base and what requires legal counsel — do NOT invent section numbers or facts.
 
-Keep answers structured, clear, and actionable with exact section citations. Do NOT output internal scratchpads, thinking steps, or preambles like "Here's a thinking process:". Begin directly with your legal assessment. Respond in ${langName}.
+Keep answers structured, clear, and actionable with exact section citations. Use clean Markdown headers (###), bullet points (- item), and bold text (**text**). Do NOT output raw HTML tags like <br> or pseudo-pipe syntax (| text |). Do NOT output internal scratchpads, thinking steps, or preambles like "Here's a thinking process:". Begin directly with your legal assessment. Respond in ${langName}.
 
 ── RETRIEVED STATUTORY LEGAL TEXT ──
 ${contextText}`;
