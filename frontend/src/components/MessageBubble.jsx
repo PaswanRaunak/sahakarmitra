@@ -13,7 +13,7 @@ import { makeT }    from '../i18n.js';
  * - Blockquotes: > quote -> Styled Callout Box
  * - Section references: (Section X) -> Clean inline SVG badge
  */
-function renderFormattedContent(text) {
+function renderFormattedContent(text, isUser = false) {
   if (!text) return null;
 
   // Pre-process text:
@@ -165,11 +165,11 @@ function renderFormattedContent(text) {
             return (
               <ol key={iIdx} className="space-y-2.5 my-2.5 pl-1">
                 {item.items.map((it, idx) => (
-                  <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed text-stone-800">
-                    <span className="w-5 h-5 rounded-full bg-amber-100/90 text-[#a03612] font-bold text-[11px] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs border border-amber-200/60">
+                  <li key={idx} className={`flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed ${isUser ? 'text-white font-medium' : 'text-stone-800'}`}>
+                    <span className={`w-5 h-5 rounded-full font-bold text-[11px] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs border ${isUser ? 'bg-white/20 text-white border-white/30' : 'bg-amber-100/90 text-[#a03612] border-amber-200/60'}`}>
                       {it.num}
                     </span>
-                    <span className="flex-1">{parseInlineFormatting(it.content)}</span>
+                    <span className="flex-1">{parseInlineFormatting(it.content, isUser)}</span>
                   </li>
                 ))}
               </ol>
@@ -180,9 +180,9 @@ function renderFormattedContent(text) {
             return (
               <ul key={iIdx} className="space-y-2 my-2 pl-1">
                 {item.items.map((it, idx) => (
-                  <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed text-stone-800">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#a03612] flex-shrink-0 mt-2"></span>
-                    <span className="flex-1">{parseInlineFormatting(it.content)}</span>
+                  <li key={idx} className={`flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed ${isUser ? 'text-white font-medium' : 'text-stone-800'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-2 ${isUser ? 'bg-amber-300' : 'bg-[#a03612]'}`}></span>
+                    <span className="flex-1">{parseInlineFormatting(it.content, isUser)}</span>
                   </li>
                 ))}
               </ul>
@@ -191,15 +191,15 @@ function renderFormattedContent(text) {
 
           if (item.type === 'heading') {
             return (
-              <h4 key={iIdx} className="text-xs sm:text-sm font-bold text-[#a03612] mt-3 mb-1 uppercase tracking-wider">
-                {parseInlineFormatting(item.title)}
+              <h4 key={iIdx} className={`text-xs sm:text-sm font-bold mt-3 mb-1 uppercase tracking-wider ${isUser ? 'text-amber-200' : 'text-[#a03612]'}`}>
+                {parseInlineFormatting(item.title, isUser)}
               </h4>
             );
           }
 
           return (
-            <p key={iIdx} className="text-xs sm:text-sm leading-relaxed text-stone-800">
-              {parseInlineFormatting(item.content)}
+            <p key={iIdx} className={`text-xs sm:text-sm leading-relaxed ${isUser ? 'text-white font-medium' : 'text-stone-800'}`}>
+              {parseInlineFormatting(item.content, isUser)}
             </p>
           );
         })}
@@ -211,7 +211,7 @@ function renderFormattedContent(text) {
 /**
  * Parse inline **bold** syntax, [ Tag1 | Tag2 ] pills, and (Section X) legal tags
  */
-function parseInlineFormatting(str) {
+function parseInlineFormatting(str, isUser = false) {
   if (!str) return '';
 
   // Check if line matches bracketed tags e.g. "[ Issue | Relevant Provision | Description ]"
@@ -224,7 +224,9 @@ function parseInlineFormatting(str) {
           <span
             key={idx}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border shadow-xs flex items-center gap-1 ${
-              idx === 0
+              isUser
+                ? 'bg-white/20 text-white border-white/30'
+                : idx === 0
                 ? 'bg-amber-100/90 text-[#a03612] border-amber-300/80'
                 : idx === 1
                 ? 'bg-teal-50 text-[#2d6a68] border-teal-200'
@@ -243,7 +245,7 @@ function parseInlineFormatting(str) {
 
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="font-bold text-stone-900">{part.slice(2, -2)}</strong>;
+      return <strong key={i} className={`font-bold ${isUser ? 'text-white' : 'text-stone-900'}`}>{part.slice(2, -2)}</strong>;
     }
 
     if (part.startsWith('`') && part.endsWith('`')) {
@@ -287,7 +289,7 @@ function formatFileSize(bytes) {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 }
 
-export default function MessageBubble({ message, language = 'en', onRetry, onRegenerate, isLastBot }) {
+export default function MessageBubble({ message, language = 'en', onRetry, onRegenerate, isLastBot, onConnectExpert }) {
   const isUser  = message.role === 'user';
   const isError = message.isError;
   const t = makeT(language);
@@ -295,6 +297,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
   const [copied, setCopied]   = useState(false);
   const [feedback, setFeedback] = useState(null); // 'up' | 'down' | null
   const [previewImage, setPreviewImage] = useState(null);
+  const [isPlayingSpeech, setIsPlayingSpeech] = useState(false);
 
   const handleCopy = async () => {
     try {
@@ -304,6 +307,39 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
     } catch {
       // Clipboard unavailable (e.g. insecure context) — ignore
     }
+  };
+
+  const handleToggleSpeech = () => {
+    if (!('speechSynthesis' in window)) {
+      alert(t('speechNotSupported'));
+      return;
+    }
+
+    if (isPlayingSpeech) {
+      window.speechSynthesis.cancel();
+      setIsPlayingSpeech(false);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const cleanText = (message.text || '').replace(/[*#_`\[\]()]/g, '').trim();
+    if (!cleanText) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const targetLang = language === 'hi' ? 'hi-IN' : language === 'mr' ? 'mr-IN' : 'en-IN';
+    utterance.lang = targetLang;
+
+    const voices = window.speechSynthesis.getVoices();
+    const matchingVoice = voices.find(v => v.lang.startsWith(targetLang) || v.lang.includes(targetLang.slice(0, 2)));
+    if (matchingVoice) {
+      utterance.voice = matchingVoice;
+    }
+
+    utterance.onstart = () => setIsPlayingSpeech(true);
+    utterance.onend = () => setIsPlayingSpeech(false);
+    utterance.onerror = () => setIsPlayingSpeech(false);
+
+    window.speechSynthesis.speak(utterance);
   };
 
   const handleFeedback = (value) => {
@@ -319,7 +355,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
         <div
           className={`max-w-[92%] sm:max-w-[85%] rounded-2xl px-5 py-4 shadow-soft transition-all duration-200 ${
             isUser
-              ? 'bg-[#1e4e4d] text-white rounded-tr-none'
+              ? 'bg-[#a03612] text-white rounded-tr-none shadow-md'
               : isError
               ? 'bg-rose-50 border border-rose-200 text-rose-800 rounded-tl-none'
               : 'bg-white border border-stone-200/90 text-stone-800 rounded-tl-none'
@@ -327,7 +363,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
         >
           {/* Timestamp */}
           {formatTime(message.ts) && (
-            <div className={`text-[10px] mb-1.5 font-medium ${isUser ? 'text-white/60' : 'text-stone-400'}`}>
+            <div className={`text-[10px] mb-1.5 font-semibold ${isUser ? 'text-amber-100/90' : 'text-stone-400'}`}>
               {formatTime(message.ts)}
             </div>
           )}
@@ -382,8 +418,8 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
 
           {/* Message Text with Rich HTML Formatting */}
           {message.text && (
-            <div className="prose prose-stone max-w-none">
-              {renderFormattedContent(message.text)}
+            <div className={`max-w-none ${isUser ? 'text-white font-medium' : 'text-stone-800'}`}>
+              {renderFormattedContent(message.text, isUser)}
             </div>
           )}
 
@@ -429,41 +465,77 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
             </div>
           )}
 
-          {/* Bot Action Bar: Copy + Regenerate + Feedback */}
+          {/* Bot Action Bar: Sleek Icon Buttons for Read Aloud, Copy, Regenerate, Feedback */}
           {!isUser && !isError && !message.streaming && (
-            <div className="mt-3 pt-2 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-500 font-medium">
-              <div className="flex items-center gap-3">
+            <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500 font-medium">
+              <div className="flex items-center gap-1.5">
+                {/* Audio Read Aloud Button */}
                 <button
-                  onClick={handleCopy}
-                  className="flex items-center gap-1 hover:text-stone-800 transition"
-                  title={t('copyAnswer')}
+                  type="button"
+                  onClick={handleToggleSpeech}
+                  className={`p-1.5 rounded-lg transition-all flex items-center gap-1 ${
+                    isPlayingSpeech
+                      ? 'text-[#a03612] bg-amber-50 font-bold animate-pulse'
+                      : 'text-stone-400 hover:text-stone-800 hover:bg-stone-100'
+                  }`}
+                  title={isPlayingSpeech ? t('stopSpeech') : t('readAloud')}
+                  aria-label={t('readAloud')}
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 012-2v-8a2 2 0 01-2-2h-8a2 2 0 01-2 2v8a2 2 0 012 2z" />
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    {isPlayingSpeech ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    )}
                   </svg>
-                  <span>{copied ? t('copied') : t('copyAnswer')}</span>
+                  {isPlayingSpeech && <span className="text-[10px] font-bold">Playing</span>}
                 </button>
 
+                {/* Copy Answer Button */}
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className={`p-1.5 rounded-lg transition-all flex items-center gap-1 ${
+                    copied
+                      ? 'text-emerald-600 bg-emerald-50 font-bold'
+                      : 'text-stone-400 hover:text-stone-800 hover:bg-stone-100'
+                  }`}
+                  title={t('copyAnswer')}
+                  aria-label={t('copyAnswer')}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 012-2v-8a2 2 0 01-2-2h-8a2 2 0 01-2 2v8a2 2 0 012 2z" />
+                  </svg>
+                  {copied && <span className="text-[10px] font-bold">{t('copied')}</span>}
+                </button>
+
+                {/* Regenerate Answer Button */}
                 {isLastBot && onRegenerate && (
                   <button
+                    type="button"
                     onClick={() => onRegenerate(message)}
-                    className="flex items-center gap-1 hover:text-stone-800 transition"
+                    className="p-1.5 text-stone-400 hover:text-stone-800 hover:bg-stone-100 rounded-lg transition-all"
                     title={t('regenerate')}
+                    aria-label={t('regenerate')}
                   >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    <span>{t('regenerate')}</span>
                   </button>
                 )}
               </div>
 
               {/* Thumbs Up / Down Feedback */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <span className="text-[10px] text-stone-400 hidden sm:inline">{t('wasHelpful')}</span>
                 <button
+                  type="button"
                   onClick={() => handleFeedback('up')}
-                  className={`p-1 rounded hover:bg-stone-100 transition ${feedback === 'up' ? 'text-emerald-600 font-bold scale-110' : 'text-stone-400'}`}
+                  className={`p-1.5 rounded-lg transition-all ${
+                    feedback === 'up'
+                      ? 'text-emerald-600 bg-emerald-50 font-bold'
+                      : 'text-stone-400 hover:text-stone-800 hover:bg-stone-100'
+                  }`}
                   title="Helpful"
                   aria-label="Helpful"
                 >
@@ -472,8 +544,13 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
                   </svg>
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleFeedback('down')}
-                  className={`p-1 rounded hover:bg-stone-100 transition ${feedback === 'down' ? 'text-rose-600 font-bold scale-110' : 'text-stone-400'}`}
+                  className={`p-1.5 rounded-lg transition-all ${
+                    feedback === 'down'
+                      ? 'text-rose-600 bg-rose-50 font-bold'
+                      : 'text-stone-400 hover:text-stone-800 hover:bg-stone-100'
+                  }`}
                   title="Not helpful"
                   aria-label="Not helpful"
                 >

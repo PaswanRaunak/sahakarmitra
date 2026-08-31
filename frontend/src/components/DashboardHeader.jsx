@@ -7,6 +7,7 @@ export default function DashboardHeader({
   user,
   onLogout,
   onGoHome,
+  onOpenSettings,
   onToggleSidebar,
   isSidebarOpen,
   onNewChat,

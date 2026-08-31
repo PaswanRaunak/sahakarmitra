@@ -13,6 +13,7 @@ import ChatWindow      from './components/ChatWindow.jsx';
 import Sidebar         from './components/Sidebar.jsx';
 import WelcomeModal    from './components/WelcomeModal.jsx';
 import SettingsView    from './components/SettingsView.jsx';
+import ExpertsView     from './components/ExpertsView.jsx';
 import { makeT }       from './i18n.js';
 
 const EXAMPLE_QUESTIONS = {
@@ -493,6 +494,10 @@ export default function App() {
                   onUpdateUser={handleUpdateUser}
                   language={language}
                 />
+              ) : activeTab === 'experts' ? (
+                <ExpertsView
+                  language={language}
+                />
               ) : (
                 <ChatWindow
                   messages={messages}
@@ -505,6 +510,7 @@ export default function App() {
                   exampleQuestions={EXAMPLE_QUESTIONS[language]}
                   showExamples={messages.length === 0}
                   language={language}
+                  onConnectExpert={() => setActiveTab('experts')}
                 />
               )}
             </div>

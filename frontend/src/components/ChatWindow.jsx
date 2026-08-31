@@ -24,6 +24,7 @@ export default function ChatWindow({
   exampleQuestions,
   showExamples,
   language = 'en',
+  onConnectExpert,
 }) {
   const scrollRef = useRef(null);
   const textareaRef = useRef(null);
@@ -32,27 +33,104 @@ export default function ChatWindow({
   const dragCounterRef = useRef(0);
 
   const [isNearBottom, setIsNearBottom] = useState(true);
+  const [hasNewContent, setHasNewContent] = useState(false);
   const [attachments, setAttachments] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const [fileError, setFileError] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+
+  const recognitionRef = useRef(null);
+  const prevMessagesLengthRef = useRef(messages.length);
+  const prevLastMsgTextRef = useRef(messages[messages.length - 1]?.text || '');
 
   const t = makeT(language);
+
+  // Toggle Speech-to-Text Microphone Listening
+  const toggleListening = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert(t('speechNotSupported'));
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = language === 'hi' ? 'hi-IN' : language === 'mr' ? 'mr-IN' : 'en-IN';
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        if (transcript) {
+          setInput((prev) => (prev ? `${prev} ${transcript.trim()}` : transcript.trim()));
+        }
+      };
+
+      recognition.onerror = (err) => {
+        console.warn('Speech recognition error:', err);
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (err) {
+      console.warn('Failed to start speech recognition:', err);
+      setIsListening(false);
+    }
+  };
 
   // Auto-scroll only when user is near bottom
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    setIsNearBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 80);
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    setIsNearBottom(nearBottom);
+    if (nearBottom) {
+      setHasNewContent(false);
+    }
   }, []);
 
   useEffect(() => {
+    const currentLength = messages.length;
+    const lastMsgText = messages[messages.length - 1]?.text || '';
+
     if (isNearBottom) {
       scrollRef.current?.scrollTo({
         top: scrollRef.current.scrollHeight,
         behavior: 'smooth',
       });
+      setHasNewContent(false);
+    } else {
+      // Only set hasNewContent when user is scrolled up AND new messages or tokens arrive
+      if (
+        currentLength > prevMessagesLengthRef.current ||
+        (lastMsgText !== prevLastMsgTextRef.current && lastMsgText.length > 0) ||
+        loading
+      ) {
+        setHasNewContent(true);
+      }
     }
+
+    prevMessagesLengthRef.current = currentLength;
+    prevLastMsgTextRef.current = lastMsgText;
   }, [messages, loading, isNearBottom]);
 
   // Auto-grow textarea
@@ -272,6 +350,7 @@ export default function ChatWindow({
               onRetry={onRetry}
               onRegenerate={onRegenerate}
               isLastBot={msg === lastMsg && isLastBotAnswer}
+              onConnectExpert={onConnectExpert}
             />
           ))}
 
@@ -304,23 +383,39 @@ export default function ChatWindow({
                     {q}
                   </button>
                 ))}
+
+                {/* Talk to an Expert Pill Button */}
+                <button
+                  type="button"
+                  onClick={() => onConnectExpert && onConnectExpert()}
+                  className="px-3.5 py-2 bg-[#a03612]/10 hover:bg-[#a03612] hover:text-white border border-[#a03612]/40 rounded-full text-xs font-bold text-[#a03612] shadow-soft transition flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                >
+                  <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  <span>{t('talkToExpert')}</span>
+                </button>
               </div>
             </div>
           )}
         </div>
       </main>
 
-      {/* Jump-to-latest pill */}
-      {!isNearBottom && messages.length > 0 && (
+      {/* Jump-to-latest pill: fixed to bottom-right, solid background + subtle shadow, hidden by default */}
+      {!isNearBottom && hasNewContent && (
         <button
           type="button"
           onClick={() => {
             setIsNearBottom(true);
+            setHasNewContent(false);
             scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
           }}
-          className="absolute bottom-32 left-1/2 -translate-x-1/2 z-10 px-4 py-2 bg-white border border-stone-200 shadow-card rounded-full text-xs font-bold text-[#a03612] hover:bg-amber-50 transition animate-fade-in"
+          className="absolute bottom-24 right-6 sm:right-8 z-20 px-4 py-2.5 bg-white text-[#a03612] border border-amber-200/90 shadow-lg rounded-full text-xs font-extrabold hover:bg-amber-50 active:scale-95 transition-all duration-200 flex items-center gap-1.5 cursor-pointer animate-slide-up"
         >
-          ↓ {t('scrollToBottom')}
+          <svg className="w-3.5 h-3.5 text-[#a03612] animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+          <span>{t('scrollToBottom')}</span>
         </button>
       )}
 
@@ -386,11 +481,37 @@ export default function ChatWindow({
             </div>
           )}
 
+          {/* Animated Listening Indicator Notification Banner */}
+          {isListening && (
+            <div className="flex items-center justify-between px-4 py-2.5 bg-amber-500/10 border border-amber-500/30 text-[#a03612] rounded-2xl text-xs font-bold shadow-soft animate-slide-up backdrop-blur-xs">
+              <div className="flex items-center gap-3">
+                {/* Animated Sound Wave Equalizer Bars */}
+                <div className="flex items-center gap-1 h-5 px-1">
+                  <span className="w-1 bg-[#a03612] rounded-full animate-audio-bar-1"></span>
+                  <span className="w-1 bg-[#a03612] rounded-full animate-audio-bar-2"></span>
+                  <span className="w-1 bg-[#a03612] rounded-full animate-audio-bar-3"></span>
+                  <span className="w-1 bg-[#a03612] rounded-full animate-audio-bar-4"></span>
+                  <span className="w-1 bg-[#a03612] rounded-full animate-audio-bar-5"></span>
+                </div>
+                <span className="font-bold text-stone-900 tracking-tight">{t('listening')}</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={toggleListening}
+                className="px-2.5 py-1 bg-[#a03612] text-white text-[11px] font-bold rounded-lg hover:bg-[#882c0e] transition shadow-xs flex items-center gap-1 active:scale-95"
+              >
+                <span>{t('stopListening')}</span>
+                <span>×</span>
+              </button>
+            </div>
+          )}
+
           {/* Main Input Form */}
           <form onSubmit={handleSubmit} className="relative flex items-end">
             
-            {/* Attachment Action Buttons (Left) */}
-            <div className="absolute left-3 bottom-3 flex items-center gap-1.5 z-10">
+            {/* Left Attachment Action Buttons */}
+            <div className="absolute left-3 bottom-3 flex items-center gap-1 z-10">
               {/* Paperclip Button for Documents */}
               <button
                 type="button"
@@ -427,21 +548,49 @@ export default function ChatWindow({
               onKeyDown={handleKeyDown}
               placeholder={attachments.length > 0 ? (language === 'hi' ? 'संलग्न फ़ाइल के बारे में पूछें...' : language === 'mr' ? 'संलग्न फाइलबाबत विचारा...' : 'Ask question about attached file/screenshot...') : t('chatPlaceholder')}
               aria-label={t('chatPlaceholder')}
-              className="w-full pl-24 pr-16 py-4 bg-white border border-stone-200 rounded-3xl text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#a03612] focus:border-transparent shadow-card transition duration-200 resize-none leading-relaxed"
+              className="w-full pl-24 pr-24 sm:pr-28 py-4 bg-white border border-stone-200 rounded-3xl text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#a03612] focus:border-transparent shadow-card transition duration-200 resize-none leading-relaxed"
             />
 
-            {/* Send Button (Right) */}
-            <button
-              type="submit"
-              disabled={loading || (!input.trim() && attachments.length === 0)}
-              aria-label={t('chatPlaceholder')}
-              title={t('chatPlaceholder')}
-              className="absolute right-2 bottom-2 p-2.5 bg-[#a03612] hover:bg-[#882c0e] text-white rounded-full transition shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed"
-            >
-              <svg className="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9-7-9-7-9 7 9 7z" />
-              </svg>
-            </button>
+            {/* Right Side Action Buttons: Microphone (Before) + Send Button */}
+            <div className="absolute right-2.5 bottom-2.5 flex items-center gap-1.5 z-10">
+              
+              {/* Animated Voice Microphone Button (Positioned on the right right before Send) */}
+              <div className="relative flex items-center justify-center">
+                {isListening && (
+                  <span className="absolute inset-0 rounded-full bg-[#a03612] animate-mic-ring"></span>
+                )}
+                <button
+                  type="button"
+                  onClick={toggleListening}
+                  title={isListening ? t('stopListening') : t('voiceInput')}
+                  className={`relative p-2.5 rounded-full transition-all duration-200 active:scale-90 flex items-center justify-center ${
+                    isListening
+                      ? 'text-white bg-[#a03612] shadow-md scale-105'
+                      : 'text-stone-400 hover:text-[#a03612] hover:bg-amber-50/80'
+                  }`}
+                  aria-label={t('voiceInput')}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 016 0v6a3 3 0 01-3 3z" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Send Button */}
+              <button
+                type="submit"
+                disabled={loading || (!input.trim() && attachments.length === 0)}
+                aria-label={t('chatPlaceholder')}
+                title={t('chatPlaceholder')}
+                className="w-9 h-9 bg-gradient-to-tr from-[#d89780] to-[#b34420] hover:from-[#b34420] hover:to-[#882c0e] text-white rounded-full transition shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0"
+              >
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M12 4.5l7.5 7.5-7.5 7.5-7.5-7.5z" />
+                </svg>
+              </button>
+
+            </div>
+
           </form>
 
           <p className="text-center text-[11px] text-stone-400 font-normal">
