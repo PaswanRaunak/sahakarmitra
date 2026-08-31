@@ -251,9 +251,10 @@ export default function App() {
   };
 
   // Send message to the streaming /api/chat/stream endpoint
-  async function sendMessage(text) {
+  async function sendMessage(text, attachments = []) {
     text = (text || '').trim();
-    if (!text || loading || !activeChat) return;
+    const hasAttachments = Array.isArray(attachments) && attachments.length > 0;
+    if ((!text && !hasAttachments) || loading || !activeChat) return;
 
     const currentChatId = activeChat.id;
     const t = makeT(language);
@@ -264,13 +265,26 @@ export default function App() {
       .slice(-6)
       .map((m) => ({ role: m.role, text: m.text }));
 
-    const userMsg = { id: newId('msg'), role: 'user', text, ts: Date.now() };
+    const userMsg = {
+      id: newId('msg'),
+      role: 'user',
+      text,
+      attachments: hasAttachments ? attachments.map(a => ({
+        name: a.name,
+        type: a.type,
+        data: a.data,
+        size: a.size,
+        isImage: a.isImage,
+      })) : [],
+      ts: Date.now(),
+    };
 
     const isFirstMessage = activeChat.messages.length === 0;
     updateChatMessages(currentChatId, (prevMsgs) => [...prevMsgs, userMsg]);
     if (isFirstMessage) {
+      const titleCandidate = text || (hasAttachments ? (attachments[0].isImage ? 'Screenshot Inquiry' : attachments[0].name) : 'Legal Inquiry');
       setChats(prev => prev.map(c => (c.id === currentChatId
-        ? { ...c, title: text.slice(0, 30) + (text.length > 30 ? '...' : '') }
+        ? { ...c, title: titleCandidate.slice(0, 30) + (titleCandidate.length > 30 ? '...' : '') }
         : c)));
     }
 
@@ -282,7 +296,7 @@ export default function App() {
     streamAbortRef.current?.abort();
     const controller = new AbortController();
     streamAbortRef.current = controller;
-    const timeout = setTimeout(() => controller.abort(), 60000);
+    const timeout = setTimeout(() => controller.abort(), 90000);
 
     const botMsgId = newId('msg');
     let botMsgAdded = false;
@@ -300,10 +314,14 @@ export default function App() {
     };
 
     try {
+      const payloadAttachments = hasAttachments
+        ? attachments.map(a => ({ name: a.name, type: a.type, data: a.data, size: a.size }))
+        : [];
+
       const res = await fetch('/api/chat/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, language, history }),
+        body: JSON.stringify({ message: text, language, history, attachments: payloadAttachments }),
         signal: controller.signal,
       });
 
@@ -374,6 +392,7 @@ export default function App() {
           sources: [],
           isError: true,
           retryText: text,
+          retryAttachments: attachments,
           ts: Date.now(),
         };
         updateChatMessages(currentChatId, (prevMsgs) => [...prevMsgs, errorMsg]);
@@ -384,18 +403,20 @@ export default function App() {
     }
   }
 
-  // Retry a failed answer (re-send the original question).
+  // Retry a failed answer (re-send the original question + attachments).
   const handleRetry = (failedMsg) => {
-    if (failedMsg?.retryText) sendMessage(failedMsg.retryText);
+    if (failedMsg?.retryText || failedMsg?.retryAttachments) {
+      sendMessage(failedMsg.retryText || '', failedMsg.retryAttachments || []);
+    }
   };
 
-  // Regenerate the latest answer (re-send the last user question).
+  // Regenerate the latest answer (re-send the last user question + attachments).
   const handleRegenerate = (botMsg) => {
     if (loading || !activeChat) return;
     const idx = activeChat.messages.findIndex((m) => m.id === botMsg.id);
     for (let i = idx - 1; i >= 0; i--) {
       if (activeChat.messages[i].role === 'user') {
-        sendMessage(activeChat.messages[i].text);
+        sendMessage(activeChat.messages[i].text, activeChat.messages[i].attachments || []);
         return;
       }
     }

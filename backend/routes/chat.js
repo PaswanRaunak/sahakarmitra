@@ -2,44 +2,42 @@
 // POST /api/chat        → blocking JSON response
 // POST /api/chat/stream → Server-Sent Events token stream
 //
-// Body: { message: string, language: "en"|"hi"|"mr", history?: [{role, text}] }
-// Resp (JSON): { answer, sources: [{ section, source_file, excerpt }] }
-// Resp (SSE):  data: {type:"token"|"done"|"no_match"|"error", ...}
-//
-// Pipeline:
-//   1. validate request
-//   2. embed the question  (embeddings.js)
-//   3. vector-search ChromaDB for top-3 law chunks (retrieval.js)
-//   3b. reject weak matches via a relevance-distance threshold
-//   4. send chunks + history + question to Groq LLM (llm.js)
-//   5. return answer + sources
+// Body: {
+//   message: string,
+//   language: "en"|"hi"|"mr",
+//   history?: [{role, text}],
+//   attachments?: [{ name, type, data, size }]
+// }
+// Resp (JSON): { answer, sources: [{ section, source_file, excerpt }], parsedAttachments: [] }
+// Resp (SSE):  data: {type:"token"|"done"|"no_match"|"error"|"status", ...}
 // ─────────────────────────────────────────────
 
 import express from 'express';
 import { retrieveRelevantChunks } from '../services/retrieval.js';
 import { generateAnswer, generateAnswerStream } from '../services/llm.js';
+import { parseAllAttachments } from '../services/documentParser.js';
 
 const router = express.Router();
 
 const ALLOWED_LANGS = new Set(['en', 'hi', 'mr']);
-
-// Cosine distance (0 = identical, 2 = opposite) above which we treat the best
-// retrieved chunk as "not relevant enough" and refuse to answer, instead of
-// risking a confident guess from weak context. Tune via .env.
-const MAX_RELEVANCE_DISTANCE = parseFloat(process.env.RELEVANCE_MAX_DISTANCE || '1.1');
+const MAX_RELEVANCE_DISTANCE = parseFloat(process.env.RELEVANCE_MAX_DISTANCE || '1.2');
 
 // ── Shared request validation ────────────────────────────────
 function parseChatRequest(req) {
-  const { message, language = 'en', history = [] } = req.body ?? {};
+  const { message = '', language = 'en', history = [], attachments = [] } = req.body ?? {};
 
-  if (!message || typeof message !== 'string' || message.trim().length === 0) {
-    return { error: 'Field "message" is required.' };
+  const cleanMessage = typeof message === 'string' ? message.trim() : '';
+  const validAttachments = Array.isArray(attachments)
+    ? attachments.filter(a => a && typeof a.data === 'string' && a.data.length > 0)
+    : [];
+
+  if (!cleanMessage && validAttachments.length === 0) {
+    return { error: 'Please provide a question or attach a file/screenshot.' };
   }
   if (!ALLOWED_LANGS.has(language)) {
     return { error: 'Field "language" must be one of: en, hi, mr.' };
   }
 
-  // History: only the last 6 turns are forwarded to the LLM (see llm.js).
   const cleanHistory = Array.isArray(history)
     ? history
         .filter((m) => m && (m.role === 'user' || m.role === 'bot') && typeof m.text === 'string')
@@ -47,7 +45,7 @@ function parseChatRequest(req) {
         .map((m) => ({ role: m.role, text: m.text }))
     : [];
 
-  return { message, language, history: cleanHistory };
+  return { message: cleanMessage, language, history: cleanHistory, attachments: validAttachments };
 }
 
 // ── Format sources for the frontend ──────────────────────────
@@ -66,35 +64,22 @@ router.post('/', async (req, res) => {
     if (parsed.error) {
       return res.status(400).json({ error: parsed.error });
     }
-    const { message, language, history } = parsed;
+    const { message, language, history, attachments } = parsed;
 
-    console.log(`[chat] q="${message.slice(0, 80)}${message.length > 80 ? '...' : ''}" lang=${language}`);
+    console.log(`[chat] q="${message.slice(0, 80)}" attachments=${attachments.length} lang=${language}`);
 
-    const chunks = await retrieveRelevantChunks(message, 3);
+    // Parse attachments (OCR images, parse PDFs, decode text files)
+    const { combinedText: attachmentContext, parsedFiles } = await parseAllAttachments(attachments);
 
-    if (chunks.length === 0) {
-      // Either ChromaDB is empty or the collection doesn't exist.
-      return res.json({
-        answer: 'I could not find any relevant legal text for your question. Please ensure the ingest script has been run (npm run ingest) and ChromaDB is populated.',
-        sources: [],
-      });
-    }
+    // Build retrieval query: combine user prompt + key terms from document
+    const retrievalQuery = (message || attachmentContext.slice(0, 300)).trim() || 'Maharashtra cooperative societies rules';
+    const chunks = await retrieveRelevantChunks(retrievalQuery, 3);
 
-    // Refuse to answer from weak matches — better an honest "I don't know"
-    // than a confident-sounding guess (the core promise of this product).
-    if (chunks[0].distance != null && chunks[0].distance > MAX_RELEVANCE_DISTANCE) {
-      console.log(`[chat] weak match (distance=${chunks[0].distance.toFixed(3)} > ${MAX_RELEVANCE_DISTANCE}) — refusing`);
-      return res.json({
-        answer: 'I could not find any relevant legal text for your question in the current knowledge base. Please try rephrasing, or consult official legal counsel.',
-        sources: [],
-      });
-    }
-
-    const answer = await generateAnswer(message, chunks, language, history);
+    const answer = await generateAnswer(message, chunks, language, history, attachmentContext);
     const sources = formatSources(chunks);
 
     console.log(`[chat] OK  answer_len=${answer.length}  sources=${sources.length}`);
-    return res.json({ answer, sources });
+    return res.json({ answer, sources, parsedFiles });
   } catch (err) {
     console.error('[chat] ERROR:', err);
     return res.status(500).json({
@@ -110,9 +95,8 @@ router.post('/stream', async (req, res) => {
   if (parsed.error) {
     return res.status(400).json({ error: parsed.error });
   }
-  const { message, language, history } = parsed;
+  const { message, language, history, attachments } = parsed;
 
-  // Switch the response to a Server-Sent Events stream.
   res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
@@ -121,27 +105,41 @@ router.post('/stream', async (req, res) => {
   const send = (obj) => res.write(`data: ${JSON.stringify(obj)}\n\n`);
 
   try {
-    console.log(`[chat-stream] q="${message.slice(0, 80)}${message.length > 80 ? '...' : ''}" lang=${language}`);
+    console.log(`[chat-stream] q="${message.slice(0, 80)}" attachments=${attachments.length} lang=${language}`);
 
-    const chunks = await retrieveRelevantChunks(message, 3);
-
-    if (chunks.length === 0 || (chunks[0].distance != null && chunks[0].distance > MAX_RELEVANCE_DISTANCE)) {
-      // Frontend renders this as a localized "no close match" message.
-      send({ type: 'no_match' });
-      res.end();
-      return;
+    if (attachments.length > 0) {
+      send({ type: 'status', text: 'Processing attachments & OCR...' });
     }
 
+    // Parse attachments (OCR for images, parsing for PDF)
+    const { combinedText: attachmentContext } = await parseAllAttachments(attachments);
+
+    // Hybrid vector retrieval
+    const retrievalQuery = (message || attachmentContext.slice(0, 300)).trim() || 'Maharashtra cooperative societies';
+    const chunks = await retrieveRelevantChunks(retrievalQuery, 3);
+
+    let tokensSent = 0;
     await generateAnswerStream(message, chunks, language, history, (token) => {
-      send({ type: 'token', text: token });
-    });
+      if (token) {
+        tokensSent++;
+        send({ type: 'token', text: token });
+      }
+    }, attachmentContext);
+
+    // If 0 tokens were streamed, fallback to blocking answer
+    if (tokensSent === 0) {
+      console.log('[chat-stream] Stream yielded 0 tokens, fetching fallback response...');
+      const fallbackAns = await generateAnswer(message, chunks, language, history, attachmentContext);
+      if (fallbackAns) {
+        send({ type: 'token', text: fallbackAns });
+      }
+    }
 
     send({ type: 'done', sources: formatSources(chunks) });
-    console.log(`[chat-stream] OK`);
+    console.log(`[chat-stream] OK (tokensSent=${tokensSent})`);
     res.end();
   } catch (err) {
     console.error('[chat-stream] ERROR:', err);
-    // If headers are already sent we can only signal via the stream.
     send({ type: 'error', error: err.message });
     res.end();
   }

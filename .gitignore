@@ -15,8 +15,11 @@
 node_modules/
 **/node_modules/
 
-# Local databases & Vector store (ChromaDB)
+# Local databases, OCR traineddata & Vector cache
 chroma_data/
+.embeddings_cache.json
+*.embeddings_cache.json
+*.traineddata
 *.sqlite3
 *.sqlite
 *.db
@@ -38,6 +41,7 @@ pnpm-debug.log*
 # IDE, Tools & Editor files
 .rocketride/
 .claude/
+.gemini/
 .vscode/
 .idea/
 *.swp
