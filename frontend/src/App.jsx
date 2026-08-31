@@ -190,12 +190,8 @@ export default function App() {
     setAuthModal(null);
     setCurrentView('dashboard');
     setActiveTab('chat');
-    // Show the feature tour only on the very first successful login.
-    try {
-      if (!localStorage.getItem(WELCOME_SEEN_KEY)) setShowWelcome(true);
-    } catch {
-      setShowWelcome(true);
-    }
+    // Show the Welcome Modal feature tour upon logging into account
+    setShowWelcome(true);
   };
 
   // Handle Continue-as-Guest (skips the fake auth entirely)
