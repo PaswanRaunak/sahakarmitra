@@ -37,7 +37,7 @@ Answer the user's inquiry directly using the provided statutory legal provisions
 
   prompt += `\n\nIf the retrieved text does not contain enough information to answer, state clearly what is known from the knowledge base and what requires legal counsel — do NOT invent section numbers or facts.
 
-Keep answers structured, clear, and actionable with exact section citations. Respond in ${langName}.
+Keep answers structured, clear, and actionable with exact section citations. Do NOT output internal scratchpads, thinking steps, or preambles like "Here's a thinking process:". Begin directly with your legal assessment. Respond in ${langName}.
 
 ── RETRIEVED STATUTORY LEGAL TEXT ──
 ${contextText}`;
@@ -121,7 +121,7 @@ export async function generateAnswer(question, retrievedChunks, language = 'en',
     providers.push({
       name: 'Groq',
       url: GROQ_API_URL,
-      model: process.env.GROQ_MODEL || 'qwen/qwen3.8-27b',
+      model: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
       headers: {
         'Authorization': `Bearer ${groqKey}`,
         'Content-Type':  'application/json',
@@ -190,7 +190,7 @@ export async function generateAnswerStream(question, retrievedChunks, language =
     providers.push({
       name: 'Groq',
       url: GROQ_API_URL,
-      model: process.env.GROQ_MODEL || 'qwen/qwen3.8-27b',
+      model: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
       headers: {
         'Authorization': `Bearer ${groqKey}`,
         'Content-Type':  'application/json',
