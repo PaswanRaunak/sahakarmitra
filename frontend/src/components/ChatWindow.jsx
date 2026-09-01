@@ -41,6 +41,9 @@ export default function ChatWindow({
   const [isListening, setIsListening] = useState(false);
 
   const recognitionRef = useRef(null);
+  // Text inserted by the current dictation session. Replaced on every
+  // result event so finalized/interim transcripts never duplicate.
+  const voiceTextRef = useRef('');
   const prevMessagesLengthRef = useRef(messages.length);
   const prevLastMsgTextRef = useRef(messages[messages.length - 1]?.text || '');
 
@@ -67,17 +70,31 @@ export default function ChatWindow({
       recognition.lang = language === 'hi' ? 'hi-IN' : language === 'mr' ? 'mr-IN' : 'en-IN';
 
       recognition.onstart = () => {
+        voiceTextRef.current = '';
         setIsListening(true);
       };
 
       recognition.onresult = (event) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
+        let finalText = '';
+        let interimText = '';
+        for (let i = 0; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            finalText += event.results[i][0].transcript;
+          } else {
+            interimText += event.results[i][0].transcript;
+          }
         }
-        if (transcript) {
-          setInput((prev) => (prev ? `${prev} ${transcript.trim()}` : transcript.trim()));
-        }
+        const full = (finalText + ' ' + interimText).trim();
+        if (!full) return;
+
+        setInput((prev) => {
+          const base = voiceTextRef.current && prev.endsWith(voiceTextRef.current)
+            ? prev.slice(0, prev.length - voiceTextRef.current.length)
+            : prev;
+          const joiner = base && !/\s$/.test(base) ? ' ' : '';
+          return base + joiner + full;
+        });
+        voiceTextRef.current = full;
       };
 
       recognition.onerror = (err) => {
@@ -288,7 +305,7 @@ export default function ChatWindow({
         type="file"
         ref={fileInputRef}
         onChange={(e) => handleFileInputChange(e, false)}
-        accept=".pdf,.txt,.doc,.docx,.csv,.md,.json"
+        accept=".pdf,.txt,.csv,.md,.json"
         multiple
         className="hidden"
       />
@@ -310,7 +327,7 @@ export default function ChatWindow({
             </svg>
           </div>
           <h3 className="text-xl font-bold">{t('dropzoneText')}</h3>
-          <p className="text-xs text-white/80 mt-1">PDF, DOCX, TXT, PNG, JPG (up to 10MB)</p>
+          <p className="text-xs text-white/80 mt-1">PDF, TXT, CSV, MD, JSON, PNG, JPG (up to 10MB)</p>
         </div>
       )}
 

@@ -443,14 +443,14 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
 
               <div className="space-y-2">
                 {message.sources.map((src, index) => (
-                  <CitationCard key={index} source={src} index={index + 1} language={language} />
+                  <CitationCard key={index} source={src} index={index} language={language} />
                 ))}
               </div>
             </div>
           )}
 
           {/* Error actions: Retry */}
-          {isError && onRetry && message.retryText && (
+          {isError && onRetry && (message.retryText || (Array.isArray(message.retryAttachments) && message.retryAttachments.length > 0)) && (
             <div className="mt-3 pt-2 border-t border-rose-200/80 flex items-center justify-between">
               <span className="text-[11px] text-rose-700 font-medium">Failed to reach AI service</span>
               <button
@@ -568,7 +568,9 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
       {/* Image Preview Lightbox Modal */}
       {previewImage && (
         <ImageModal
-          image={previewImage}
+          src={previewImage.data}
+          name={previewImage.name}
+          alt={previewImage.name}
           onClose={() => setPreviewImage(null)}
         />
       )}
