@@ -289,7 +289,7 @@ function formatFileSize(bytes) {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 }
 
-export default function MessageBubble({ message, language = 'en', onRetry, onRegenerate, isLastBot, onConnectExpert }) {
+export default function MessageBubble({ message, language = 'en', onRetry, onRegenerate, isLastBot, onConnectExpert, question = '' }) {
   const isUser  = message.role === 'user';
   const isError = message.isError;
   const t = makeT(language);
@@ -344,7 +344,21 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
 
   const handleFeedback = (value) => {
     setFeedback(value);
-    console.log(`[feedback] msg=${message.id} rating=${value}`);
+    try {
+      // Persist feedback server-side (best-effort — UI never blocks on it)
+      fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messageId: message.id,
+          rating: value,
+          question,
+          answer: message.text || '',
+        }),
+      }).catch(() => {});
+    } catch {
+      // Feedback is fire-and-forget
+    }
   };
 
   const hasAttachments = Array.isArray(message.attachments) && message.attachments.length > 0;

@@ -128,7 +128,15 @@ export default function App() {
     const timer = setTimeout(() => controller.abort(), 4000);
 
     fetch('/api/health', { signal: controller.signal })
-      .then((res) => (res.ok ? setBackendStatus('ok') : setBackendStatus('down')))
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled) return;
+        if (!data) {
+          setBackendStatus('down');
+        } else {
+          setBackendStatus(data.status === 'degraded' ? 'degraded' : 'ok');
+        }
+      })
       .catch(() => { if (!cancelled) setBackendStatus('down'); })
       .finally(() => clearTimeout(timer));
 

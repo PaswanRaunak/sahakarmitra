@@ -359,17 +359,23 @@ export default function ChatWindow({
           )}
 
           {/* Active Messages List */}
-          {messages.map((msg, i) => (
-            <MessageBubble
-              key={msg.id || i}
-              message={msg}
-              language={language}
-              onRetry={onRetry}
-              onRegenerate={onRegenerate}
-              isLastBot={msg === lastMsg && isLastBotAnswer}
-              onConnectExpert={onConnectExpert}
-            />
-          ))}
+          {messages.map((msg, i) => {
+            const prevUser = msg.role === 'bot'
+              ? [...messages.slice(0, i)].reverse().find((m) => m.role === 'user')?.text || ''
+              : '';
+            return (
+              <MessageBubble
+                key={msg.id || i}
+                message={msg}
+                language={language}
+                onRetry={onRetry}
+                onRegenerate={onRegenerate}
+                isLastBot={msg === lastMsg && isLastBotAnswer}
+                onConnectExpert={onConnectExpert}
+                question={prevUser}
+              />
+            );
+          })}
 
           {/* Loading Indicator */}
           {loading && !messages.some((m) => m.streaming) && (

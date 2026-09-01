@@ -38,11 +38,15 @@ export default function DashboardHeader({
     ? 'bg-emerald-500'
     : backendStatus === 'down'
     ? 'bg-rose-500'
+    : backendStatus === 'degraded'
+    ? 'bg-amber-500'
     : 'bg-amber-400 animate-pulse';
   const statusText = backendStatus === 'ok'
     ? t('backendOnline')
     : backendStatus === 'down'
     ? t('backendOffline')
+    : backendStatus === 'degraded'
+    ? t('backendDegraded')
     : t('backendChecking');
   const statusTitle = `${statusText} — /api/health`;
 

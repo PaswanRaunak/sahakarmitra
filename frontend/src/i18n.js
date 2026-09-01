@@ -89,6 +89,7 @@ export const STRINGS = {
     switchLang: 'Switch Language (EN / HI / MR)',
     backendOnline: 'Law database connected',
     backendOffline: 'Backend offline — answers unavailable',
+    backendDegraded: 'Limited mode — AI provider or knowledge base missing',
     backendChecking: 'Checking connection...',
 
     // Dashboard view
@@ -309,6 +310,7 @@ export const STRINGS = {
     switchLang: 'भाषा बदलें (EN / HI / MR)',
     backendOnline: 'कानून डेटाबेस जुड़ा है',
     backendOffline: 'बैकएंड ऑफ़लाइन — उत्तर उपलब्ध नहीं',
+    backendDegraded: 'सीमित मोड — AI प्रदाता या ज्ञान कोश अनुपलब्ध',
     backendChecking: 'कनेक्शन जाँचा जा रहा है...',
 
     goodMorning: 'सुप्रभात',
@@ -524,6 +526,7 @@ export const STRINGS = {
     switchLang: 'भाषा बदला (EN / HI / MR)',
     backendOnline: 'कायदा डेटाबेस जोडलेला आहे',
     backendOffline: 'बॅकएंड ऑफलाइन — उत्तरे उपलब्ध नाहीत',
+    backendDegraded: 'मर्यादित मोड — AI प्रदाता किंवा ज्ञानकोश नाही',
     backendChecking: 'कनेक्शन तपासले जात आहे...',
 
     goodMorning: 'शुभ प्रभात',

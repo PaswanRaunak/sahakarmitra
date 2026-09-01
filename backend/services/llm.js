@@ -107,11 +107,11 @@ async function callChatApi({ url, headers, model, messages, stream = false }) {
 }
 
 /**
- * Call LLM blocking response with automatic multi-provider fallback.
+ * Build the ordered provider list (Groq first, then OpenRouter).
+ * A GROQ_API_KEY that actually starts with "sk-or-" is treated as
+ * an OpenRouter key, since those prefixes are how users paste keys.
  */
-export async function generateAnswer(question, retrievedChunks, language = 'en', history = [], attachmentContext = '') {
-  const messages = buildMessages(question, retrievedChunks, language, history, attachmentContext);
-
+function getProviders() {
   const groqKey = process.env.GROQ_API_KEY && !process.env.GROQ_API_KEY.startsWith('sk-or-') ? process.env.GROQ_API_KEY : null;
   const openRouterKey = process.env.OPENROUTER_API_KEY || (process.env.GROQ_API_KEY?.startsWith('sk-or-') ? process.env.GROQ_API_KEY : null);
 
@@ -143,7 +143,62 @@ export async function generateAnswer(question, retrievedChunks, language = 'en',
     });
   }
 
+  return providers;
+}
+
+export function isLlmConfigured() {
+  return getProviders().length > 0;
+}
+
+/**
+ * Translate a non-English query to English so it can be embedded
+ * against the (English-only) law knowledge base. Falls back to the
+ * original text on any failure — retrieval quality degrades, but
+ * the request never breaks.
+ */
+export async function translateToEnglish(text) {
+  const providers = getProviders();
+  if (!providers.length || !text || !text.trim()) return text;
+
   for (const prov of providers) {
+    try {
+      const response = await callChatApi({
+        url: prov.url,
+        headers: prov.headers,
+        model: prov.model,
+        stream: false,
+        messages: [
+          {
+            role: 'system',
+            content: 'You translate user questions to English. Reply with ONLY the English translation of the question — no explanations, no quotes, no extra text.',
+          },
+          { role: 'user', content: text },
+        ],
+      });
+
+      if (!response.ok) continue;
+
+      const data = await response.json();
+      const out = data.choices?.[0]?.message?.content?.trim();
+      if (out) {
+        // Strip wrapping quotes some models add
+        return out.replace(/^["']|["']$/g, '').slice(0, 500);
+      }
+    } catch {
+      // Try the next provider, else fall back to original text
+    }
+  }
+
+  return text;
+}
+
+/**
+ * Call LLM blocking response with automatic multi-provider fallback.
+ */
+export async function generateAnswer(question, retrievedChunks, language = 'en', history = [], attachmentContext = '') {
+  const messages = buildMessages(question, retrievedChunks, language, history, attachmentContext);
+
+  for (const prov of getProviders()) {
     try {
       console.log(`[llm] Calling ${prov.name} (model: ${prov.model})...`);
       const response = await callChatApi({
@@ -180,40 +235,7 @@ export async function generateAnswer(question, retrievedChunks, language = 'en',
 export async function generateAnswerStream(question, retrievedChunks, language = 'en', history = [], onToken = () => {}, attachmentContext = '') {
   const messages = buildMessages(question, retrievedChunks, language, history, attachmentContext);
 
-  const groqKey = process.env.GROQ_API_KEY && !process.env.GROQ_API_KEY.startsWith('sk-or-') ? process.env.GROQ_API_KEY : null;
-  const openRouterKey = process.env.OPENROUTER_API_KEY || (process.env.GROQ_API_KEY?.startsWith('sk-or-') ? process.env.GROQ_API_KEY : null);
-
-  const providers = [];
-
-  // Priority 1: Groq (ultra-fast 400ms streaming)
-  if (groqKey) {
-    providers.push({
-      name: 'Groq',
-      url: GROQ_API_URL,
-      model: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
-      headers: {
-        'Authorization': `Bearer ${groqKey}`,
-        'Content-Type':  'application/json',
-      },
-    });
-  }
-
-  // Priority 2: OpenRouter
-  if (openRouterKey) {
-    providers.push({
-      name: 'OpenRouter',
-      url: OPENROUTER_API_URL,
-      model: process.env.OPENROUTER_MODEL || 'openrouter/free',
-      headers: {
-        'Authorization': `Bearer ${openRouterKey}`,
-        'HTTP-Referer':  process.env.SITE_URL || 'http://localhost:5173',
-        'X-Title':       'SahakarMitra',
-        'Content-Type':  'application/json',
-      },
-    });
-  }
-
-  for (const prov of providers) {
+  for (const prov of getProviders()) {
     try {
       console.log(`[llm-stream] Calling ${prov.name} stream (model: ${prov.model})...`);
       const response = await callChatApi({

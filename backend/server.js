@@ -4,28 +4,107 @@
 // ─────────────────────────────────────────────
 
 import 'dotenv/config';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
 import chatRoutes from './routes/chat.js';
+import { isLlmConfigured } from './services/llm.js';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// ── Simple in-memory rate limiter (per IP, fixed window) ─────
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const RATE_LIMIT_MAX = 60;
+
+const rateBuckets = new Map(); // ip -> { count, resetAt }
+
+// Periodically drop expired buckets so the map can't grow unbounded
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, bucket] of rateBuckets) {
+    if (bucket.resetAt <= now) rateBuckets.delete(ip);
+  }
+}, RATE_LIMIT_WINDOW_MS).unref();
+
+function rateLimit(req, res, next) {
+  const ip = req.ip || req.socket?.remoteAddress || 'unknown';
+  const now = Date.now();
+
+  let bucket = rateBuckets.get(ip);
+  if (!bucket || bucket.resetAt <= now) {
+    bucket = { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
+    rateBuckets.set(ip, bucket);
+  }
+
+  bucket.count += 1;
+  if (bucket.count > RATE_LIMIT_MAX) {
+    return res.status(429).json({
+      error: 'Too many requests. Please wait a few minutes and try again.',
+    });
+  }
+  next();
+}
 
 // Middleware
 app.use(cors());                                  // allow the Vite dev server (5173) to call us
 app.use(express.json({ limit: '25mb' }));         // parse JSON bodies (chat messages & attachments)
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
-// Health-check endpoint — handy for curl/Postman smoke tests
+// Health-check endpoint — reports real readiness, not just liveness:
+//   llm: whether at least one AI provider key is configured
+//   knowledgeBase: how many law text files are available for retrieval
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'SahakarMitra API' });
+  const dataDir = path.join(__dirname, 'data');
+  const dataFiles = fs.existsSync(dataDir)
+    ? fs.readdirSync(dataDir).filter(f => f.endsWith('.txt')).length
+    : 0;
+
+  res.json({
+    status: isLlmConfigured() && dataFiles > 0 ? 'ok' : 'degraded',
+    service: 'SahakarMitra API',
+    llmConfigured: isLlmConfigured(),
+    knowledgeBaseFiles: dataFiles,
+  });
 });
 
-// Main chat endpoint — POST /api/chat
-app.use('/api/chat', chatRoutes);
+// Rate-limited API surface (chat = LLM cost, feedback = write path)
+app.use('/api/chat', rateLimit, chatRoutes);
+
+// ── Feedback endpoint — persists thumbs up/down for later analysis ──
+const feedbackPath = path.join(__dirname, 'data', 'feedback.jsonl');
+
+app.post('/api/feedback', rateLimit, (req, res) => {
+  const { messageId, rating, question = '', answer = '' } = req.body ?? {};
+
+  if (!messageId || (rating !== 'up' && rating !== 'down')) {
+    return res.status(400).json({ error: 'Fields "messageId" and "rating" (up|down) are required.' });
+  }
+
+  const entry = {
+    messageId: String(messageId).slice(0, 100),
+    rating,
+    question: String(question).slice(0, 2000),
+    answer: String(answer).slice(0, 4000),
+    ts: new Date().toISOString(),
+  };
+
+  try {
+    fs.appendFileSync(feedbackPath, JSON.stringify(entry) + '\n', 'utf-8');
+  } catch (err) {
+    console.warn('[feedback] Could not persist feedback:', err.message);
+    return res.status(500).json({ error: 'Could not store feedback.' });
+  }
+
+  return res.json({ ok: true });
+});
 
 app.listen(PORT, () => {
   console.log(`SahakarMitra backend running on http://localhost:${PORT}`);
   console.log(`  Health check : http://localhost:${PORT}/api/health`);
   console.log(`  Chat endpoint: http://localhost:${PORT}/api/chat`);
+  console.log(`  Rate limit   : ${RATE_LIMIT_MAX} requests / ${RATE_LIMIT_WINDOW_MS / 60000} min per IP`);
 });
