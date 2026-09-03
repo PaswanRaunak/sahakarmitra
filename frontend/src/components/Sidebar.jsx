@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeT } from '../i18n.js';
 
 export default function Sidebar({
@@ -17,6 +17,8 @@ export default function Sidebar({
   language = 'en',
 }) {
   const t = makeT(language);
+  const [searchFilter, setSearchFilter] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
 
   const getDerivedName = (u) => {
     if (u?.name && u.name.trim().length > 1) return u.name.trim();
@@ -33,23 +35,37 @@ export default function Sidebar({
   const userName = getDerivedName(currentUser);
   const societyName = (currentUser?.societyName && currentUser.societyName.trim().length > 1) ? currentUser.societyName : t('fallbackSociety');
 
+  // Handle navigation with mobile drawer auto-close
+  const handleNav = (tab, customAction) => {
+    if (customAction) customAction();
+    setActiveTab(tab);
+    if (window.innerWidth < 768) {
+      onClose();
+    }
+  };
+
+  // Filter conversations
+  const filteredChats = searchFilter.trim()
+    ? chats.filter((c) => (c.title || '').toLowerCase().includes(searchFilter.toLowerCase().trim()))
+    : chats;
+
   return (
     <>
-      {/* Mobile Backdrop */}
+      {/* Mobile Backdrop Overlay */}
       {isOpen && (
         <div
           onClick={onClose}
-          className="md:hidden fixed inset-0 z-40 bg-stone-900/50 backdrop-blur-xs transition-opacity animate-fade-in"
+          className="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-xs transition-opacity animate-fade-in"
         />
       )}
 
-      {/* Upgraded Sidebar */}
+      {/* Upgraded Sidebar / Mobile Drawer */}
       <aside
         className={`fixed md:static inset-y-0 left-0 z-40 bg-[#f5f2ec] border-r border-stone-200/80 flex flex-col transition-all duration-300 ease-in-out ${
-          isCollapsed ? 'w-20' : 'w-72 sm:w-80'
+          isCollapsed ? 'w-20' : 'w-[82vw] max-w-[320px] md:w-72'
         } ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} ${!isOpen ? 'md:hidden' : ''}`}
       >
-        {/* Top Branding & New Chat Button */}
+        {/* Top Drawer Header: Logo + Title + Quick Actions */}
         <div className="p-4 space-y-3 border-b border-stone-200/80 bg-[#faf8f5]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5 text-stone-900 font-bold text-xs uppercase tracking-wider overflow-hidden">
@@ -66,20 +82,36 @@ export default function Sidebar({
               )}
             </div>
 
-            <button
-              onClick={onClose}
-              aria-label={t('closeSidebar')}
-              className="md:hidden text-stone-400 hover:text-stone-700 p-1 rounded-lg hover:bg-stone-200/60 transition"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-1">
+              {!isCollapsed && (
+                <button
+                  onClick={() => setShowSearch(!showSearch)}
+                  aria-label="Search conversations"
+                  className="text-stone-500 hover:text-stone-900 p-1.5 rounded-lg hover:bg-stone-200/60 transition"
+                  title="Search chats"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+              )}
+
+              <button
+                onClick={onClose}
+                aria-label={t('closeSidebar')}
+                className="md:hidden text-stone-400 hover:text-stone-700 p-1.5 rounded-lg hover:bg-stone-200/60 transition"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
 
+          {/* Desktop New Chat Button */}
           <button
-            onClick={() => { onNewChat(); setActiveTab('chat'); }}
-            className={`w-full py-2.5 px-3 bg-[#a03612] hover:bg-[#882c0e] text-white rounded-xl font-bold text-xs shadow-sm transition flex items-center justify-center gap-2 transform hover:-translate-y-0.5 active:translate-y-0 ${
+            onClick={() => handleNav('chat', onNewChat)}
+            className={`hidden md:flex w-full py-2.5 px-3 bg-[#a03612] hover:bg-[#882c0e] text-white rounded-xl font-bold text-xs shadow-sm transition items-center justify-center gap-2 transform hover:-translate-y-0.5 active:translate-y-0 ${
               isCollapsed ? 'px-2' : ''
             }`}
             title={t('newQuery')}
@@ -89,12 +121,26 @@ export default function Sidebar({
             </svg>
             {!isCollapsed && <span className="truncate">{t('newQuery')}</span>}
           </button>
+
+          {/* Search Input (Collapsible) */}
+          {showSearch && !isCollapsed && (
+            <div className="pt-1">
+              <input
+                type="text"
+                value={searchFilter}
+                onChange={(e) => setSearchFilter(e.target.value)}
+                placeholder="Filter chats..."
+                className="w-full px-3 py-1.5 text-xs bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#a03612]"
+                autoFocus
+              />
+            </div>
+          )}
         </div>
 
         {/* Main Navigation Items */}
         <div className="p-3 border-b border-stone-200/80 space-y-1">
           <button
-            onClick={() => setActiveTab('dashboard')}
+            onClick={() => handleNav('dashboard')}
             className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-xs font-bold transition ${
               activeTab === 'dashboard'
                 ? 'bg-white text-[#a03612] shadow-soft border border-stone-200/80'
@@ -108,7 +154,7 @@ export default function Sidebar({
           </button>
 
           <button
-            onClick={() => setActiveTab('chat')}
+            onClick={() => handleNav('chat')}
             className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-xs font-bold transition ${
               activeTab === 'chat'
                 ? 'bg-white text-[#a03612] shadow-soft border border-stone-200/80'
@@ -122,7 +168,7 @@ export default function Sidebar({
           </button>
 
           <button
-            onClick={() => { setActiveTab('library'); window.history.pushState({}, '', '/library'); }}
+            onClick={() => handleNav('library', () => window.history.pushState({}, '', '/library'))}
             className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-xs font-bold transition ${
               activeTab === 'library'
                 ? 'bg-white text-[#a03612] shadow-soft border border-stone-200/80'
@@ -136,7 +182,7 @@ export default function Sidebar({
           </button>
 
           <button
-            onClick={() => setActiveTab('bookmarks')}
+            onClick={() => handleNav('bookmarks')}
             className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-xs font-bold transition ${
               activeTab === 'bookmarks'
                 ? 'bg-white text-[#a03612] shadow-soft border border-stone-200/80'
@@ -150,7 +196,7 @@ export default function Sidebar({
           </button>
 
           <button
-            onClick={() => setActiveTab('experts')}
+            onClick={() => handleNav('experts')}
             className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-xs font-bold transition ${
               activeTab === 'experts'
                 ? 'bg-white text-[#a03612] shadow-soft border border-stone-200/80'
@@ -162,31 +208,36 @@ export default function Sidebar({
             </svg>
             {!isCollapsed && <span>{t('expertsTab')}</span>}
           </button>
-
         </div>
 
-        {/* Chat History List */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-1">
-          {!isCollapsed && (
-            <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-stone-400">
-              {t('recentConversations')} ({chats.length})
-            </div>
-          )}
+        {/* Section Header: Recent Conversations */}
+        {!isCollapsed && (
+          <div className="px-4 pt-3 pb-1 flex items-center justify-between text-[11px] font-bold text-stone-400 uppercase tracking-wider">
+            <span>{t('recentConversations')} ({filteredChats.length})</span>
+          </div>
+        )}
 
-          {chats.map((chat, idx) => {
-            const isActive = activeTab === 'chat' && chat.id === activeChatId;
-            const displayTitle = (chat.title && chat.title !== 'New Legal Inquiry')
+        {/* Conversation List */}
+        <div className="flex-1 overflow-y-auto px-2 space-y-1 py-1 scrollbar-none">
+          {filteredChats.map((chat) => {
+            const isActive = chat.id === activeChatId && activeTab === 'chat';
+            const displayTitle = (chat.title && chat.title.trim().length > 0)
               ? chat.title
-              : `Inquiry #${chats.length - idx}`;
+              : (chat.messages && chat.messages.length > 0 && chat.messages[0]?.text)
+              ? chat.messages[0].text.slice(0, 30) + '...'
+              : t('newQuery');
 
             return (
               <div
                 key={chat.id}
-                onClick={() => { onSelectChat(chat.id); setActiveTab('chat'); }}
-                className={`group relative flex items-center justify-between p-2.5 rounded-xl text-xs cursor-pointer transition ${
+                onClick={() => {
+                  onSelectChat(chat.id);
+                  handleNav('chat');
+                }}
+                className={`group flex items-center justify-between p-2 rounded-xl text-xs font-semibold cursor-pointer transition ${
                   isActive
-                    ? 'bg-white text-stone-900 font-bold shadow-soft border border-stone-200/80'
-                    : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900 font-medium'
+                    ? 'bg-white text-[#a03612] shadow-soft border border-stone-200/80 font-bold'
+                    : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900'
                 }`}
                 title={displayTitle}
               >
@@ -221,35 +272,62 @@ export default function Sidebar({
           })}
         </div>
 
-        {/* Bottom Expand / Collapse Toggle & User Badge */}
-        <div className="p-3 border-t border-stone-200/80 bg-stone-100/60 space-y-2">
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="w-full flex items-center justify-center gap-2 p-2 rounded-xl text-stone-500 hover:text-stone-900 hover:bg-stone-200/60 text-xs font-semibold transition"
-            title={isCollapsed ? t('expandSidebar') : t('collapseSidebar')}
-          >
-            <svg className={`w-4 h-4 transform transition-transform ${isCollapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-            </svg>
-            {!isCollapsed && <span>{t('collapseSidebar')}</span>}
-          </button>
+        {/* ChatGPT-Style Mobile Action Bottom Bar */}
+        <div className="p-3 border-t border-stone-200/80 bg-white/90 backdrop-blur-sm">
+          {/* Mobile Bottom Bar: Pill Chat Button + Avatar */}
+          <div className="flex md:hidden items-center justify-between gap-3">
+            <button
+              onClick={() => handleNav('chat', onNewChat)}
+              className="flex-1 py-2.5 px-4 bg-[#a03612] active:bg-[#882c0e] text-white rounded-full font-bold text-xs shadow-md transition flex items-center justify-center gap-2 transform active:scale-95"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              <span>{t('chatTab') || 'Chat'}</span>
+            </button>
 
-          {/* User Profile Badge */}
-          {!isCollapsed && (
-            <div className="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-stone-200/80 shadow-xs">
-              <div className="w-7 h-7 rounded-full bg-[#2d6a68] text-white flex items-center justify-center font-bold text-xs shadow-xs">
-                {userName[0]?.toUpperCase() || 'R'}
+            <button
+              onClick={() => handleNav('settings')}
+              className="w-9 h-9 rounded-full bg-[#2d6a68] text-white flex items-center justify-center font-bold text-xs shadow-sm border border-stone-200 flex-shrink-0"
+              title={userName}
+            >
+              {userName[0]?.toUpperCase() || 'R'}
+            </button>
+          </div>
+
+          {/* Desktop Collapse Toggle & User Badge */}
+          <div className="hidden md:block space-y-2">
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="w-full flex items-center justify-center gap-2 p-2 rounded-xl text-stone-500 hover:text-stone-900 hover:bg-stone-200/60 text-xs font-semibold transition"
+              title={isCollapsed ? t('expandSidebar') : t('collapseSidebar')}
+            >
+              <svg className={`w-4 h-4 transform transition-transform ${isCollapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+              </svg>
+              {!isCollapsed && <span>{t('collapseSidebar')}</span>}
+            </button>
+
+            {/* Desktop User Profile Badge */}
+            {!isCollapsed && (
+              <div
+                onClick={() => handleNav('settings')}
+                className="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-stone-200/80 shadow-xs cursor-pointer hover:bg-stone-50 transition"
+              >
+                <div className="w-7 h-7 rounded-full bg-[#2d6a68] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                  {userName[0]?.toUpperCase() || 'R'}
+                </div>
+                <div className="min-w-0 flex-1 text-xs">
+                  <p className="font-bold text-stone-900 truncate">
+                    {userName}
+                  </p>
+                  <p className="text-[10px] text-stone-500 truncate">
+                    {societyName}
+                  </p>
+                </div>
               </div>
-              <div className="min-w-0 flex-1 text-xs">
-                <p className="font-bold text-stone-900 truncate">
-                  {userName}
-                </p>
-                <p className="text-[10px] text-stone-500 truncate">
-                  {societyName}
-                </p>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
       </aside>
