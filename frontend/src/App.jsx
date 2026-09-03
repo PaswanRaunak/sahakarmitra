@@ -1,8 +1,8 @@
-// ─────────────────────────────────────────────
+// ---------------------------------------------
 // SahakarMitra: Top-Level Application Component
 // Supports Landing Page, Auth Flow, Legal Dashboard Overview,
-// Multi-Chat Sessions, Settings, and RAG AI with token streaming.
-// ─────────────────────────────────────────────
+// Multi-Chat Sessions, Settings, Knowledge Repository, and RAG AI.
+// ---------------------------------------------
 
 import React, { useState, useEffect, useRef } from 'react';
 import LandingPage     from './components/LandingPage.jsx';
@@ -14,6 +14,7 @@ import Sidebar         from './components/Sidebar.jsx';
 import WelcomeModal    from './components/WelcomeModal.jsx';
 import SettingsView    from './components/SettingsView.jsx';
 import ExpertsView     from './components/ExpertsView.jsx';
+import LibraryView     from './components/LibraryView.jsx';
 import { makeT }       from './i18n.js';
 
 const EXAMPLE_QUESTIONS = {
@@ -42,6 +43,7 @@ const WELCOME_SEEN_KEY = 'sahakar_welcome_seen';
 // Stable ids for messages / chats (never use array index as a React key).
 const newId = (prefix) => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
+
 const makeChat = () => ({
   id: newId('chat'),
   title: 'New Legal Inquiry',
@@ -49,18 +51,12 @@ const makeChat = () => ({
   timestamp: Date.now(),
 });
 
-// Timed fetch helper — aborts if the backend does not respond within `ms`.
-function fetchWithTimeout(url, options = {}, ms = 45000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), ms);
-  return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
-}
-
 export default function App() {
   // Navigation & Auth State
-  const [currentView, setCurrentView] = useState('landing'); // 'landing' | 'dashboard'
-  const [activeTab,   setActiveTab]   = useState('dashboard'); // 'dashboard' | 'chat' | 'settings'
-  const [authModal,   setAuthModal]   = useState(null);      // null | 'login' | 'register' | 'forgotPassword'
+  const initialIsLibrary = typeof window !== 'undefined' && window.location.pathname === '/library';
+  const [currentView, setCurrentView] = useState(initialIsLibrary ? 'dashboard' : 'landing');
+  const [activeTab,   setActiveTab]   = useState(initialIsLibrary ? 'library' : 'dashboard');
+  const [authModal,   setAuthModal]   = useState(null);
   const [showWelcome, setShowWelcome] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -78,7 +74,7 @@ export default function App() {
   // Backend health status: 'checking' | 'ok' | 'down'
   const [backendStatus, setBackendStatus] = useState('checking');
 
-  // Guards against sending messages after the component unmounted mid-stream.
+  // Stream abort ref
   const streamAbortRef = useRef(null);
 
   // Load stored User and Chat History on startup
@@ -100,7 +96,6 @@ export default function App() {
       // Fallback
     }
 
-    // Default initial chat session if none exist
     const defaultChat = makeChat();
     setChats([defaultChat]);
     setActiveChatId(defaultChat.id);
@@ -117,8 +112,7 @@ export default function App() {
     }
   }, [chats]);
 
-  // Health check: ping the backend so the UI can show connection status
-  // before the user types anything. Re-checked whenever the dashboard opens.
+  // Health check: ping the backend
   useEffect(() => {
     if (currentView !== 'dashboard') return;
     let cancelled = false;
@@ -143,10 +137,8 @@ export default function App() {
     return () => { cancelled = true; clearTimeout(timer); controller.abort(); };
   }, [currentView, activeTab]);
 
-  // Abort any in-flight stream when the page is closed.
   useEffect(() => () => streamAbortRef.current?.abort(), []);
 
-  // Handle User Settings Update
   const handleUpdateUser = (updatedUser) => {
     setCurrentUser(updatedUser);
     if (updatedUser.preferredLang) {
@@ -159,11 +151,9 @@ export default function App() {
     }
   };
 
-  // Get active chat object & messages list
   const activeChat = chats.find(c => c.id === activeChatId) || chats[0];
   const messages = activeChat?.messages || [];
 
-  // Create a new chat session
   const handleNewChat = () => {
     const newChat = makeChat();
     setChats(prev => [newChat, ...prev]);
@@ -171,7 +161,6 @@ export default function App() {
     setActiveTab('chat');
   };
 
-  // Delete a chat session
   const handleDeleteChat = (chatId) => {
     setChats(prev => {
       const filtered = prev.filter(c => c.id !== chatId);
@@ -187,7 +176,6 @@ export default function App() {
     });
   };
 
-  // Handle Auth Success
   const handleAuthSuccess = (user) => {
     setCurrentUser(user);
     try {
@@ -198,11 +186,9 @@ export default function App() {
     setAuthModal(null);
     setCurrentView('dashboard');
     setActiveTab('chat');
-    // Show the Welcome Modal feature tour upon logging into account
     setShowWelcome(true);
   };
 
-  // Handle Continue-as-Guest (skips the fake auth entirely)
   const handleGuestLogin = () => {
     handleAuthSuccess({
       name: 'Guest',
@@ -213,7 +199,6 @@ export default function App() {
     });
   };
 
-  // Handle Logout
   const handleLogout = () => {
     setCurrentUser(null);
     try {
@@ -221,17 +206,14 @@ export default function App() {
     } catch {
       // Ignore
     }
-    // Reset the workspace view so re-login always lands on a fresh tab.
     setActiveTab('dashboard');
     setCurrentView('landing');
   };
 
-  // Toggle Language between EN -> HI -> MR
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'en' ? 'hi' : prev === 'hi' ? 'mr' : 'en');
   };
 
-  // Start chatting handler - prompts login if not authenticated
   const handleStartChatting = () => {
     if (currentUser) {
       setCurrentView('dashboard');
@@ -250,12 +232,10 @@ export default function App() {
     }
   };
 
-  // Helper: append/update messages of one chat immutably
   const updateChatMessages = (chatId, updater) => {
     setChats(prev => prev.map(c => (c.id === chatId ? { ...c, messages: updater(c.messages) } : c)));
   };
 
-  // Send message to the streaming /api/chat/stream endpoint
   async function sendMessage(text, attachments = []) {
     text = (text || '').trim();
     const hasAttachments = Array.isArray(attachments) && attachments.length > 0;
@@ -264,7 +244,6 @@ export default function App() {
     const currentChatId = activeChat.id;
     const t = makeT(language);
 
-    // 1. Optimistic user bubble + update chat title if first message
     const history = messages
       .filter((m) => !m.isError)
       .slice(-6)
@@ -297,7 +276,6 @@ export default function App() {
     setInput('');
     setActiveTab('chat');
 
-    // Abort any previous stream, then own the new one.
     streamAbortRef.current?.abort();
     const controller = new AbortController();
     streamAbortRef.current = controller;
@@ -335,7 +313,7 @@ export default function App() {
         throw new Error(err.error || `Server error ${res.status}`);
       }
 
-      // Parse the Server-Sent Events stream.
+
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
@@ -378,13 +356,11 @@ export default function App() {
       }
 
       ensureBotMsg();
-      // Mark streaming finished (e.g. if the server closed without a done event).
       updateChatMessages(currentChatId, (prevMsgs) =>
         prevMsgs.map((m) => (m.id === botMsgId ? { ...m, streaming: false } : m)));
 
     } catch (err) {
       if (err.name === 'AbortError') {
-        // User closed the page or the request timed out.
         if (botMsgAdded) {
           updateChatMessages(currentChatId, (prevMsgs) =>
             prevMsgs.map((m) => (m.id === botMsgId ? { ...m, streaming: false } : m)));
@@ -408,14 +384,12 @@ export default function App() {
     }
   }
 
-  // Retry a failed answer (re-send the original question + attachments).
   const handleRetry = (failedMsg) => {
     if (failedMsg?.retryText || failedMsg?.retryAttachments) {
       sendMessage(failedMsg.retryText || '', failedMsg.retryAttachments || []);
     }
   };
 
-  // Regenerate the latest answer (re-send the last user question + attachments).
   const handleRegenerate = (botMsg) => {
     if (loading || !activeChat) return;
     const idx = activeChat.messages.findIndex((m) => m.id === botMsg.id);
@@ -432,6 +406,7 @@ export default function App() {
 
   return (
     <div className={`min-h-screen bg-[#faf8f5] text-[#1c1917] flex flex-col font-sans ${isDevanagari ? 'lang-dev' : ''}`}>
+
 
       {/* VIEW 1: LANDING PAGE */}
       {currentView === 'landing' && (
@@ -461,7 +436,7 @@ export default function App() {
             backendStatus={backendStatus}
           />
 
-          {/* Main Dashboard Layout: Expandable Sidebar + Active Workspace */}
+          {/* Main Dashboard Layout */}
           <div className="flex-1 flex overflow-hidden relative">
 
             {/* Legal Sidebar */}
@@ -481,8 +456,9 @@ export default function App() {
               language={language}
             />
 
-            {/* Main Workspace Area (Dashboard Overview OR Chat Window OR Settings) */}
+            {/* Main Workspace Area */}
             <div className="flex-1 flex flex-col min-w-0 bg-[#faf8f5]">
+
               {activeTab === 'dashboard' ? (
                 <DashboardView
                   user={currentUser}
@@ -502,7 +478,20 @@ export default function App() {
                 <ExpertsView
                   language={language}
                 />
+              ) : activeTab === 'library' ? (
+                <LibraryView
+                  language={language}
+                  initialCategory="all"
+                  initialShowBookmarksOnly={false}
+                />
+              ) : activeTab === 'bookmarks' ? (
+                <LibraryView
+                  language={language}
+                  initialCategory="all"
+                  initialShowBookmarksOnly={true}
+                />
               ) : (
+
                 <ChatWindow
                   messages={messages}
                   loading={loading}
@@ -535,7 +524,7 @@ export default function App() {
         />
       )}
 
-      {/* WELCOME FEATURE MODAL (shown once per browser) */}
+      {/* WELCOME FEATURE MODAL */}
       {showWelcome && (
         <WelcomeModal
           onClose={closeWelcome}

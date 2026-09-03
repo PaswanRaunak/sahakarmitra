@@ -122,6 +122,34 @@ export default function Sidebar({
           </button>
 
           <button
+            onClick={() => { setActiveTab('library'); window.history.pushState({}, '', '/library'); }}
+            className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-xs font-bold transition ${
+              activeTab === 'library'
+                ? 'bg-white text-[#a03612] shadow-soft border border-stone-200/80'
+                : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900'
+            }`}
+          >
+            <svg className="w-4 h-4 text-[#a03612] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            {!isCollapsed && <span>{t('libraryTab') || 'Knowledge Repository'}</span>}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('bookmarks')}
+            className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-xs font-bold transition ${
+              activeTab === 'bookmarks'
+                ? 'bg-white text-[#a03612] shadow-soft border border-stone-200/80'
+                : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900'
+            }`}
+          >
+            <svg className="w-4 h-4 text-[#a03612] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+            {!isCollapsed && <span>{t('bookmarksTab') || 'Saved Sections'}</span>}
+          </button>
+
+          <button
             onClick={() => setActiveTab('experts')}
             className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-xs font-bold transition ${
               activeTab === 'experts'
@@ -134,6 +162,7 @@ export default function Sidebar({
             </svg>
             {!isCollapsed && <span>{t('expertsTab')}</span>}
           </button>
+
         </div>
 
         {/* Chat History List */}

@@ -204,3 +204,85 @@ export async function retrieveRelevantChunks(query, topK = 3) {
 
   return scored.slice(0, topK);
 }
+
+function determineCategory(sourceFile = '', sectionTitle = '', fullText = '') {
+  const file = String(sourceFile).toLowerCase();
+  const title = String(sectionTitle).toLowerCase();
+  const text = String(fullText).toLowerCase();
+
+  if (file.includes('election') || title.includes('election')) {
+    return 'Elections';
+  }
+  if (title.includes('agm') || title.includes('annual general meeting') || text.includes('annual general meeting') || title.includes('section 81a') || text.includes('section 81a')) {
+    return 'AGM';
+  }
+  if (file.includes('audit') || title.includes('audit') || text.includes('auditor')) {
+    return 'Auditing';
+  }
+  if (file.includes('registration') || title.includes('registration') || title.includes('section 5') || title.includes('section 6')) {
+    return 'Registration';
+  }
+  if (file.includes('member_rights') || title.includes('member') || title.includes('rights') || title.includes('privilege') || title.includes('section 24')) {
+    return 'Member Rights';
+  }
+  if (file.includes('dispute') || file.includes('winding') || title.includes('dispute') || title.includes('appeal') || title.includes('winding')) {
+    return 'Disputes';
+  }
+  return 'Registration';
+}
+
+/**
+ * Retrieve ALL documents/chunks currently stored in ChromaDB
+ * (or fallback to local vector store if ChromaDB is not running).
+ * Returns array of { id, section_title, act_name, full_text, category, source_file }.
+ */
+export async function getAllDocumentChunks() {
+  const actName = 'Maharashtra Cooperative Societies Act, 1960';
+  let rawChunks = [];
+
+  try {
+    const col = await getChromaCollection();
+    if (col) {
+      const getRes = await col.get({ include: ['documents', 'metadatas'] });
+      if (getRes && getRes.ids && getRes.ids.length > 0) {
+        rawChunks = getRes.ids.map((id, i) => {
+          const doc = getRes.documents?.[i] || '';
+          const meta = getRes.metadatas?.[i] || {};
+          return {
+            id,
+            text: doc || meta.chunk_text || '',
+            metadata: meta,
+          };
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('[retrieval] ChromaDB get failed, falling back to local vector store:', err.message);
+  }
+
+  if (rawChunks.length === 0) {
+    const store = await initLocalStore();
+    rawChunks = store.map(item => ({
+      id: item.id,
+      text: item.text,
+      metadata: item.metadata || {},
+    }));
+  }
+
+  return rawChunks.map(chunk => {
+    const sectionTitle = chunk.metadata?.section_title || extractSectionTitle(chunk.text);
+    const sourceFile = chunk.metadata?.source_file || chunk.id.split('::')[0] || '';
+    const fullText = chunk.text;
+    const category = determineCategory(sourceFile, sectionTitle, fullText);
+
+    return {
+      id: chunk.id,
+      section_title: sectionTitle,
+      act_name: actName,
+      full_text: fullText,
+      category,
+      source_file: sourceFile,
+    };
+  });
+}
+

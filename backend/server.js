@@ -11,6 +11,7 @@ import express from 'express';
 import cors from 'cors';
 import chatRoutes from './routes/chat.js';
 import { isLlmConfigured } from './services/llm.js';
+import { getAllDocumentChunks } from './services/retrieval.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -74,6 +75,73 @@ app.get('/api/health', (req, res) => {
 // Rate-limited API surface (chat = LLM cost, feedback = write path)
 app.use('/api/chat', rateLimit, chatRoutes);
 
+// ── Knowledge Repository Endpoint ──────────────────────────────
+// Retrieves ALL documents/chunks currently stored in ChromaDB
+app.get('/api/library', async (req, res) => {
+  try {
+    const documents = await getAllDocumentChunks();
+    res.json(documents);
+  } catch (err) {
+    console.error('[library] Failed to fetch documents:', err.message);
+    res.status(500).json({ error: 'Failed to retrieve library documents.' });
+  }
+});
+
+// ── Bookmarks Endpoints ─────────────────────────────────────────
+const bookmarksPath = path.join(__dirname, 'data', 'bookmarks.json');
+
+function readBookmarks() {
+  try {
+    if (fs.existsSync(bookmarksPath)) {
+      const raw = fs.readFileSync(bookmarksPath, 'utf-8');
+      return JSON.parse(raw);
+    }
+  } catch (err) {
+    console.warn('[bookmarks] Failed to read bookmarks:', err.message);
+  }
+  return [];
+}
+
+function writeBookmarks(bookmarks) {
+  try {
+    fs.writeFileSync(bookmarksPath, JSON.stringify(bookmarks, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('[bookmarks] Failed to write bookmarks:', err.message);
+  }
+}
+
+app.get('/api/bookmarks', (req, res) => {
+  const bookmarks = readBookmarks();
+  res.json(bookmarks);
+});
+
+app.post('/api/bookmarks', (req, res) => {
+  const item = req.body;
+  if (!item || (!item.id && !item.section_title)) {
+    return res.status(400).json({ error: 'Invalid bookmark item' });
+  }
+  let bookmarks = readBookmarks();
+  const existingIndex = bookmarks.findIndex(b => b.id === item.id || b.section_title === item.section_title);
+  if (existingIndex >= 0) {
+    bookmarks.splice(existingIndex, 1);
+  } else {
+    bookmarks.unshift({
+      ...item,
+      bookmarkedAt: new Date().toISOString(),
+    });
+  }
+  writeBookmarks(bookmarks);
+  res.json(bookmarks);
+});
+
+app.delete('/api/bookmarks/:id', (req, res) => {
+  const { id } = req.params;
+  let bookmarks = readBookmarks();
+  bookmarks = bookmarks.filter(b => b.id !== id && b.section_title !== id);
+  writeBookmarks(bookmarks);
+  res.json(bookmarks);
+});
+
 // ── Feedback endpoint — persists thumbs up/down for later analysis ──
 const feedbackPath = path.join(__dirname, 'data', 'feedback.jsonl');
 
@@ -106,5 +174,7 @@ app.listen(PORT, () => {
   console.log(`SahakarMitra backend running on http://localhost:${PORT}`);
   console.log(`  Health check : http://localhost:${PORT}/api/health`);
   console.log(`  Chat endpoint: http://localhost:${PORT}/api/chat`);
+  console.log(`  Library API  : http://localhost:${PORT}/api/library`);
   console.log(`  Rate limit   : ${RATE_LIMIT_MAX} requests / ${RATE_LIMIT_WINDOW_MS / 60000} min per IP`);
 });
+
