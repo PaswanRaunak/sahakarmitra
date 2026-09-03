@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeT } from '../i18n.js';
 
-export default function SettingsView({ user, onUpdateUser, language = 'en' }) {
+export default function SettingsView({ user, onUpdateUser, language = 'en', initialSubTab = 'profile' }) {
   const t = makeT(language);
 
   // Profile Form State initialized from user props or defaults
@@ -32,7 +32,12 @@ export default function SettingsView({ user, onUpdateUser, language = 'en' }) {
   const [passwordError, setPasswordError]     = useState('');
 
   // Active Subtab State
-  const [activeSubTab, setActiveSubTab] = useState('profile'); // 'profile' | 'preferences' | 'security'
+  const [activeSubTab, setActiveSubTab] = useState(initialSubTab); // 'profile' | 'preferences' | 'security'
+
+  useEffect(() => {
+    if (initialSubTab) setActiveSubTab(initialSubTab);
+  }, [initialSubTab]);
+
 
   function handleProfileSubmit(e) {
     e.preventDefault();

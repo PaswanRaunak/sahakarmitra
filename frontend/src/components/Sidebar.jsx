@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { makeT } from '../i18n.js';
 
 export default function Sidebar({
@@ -15,10 +15,15 @@ export default function Sidebar({
   isCollapsed,
   setIsCollapsed,
   language = 'en',
+  onLogout,
+  onOpenHelp,
+  onOpenSettingsTab,
 }) {
   const t = makeT(language);
   const [searchFilter, setSearchFilter] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef(null);
 
   const getDerivedName = (u) => {
     if (u?.name && u.name.trim().length > 1) return u.name.trim();
@@ -29,16 +34,47 @@ export default function Sidebar({
         return words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
       }
     }
-    return t('fallbackUser');
+    return 'Anya Foger';
   };
 
   const userName = getDerivedName(currentUser);
-  const societyName = (currentUser?.societyName && currentUser.societyName.trim().length > 1) ? currentUser.societyName : t('fallbackSociety');
+  const societyName = (currentUser?.societyName && currentUser.societyName.trim().length > 1)
+    ? currentUser.societyName
+    : 'Shivaji Housing Society';
+  const memberRole = currentUser?.role || 'Managing Committee';
 
-  // Handle navigation with mobile drawer auto-close
+  // Handle outside click to close user menu
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setShowUserMenu(false);
+      }
+    };
+    if (showUserMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserMenu]);
+
+  // Handle navigation with mobile auto-close
   const handleNav = (tab, customAction) => {
     if (customAction) customAction();
     setActiveTab(tab);
+    setShowUserMenu(false);
+    if (window.innerWidth < 768) {
+      onClose();
+    }
+  };
+
+  const handleOpenSubTab = (subTab) => {
+    if (onOpenSettingsTab) {
+      onOpenSettingsTab(subTab);
+    } else {
+      setActiveTab('settings');
+    }
+    setShowUserMenu(false);
     if (window.innerWidth < 768) {
       onClose();
     }
@@ -55,19 +91,20 @@ export default function Sidebar({
       {isOpen && (
         <div
           onClick={onClose}
-          className="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-xs transition-opacity animate-fade-in"
+          className="md:hidden fixed inset-0 z-40 bg-stone-900/50 backdrop-blur-xs transition-opacity animate-fade-in"
         />
       )}
 
-      {/* Upgraded Sidebar / Mobile Drawer */}
+      {/* Sidebar (Responsive: Original PC Design + ChatGPT-style Mobile Drawer) */}
       <aside
         className={`fixed md:static inset-y-0 left-0 z-40 bg-[#f5f2ec] border-r border-stone-200/80 flex flex-col transition-all duration-300 ease-in-out ${
-          isCollapsed ? 'w-20' : 'w-[82vw] max-w-[320px] md:w-72'
+          isCollapsed ? 'w-20' : 'w-[82vw] max-w-[320px] md:w-72 sm:md:w-80'
         } ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} ${!isOpen ? 'md:hidden' : ''}`}
       >
-        {/* Top Drawer Header: Logo + Title + Quick Actions */}
-        <div className="p-4 space-y-3 border-b border-stone-200/80 bg-[#faf8f5]">
+        {/* Top Header */}
+        <div className="p-4 space-y-3 border-b border-stone-200/80 bg-[#faf8f5] flex-shrink-0">
           <div className="flex items-center justify-between">
+            {/* Branding */}
             <div className="flex items-center gap-2.5 text-stone-900 font-bold text-xs uppercase tracking-wider overflow-hidden">
               <img
                 src="/logo.jpg"
@@ -82,33 +119,32 @@ export default function Sidebar({
               )}
             </div>
 
+            {/* Mobile Header Actions (Search & Close) */}
             <div className="flex items-center gap-1">
-              {!isCollapsed && (
-                <button
-                  onClick={() => setShowSearch(!showSearch)}
-                  aria-label="Search conversations"
-                  className="text-stone-500 hover:text-stone-900 p-1.5 rounded-lg hover:bg-stone-200/60 transition"
-                  title="Search chats"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </button>
-              )}
+              <button
+                onClick={() => setShowSearch(!showSearch)}
+                aria-label="Search conversations"
+                className="md:hidden text-stone-500 hover:text-stone-900 p-1.5 rounded-lg hover:bg-stone-200/60 transition"
+                title="Search chats"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
 
               <button
                 onClick={onClose}
                 aria-label={t('closeSidebar')}
                 className="md:hidden text-stone-400 hover:text-stone-700 p-1.5 rounded-lg hover:bg-stone-200/60 transition"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
           </div>
 
-          {/* Desktop New Chat Button */}
+          {/* PC Desktop ONLY: Top "+ New Legal Query" Button */}
           <button
             onClick={() => handleNav('chat', onNewChat)}
             className={`hidden md:flex w-full py-2.5 px-3 bg-[#a03612] hover:bg-[#882c0e] text-white rounded-xl font-bold text-xs shadow-sm transition items-center justify-center gap-2 transform hover:-translate-y-0.5 active:translate-y-0 ${
@@ -122,14 +158,14 @@ export default function Sidebar({
             {!isCollapsed && <span className="truncate">{t('newQuery')}</span>}
           </button>
 
-          {/* Search Input (Collapsible) */}
-          {showSearch && !isCollapsed && (
-            <div className="pt-1">
+          {/* Mobile Collapsible Search Input */}
+          {showSearch && (
+            <div className="md:hidden pt-1">
               <input
                 type="text"
                 value={searchFilter}
                 onChange={(e) => setSearchFilter(e.target.value)}
-                placeholder="Filter chats..."
+                placeholder="Search conversations..."
                 className="w-full px-3 py-1.5 text-xs bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#a03612]"
                 autoFocus
               />
@@ -138,7 +174,7 @@ export default function Sidebar({
         </div>
 
         {/* Main Navigation Items */}
-        <div className="p-3 border-b border-stone-200/80 space-y-1">
+        <div className="p-3 border-b border-stone-200/80 space-y-1 flex-shrink-0">
           <button
             onClick={() => handleNav('dashboard')}
             className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-xs font-bold transition ${
@@ -212,13 +248,13 @@ export default function Sidebar({
 
         {/* Section Header: Recent Conversations */}
         {!isCollapsed && (
-          <div className="px-4 pt-3 pb-1 flex items-center justify-between text-[11px] font-bold text-stone-400 uppercase tracking-wider">
+          <div className="px-4 pt-3 pb-1 flex items-center justify-between text-[11px] font-bold text-stone-400 uppercase tracking-wider flex-shrink-0">
             <span>{t('recentConversations')} ({filteredChats.length})</span>
           </div>
         )}
 
-        {/* Conversation List */}
-        <div className="flex-1 overflow-y-auto px-2 space-y-1 py-1 scrollbar-none">
+        {/* Scrollable Conversation List */}
+        <div className="flex-1 overflow-y-auto px-2 space-y-1 py-1 scrollbar-none pb-20 md:pb-2">
           {filteredChats.map((chat) => {
             const isActive = chat.id === activeChatId && activeTab === 'chat';
             const displayTitle = (chat.title && chat.title.trim().length > 0)
@@ -272,31 +308,129 @@ export default function Sidebar({
           })}
         </div>
 
-        {/* ChatGPT-Style Mobile Action Bottom Bar */}
-        <div className="p-3 border-t border-stone-200/80 bg-white/90 backdrop-blur-sm">
-          {/* Mobile Bottom Bar: Pill Chat Button + Avatar */}
-          <div className="flex md:hidden items-center justify-between gap-3">
-            <button
-              onClick={() => handleNav('chat', onNewChat)}
-              className="flex-1 py-2.5 px-4 bg-[#a03612] active:bg-[#882c0e] text-white rounded-full font-bold text-xs shadow-md transition flex items-center justify-center gap-2 transform active:scale-95"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
-              <span>{t('chatTab') || 'Chat'}</span>
-            </button>
+        {/* BOTTOM AREA & USER POPOVER MENU CONTAINER */}
+        <div className="relative" ref={userMenuRef}>
 
-            <button
-              onClick={() => handleNav('settings')}
-              className="w-9 h-9 rounded-full bg-[#2d6a68] text-white flex items-center justify-center font-bold text-xs shadow-sm border border-stone-200 flex-shrink-0"
-              title={userName}
-            >
-              {userName[0]?.toUpperCase() || 'R'}
-            </button>
+          {/* SAHAKARMITRA FUNCTIONAL USER PROFILE POPOVER MENU */}
+          {showUserMenu && (
+            <div className="absolute bottom-full left-3 right-3 mb-2 bg-white text-stone-900 border border-stone-200/90 rounded-2xl shadow-2xl p-2 z-50 animate-scale-in text-xs select-none">
+              
+              {/* Menu Top: User Profile Tile */}
+              <div
+                onClick={() => handleOpenSubTab('profile')}
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#faf8f5] cursor-pointer transition border border-stone-100 mb-1"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-[#2d6a68] text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
+                    {userName[0]?.toUpperCase() || 'A'}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-stone-900 text-xs truncate leading-tight">{userName}</p>
+                    <p className="text-[10px] text-stone-500 truncate leading-tight mt-0.5">{societyName}</p>
+                  </div>
+                </div>
+                <svg className="w-4 h-4 text-stone-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+
+              {/* Functional Menu Options */}
+              <div className="space-y-0.5 pt-1">
+                {/* 1. Profile & Society Details */}
+                <button
+                  onClick={() => handleOpenSubTab('profile')}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-stone-700 hover:text-[#a03612] hover:bg-[#faf8f5] transition text-left"
+                >
+                  <svg className="w-4 h-4 text-[#a03612] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span className="font-semibold">{t('profile') || 'Profile & Society Details'}</span>
+                </button>
+
+                {/* 2. Preferences & Language */}
+                <button
+                  onClick={() => handleOpenSubTab('preferences')}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-stone-700 hover:text-[#a03612] hover:bg-[#faf8f5] transition text-left"
+                >
+                  <svg className="w-4 h-4 text-[#a03612] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                  </svg>
+                  <span className="font-semibold">{t('preferences') || 'Preferences & Language'}</span>
+                </button>
+
+                {/* 3. Security & 2FA */}
+                <button
+                  onClick={() => handleOpenSubTab('security')}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-stone-700 hover:text-[#a03612] hover:bg-[#faf8f5] transition text-left"
+                >
+                  <svg className="w-4 h-4 text-[#a03612] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <span className="font-semibold">{t('securityHub') || 'Security & Access'}</span>
+                </button>
+              </div>
+
+              {/* Divider */}
+              <div className="my-1.5 border-t border-stone-100" />
+
+              {/* Help & Logout */}
+              <div className="space-y-0.5">
+                <button
+                  onClick={() => { if (onOpenHelp) onOpenHelp(); setShowUserMenu(false); }}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-stone-700 hover:text-[#a03612] hover:bg-[#faf8f5] transition text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <svg className="w-4 h-4 text-stone-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <span className="font-semibold">Help & Legal Tour</span>
+                  </div>
+                  <svg className="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+
+                <button
+                  onClick={() => { if (onLogout) onLogout(); setShowUserMenu(false); }}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 transition text-left font-bold"
+                >
+                  <svg className="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>{t('logout') || 'Log out'}</span>
+                </button>
+              </div>
+
+            </div>
+          )}
+
+          {/* MOBILE ONLY: Floating Action Bar */}
+          <div className="md:hidden p-3 bg-[#f5f2ec] border-t border-stone-200/80">
+            <div className="flex items-center justify-between gap-3">
+              {/* Terracotta Pill Button */}
+              <button
+                onClick={() => handleNav('chat', onNewChat)}
+                className="flex-1 py-3 px-5 bg-[#a03612] active:bg-[#882c0e] text-white rounded-full font-bold text-xs shadow-md transition flex items-center justify-center gap-2 transform active:scale-95"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+                <span>{t('newQuery')}</span>
+              </button>
+
+              {/* Mobile User Avatar Circle (Toggles Popup Menu) */}
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="w-10 h-10 rounded-full bg-[#2d6a68] text-white flex items-center justify-center font-bold text-xs shadow-sm border-2 border-white flex-shrink-0 transition active:scale-95 hover:brightness-110"
+                title={userName}
+              >
+                {userName[0]?.toUpperCase() || 'A'}
+              </button>
+            </div>
           </div>
 
-          {/* Desktop Collapse Toggle & User Badge */}
-          <div className="hidden md:block space-y-2">
+          {/* PC DESKTOP ONLY: Collapse Toggle & Desktop User Profile Card */}
+          <div className="hidden md:block p-3 border-t border-stone-200/80 bg-stone-100/60 space-y-2 flex-shrink-0">
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="w-full flex items-center justify-center gap-2 p-2 rounded-xl text-stone-500 hover:text-stone-900 hover:bg-stone-200/60 text-xs font-semibold transition"
@@ -308,14 +442,16 @@ export default function Sidebar({
               {!isCollapsed && <span>{t('collapseSidebar')}</span>}
             </button>
 
-            {/* Desktop User Profile Badge */}
+            {/* Desktop User Profile Card (Clicking toggles the menu) */}
             {!isCollapsed && (
               <div
-                onClick={() => handleNav('settings')}
-                className="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-stone-200/80 shadow-xs cursor-pointer hover:bg-stone-50 transition"
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className={`flex items-center gap-2.5 p-2 rounded-xl bg-white border border-stone-200/80 shadow-xs cursor-pointer hover:bg-stone-50 transition active:scale-98 ${
+                  showUserMenu ? 'ring-2 ring-[#a03612]/30 border-[#a03612]' : ''
+                }`}
               >
-                <div className="w-7 h-7 rounded-full bg-[#2d6a68] text-white flex items-center justify-center font-bold text-xs shadow-xs">
-                  {userName[0]?.toUpperCase() || 'R'}
+                <div className="w-8 h-8 rounded-full bg-[#2d6a68] text-white flex items-center justify-center font-bold text-xs shadow-xs flex-shrink-0">
+                  {userName[0]?.toUpperCase() || 'A'}
                 </div>
                 <div className="min-w-0 flex-1 text-xs">
                   <p className="font-bold text-stone-900 truncate">
@@ -325,9 +461,13 @@ export default function Sidebar({
                     {societyName}
                   </p>
                 </div>
+                <svg className={`w-3.5 h-3.5 text-stone-400 transform transition-transform ${showUserMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
+                </svg>
               </div>
             )}
           </div>
+
         </div>
 
       </aside>

@@ -59,6 +59,8 @@ export default function App() {
   const [authModal,   setAuthModal]   = useState(null);
   const [showWelcome, setShowWelcome] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [settingsSubTab, setSettingsSubTab] = useState('profile');
+
 
   // Multi-Chat Sessions & Sidebar State
   const [chats, setChats]               = useState([]);
@@ -454,7 +456,11 @@ export default function App() {
               isCollapsed={isCollapsed}
               setIsCollapsed={setIsCollapsed}
               language={language}
+              onLogout={handleLogout}
+              onOpenHelp={() => setShowWelcome(true)}
+              onOpenSettingsTab={(subTab) => { setSettingsSubTab(subTab || 'profile'); setActiveTab('settings'); }}
             />
+
 
             {/* Main Workspace Area */}
             <div className="flex-1 flex flex-col min-w-0 bg-[#faf8f5]">
@@ -473,7 +479,9 @@ export default function App() {
                   user={currentUser}
                   onUpdateUser={handleUpdateUser}
                   language={language}
+                  initialSubTab={settingsSubTab}
                 />
+
               ) : activeTab === 'experts' ? (
                 <ExpertsView
                   language={language}
