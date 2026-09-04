@@ -1,13 +1,22 @@
 // ─────────────────────────────────────────────
-// Ingestion script
+// Ingestion — parent-child chunking pipeline.
 //
-// Reads every .txt file from backend/data/, splits each one into
-// ~250-word chunks (preserving paragraph boundaries), generates an
-// embedding per chunk using all-MiniLM-L6-v2, and stores the chunks
-// in ChromaDB with metadata { source_file, section_title, chunk_text }.
+// For every corpus file (data/*.txt + data/updates/*.txt):
+//   1. Split into PARENT chunks = whole legal sections.
+//   2. Split each parent into CHILD chunks = ~100-token dense
+//      sub-clauses, split on sentence boundaries.
+//   3. Embed CHILD chunks with the hybrid recipe (body ⊕ section
+//      heading, 50/50) and store them in the TARGET ChromaDB collection
+//      with metadata { source_file, section_title, parent_id }.
+//   4. Store PARENT chunks (full text, no embedding) in
+//      data/parents-{collection}.json for retrieval-time resolution.
 //
-// Run with:
-//   npm run ingest
+// Target selection:
+//   • npm run ingest            → ingests into the ACTIVE collection
+//                                 (dev loop; requires ChromaDB running)
+//   • reindex.js                → calls ingestToCollection() with a NEW
+//                                 versioned name (blue-green build)
+//   • TARGET_COLLECTION=name    → override from the environment
 //
 // Prereq: ChromaDB server must be running. Start it with:
 //   pip install chromadb
@@ -19,123 +28,137 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { ChromaClient } from 'chromadb';
-import { generateEmbeddings } from '../services/embeddings.js';
+import { generateChildEmbeddings } from '../services/embeddings.js';
+import { buildParentChildChunks, estimateTokens } from '../services/chunking.js';
+import { getActiveCollectionName, parentStorePathFor, listCorpusFiles } from '../services/vectorStore.js';
 
 dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataDir   = path.join(__dirname, '..', 'data');
 const CHROMA_URL = process.env.CHROMA_URL || 'http://localhost:8000';
-const COLLECTION_NAME = 'sahakarmitra_laws';
 
-// ─────────────────────────────────────────────
-// Text chunker
-//   - Split on blank lines into paragraphs
-//   - Greedily accumulate paragraphs into chunks of ~targetWords
-//   - Never split a paragraph across chunks
-// ─────────────────────────────────────────────
-function chunkText(text, targetWords = 250) {
-  const paragraphs = text.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
-  const chunks = [];
-  let current = '';
-  let currentWordCount = 0;
+/**
+ * Build the parent/child corpus from all source files.
+ * @returns {{ allParents: Map, allChildren: Array, files: string[] }}
+ */
+export function buildCorpus() {
+  const allParents = new Map();   // parent_id → parent record
+  const allChildren = [];         // { child_id, parent_id, text, source_file, section_title }
+  const files = [];
 
-  for (const para of paragraphs) {
-    const words = para.split(/\s+/).length;
-    if (currentWordCount + words > targetWords && current.length > 0) {
-      chunks.push(current.trim());
-      current = para;
-      currentWordCount = words;
-    } else {
-      current += (current ? '\n\n' : '') + para;
-      currentWordCount += words;
+  for (const { file, path: filePath } of listCorpusFiles()) {
+    files.push(file);
+    const text = fs.readFileSync(filePath, 'utf-8');
+    const { parents, children } = buildParentChildChunks(text, file);
+
+    for (const p of parents) allParents.set(p.parent_id, p);
+    for (const c of children) {
+      allChildren.push({
+        ...c,
+        source_file: file,
+        section_title: allParents.get(c.parent_id)?.section_title || 'Untitled',
+      });
     }
+    console.log(`- ${file}: ${parents.length} section(s) → ${parents.length} parent(s), ${children.length} child chunk(s)`);
   }
-  if (current.trim().length > 0) chunks.push(current.trim());
-  return chunks;
+
+  return { allParents, allChildren, files };
 }
 
-// The first non-empty line of a chunk is treated as the section title.
-// This works for our placeholder data files where each section starts
-// with a heading like "Section 73: Conduct of elections".
-function extractSectionTitle(chunk) {
-  const firstLine = chunk.split('\n').find(l => l.trim().length > 0);
-  if (!firstLine) return 'Untitled';
-  return firstLine.trim().slice(0, 120);
-}
+/**
+ * Run the full ingestion into a (new or existing) collection.
+ *
+ * @param {object} [opts]
+ * @param {string} [opts.collectionName] target collection; defaults to the
+ *        ACTIVE collection (plain dev re-ingest) or TARGET_COLLECTION env
+ * @returns {{ collection: string, parentsFile: string, parentCount: number, childCount: number, files: string[] }}
+ */
+export async function ingestToCollection({ collectionName } = {}) {
+  const target = collectionName
+    || process.env.TARGET_COLLECTION
+    || getActiveCollectionName();
 
-async function main() {
-  console.log('── SahakarMitra ingestion ──');
-  console.log(`Data dir:    ${dataDir}`);
-  console.log(`ChromaDB URL: ${CHROMA_URL}`);
+  console.log(`── SahakarMitra ingestion (parent-child) ──`);
+  console.log(`Data dir:      ${dataDir}`);
+  console.log(`ChromaDB URL:  ${CHROMA_URL}`);
+  console.log(`Target:        ${target}${collectionName ? '  (explicit)' : '  (active collection)'}`);
   console.log('');
 
-  if (!fs.existsSync(dataDir)) {
-    console.error(`Data directory not found: ${dataDir}`);
-    process.exit(1);
-  }
-
-  const files = fs.readdirSync(dataDir).filter(f => f.endsWith('.txt'));
+  const { allParents, allChildren, files } = buildCorpus();
   if (files.length === 0) {
-    console.error('No .txt files found in data/. Add some legal text files first.');
-    process.exit(1);
+    throw new Error('No .txt corpus files found (data/ and data/updates/).');
   }
-  console.log(`Found ${files.length} text file(s): ${files.join(', ')}`);
-  console.log('');
+  if (allChildren.length === 0) {
+    throw new Error('No chunks produced from the corpus files — nothing to ingest.');
+  }
 
-  // Connect to ChromaDB and create/recreate the collection
+  // Parent lookup table for this collection (full sections, no embeddings)
+  const parentsFile = parentStorePathFor(target);
+  fs.mkdirSync(path.dirname(parentsFile), { recursive: true });
+  fs.writeFileSync(parentsFile, JSON.stringify(Object.fromEntries(allParents), null, 2), 'utf-8');
+  console.log(`Parent store written: ${parentsFile} (${allParents.size} parent section(s))`);
+
+  // Embed children (hybrid: body ⊕ section heading) and store in Chroma
   const client = new ChromaClient({ path: CHROMA_URL });
 
-  // Drop existing collection if present, so re-running ingest is idempotent
+  // Drop existing target collection if present, so re-ingesting is idempotent
   try {
-    await client.deleteCollection({ name: COLLECTION_NAME });
-    console.log(`Deleted existing collection "${COLLECTION_NAME}".`);
+    await client.deleteCollection({ name: target });
+    console.log(`Deleted existing collection "${target}".`);
   } catch {
     // Collection didn't exist — that's fine.
   }
 
   const collection = await client.createCollection({
-    name: COLLECTION_NAME,
-    metadata: { description: 'Maharashtra Cooperative Societies Act chunks' },
+    name: target,
+    metadata: { description: 'Maharashtra Cooperative Societies Act — child chunks (parent-child ingestion)' },
   });
 
-  let totalChunks = 0;
+  console.log(`Embedding ${allChildren.length} child chunk(s) (hybrid body+heading)...`);
+  const embeddings = await generateChildEmbeddings(
+    allChildren.map(c => c.text),
+    allChildren.map(c => `${c.section_title}\n${c.text}`)
+  );
 
-  for (const file of files) {
-    const text   = fs.readFileSync(path.join(dataDir, file), 'utf-8');
-    const chunks = chunkText(text);
-    console.log(`- ${file}: ${chunks.length} chunk(s)`);
+  await collection.add({
+    ids:        allChildren.map(c => c.child_id),
+    embeddings,
+    metadatas:  allChildren.map(c => ({
+      source_file:   c.source_file,
+      section_title: c.section_title,   // parent heading → citation stays section-accurate
+      parent_id:     c.parent_id,
+      chunk_type:    'child',
+    })),
+    documents:  allChildren.map(c => c.text),
+  });
 
-    // Batch embed — one model call per file, much faster than per-chunk.
-    const embeddings = await generateEmbeddings(chunks);
-
-    const ids       = chunks.map((_, i) => `${file}::${i}`);
-    const metadatas = chunks.map(c => ({
-      source_file:   file,
-      section_title: extractSectionTitle(c),
-      chunk_text:    c,
-    }));
-
-    await collection.add({
-      ids,
-      embeddings,
-      metadatas,
-      documents: chunks,   // ChromaDB stores the raw text too
-    });
-
-    totalChunks += chunks.length;
-  }
-
+  const avgTokens = Math.round(
+    allChildren.reduce((sum, c) => sum + estimateTokens(c.text), 0) / allChildren.length
+  );
   console.log('');
-  console.log(`✅ Ingested ${totalChunks} chunks from ${files.length} document(s) into ChromaDB.`);
-  console.log(`   Collection: ${COLLECTION_NAME}`);
+  console.log(`✅ Ingested ${allChildren.length} child chunk(s) across ${allParents.size} parent section(s) from ${files.length} file(s) into "${target}".`);
+  console.log(`   Parent store: ${path.basename(parentsFile)} (avg child ~${avgTokens} tokens)`);
+
+  return {
+    collection: target,
+    parentsFile,
+    parentCount: allParents.size,
+    childCount: allChildren.length,
+    files,
+  };
 }
 
-main().catch(err => {
-  console.error('Ingestion failed:', err);
-  console.error('');
-  console.error('Troubleshooting:');
-  console.error('  1. Is the ChromaDB server running? (chroma run --path ./chroma_data --port 8000)');
-  console.error('  2. Is CHROMA_URL in .env pointing at the right host/port?');
-  process.exit(1);
-});
+// ── CLI entry ───────────────────────────────────────────────────
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  ingestToCollection()
+    .then(() => process.exit(0))
+    .catch(err => {
+      console.error('Ingestion failed:', err);
+      console.error('');
+      console.error('Troubleshooting:');
+      console.error('  1. Is the ChromaDB server running? (chroma run --path ./chroma_data --port 8000)');
+      console.error('  2. Is CHROMA_URL in .env pointing at the right host/port?');
+      process.exit(1);
+    });
+}

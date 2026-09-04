@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SahakarMitra — Translation Review (HITL)</title>
+<style>
+  :root {
+    --bg: #f4f6f8; --card: #ffffff; --ink: #1c2b33; --muted: #5c6f7a;
+    --accent: #0e7a5f; --danger: #b23a48; --warn: #b07d2b; --border: #dde5ea;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px; background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif; line-height: 1.5;
+  }
+  header { max-width: 860px; margin: 0 auto 20px; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  header p { color: var(--muted); margin: 0; font-size: 0.92rem; }
+  .summary {
+    max-width: 860px; margin: 0 auto 20px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px;
+    display: flex; flex-wrap: wrap; gap: 24px; font-size: 0.9rem;
+  }
+  .summary b { display: block; font-size: 1.15rem; }
+  .summary .bad b { color: var(--danger); }
+  .summary span { color: var(--muted); }
+  main { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .card.reviewed { border-left: 4px solid var(--accent); }
+  .card-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .card-head .id { font-weight: 600; font-size: 0.95rem; }
+  .badge {
+    font-size: 0.72rem; padding: 2px 9px; border-radius: 999px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .badge.cat { background: #e8f0fb; color: #2b5fa7; }
+  .badge.lang { background: #fdeee0; color: var(--warn); }
+  .badge.scores { background: #f4e2e4; color: var(--danger); margin-left: auto; }
+  .field { margin: 8px 0; }
+  .field label { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 2px; }
+  .field .text { font-size: 0.95rem; white-space: pre-wrap; }
+  .field .text.ref { color: var(--muted); }
+  form { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; margin-top: 14px; border-top: 1px dashed var(--border); padding-top: 12px; }
+  form .input-group label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  select, input[type="text"] {
+    padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 0.9rem; background: #fff; color: var(--ink);
+  }
+  button {
+    background: var(--accent); color: #fff; border: 0; border-radius: 6px;
+    padding: 8px 18px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+  }
+  button:disabled { opacity: 0.6; cursor: default; }
+  .saved { color: var(--accent); font-weight: 600; font-size: 0.88rem; }
+  .error { color: var(--danger); font-size: 0.9rem; }
+  .empty { text-align: center; color: var(--muted); padding: 40px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>SahakarMitra — Translation Review (Human-in-the-Loop)</h1>
+  <p>Flagged low-scoring translations from the latest Golden Dataset run. Score each one: Accuracy (1–5), Fluency (1–5), and whether the legal meaning is preserved.</p>
+</header>
+
+<div class="summary" id="summary"></div>
+<main id="list"><div class="empty">Loading flagged translations…</div></main>
+
+<script>
+const API = '/api/review';
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function field(labelText, valueText, ref) {
+  const f = el('div', 'field');
+  f.appendChild(el('label', null, labelText));
+  f.appendChild(el('div', 'text' + (ref ? ' ref' : ''), valueText));
+  return f;
+}
+
+function renderSummary(data) {
+  const box = document.getElementById('summary');
+  box.innerHTML = '';
+  const s = data.summary || {};
+  const items = [
+    ['Flagged for review', data.flagged_count, data.flagged_count > 0],
+    ['Average BLEU', (s.avg_bleu ?? 0).toFixed(3), (s.avg_bleu ?? 0) < (data.thresholds?.bleu ?? 0.78)],
+    ['Average cosine', (s.avg_cosine ?? 0).toFixed(3), (s.avg_cosine ?? 0) < (data.thresholds?.cosine ?? 0.85)],
+    ['Reviews saved', data.reviewed_count, false],
+  ];
+  for (const [label, value, bad] of items) {
+    const d = el('div', bad ? 'bad' : null);
+    d.appendChild(el('b', null, String(value)));
+    d.appendChild(el('span', null, label));
+    box.appendChild(d);
+  }
+  const run = el('div');
+  run.appendChild(el('span', null, 'Validation run: ' + (data.generated_at || '—')));
+  box.appendChild(run);
+}
+
+function renderCard(entry) {
+  const card = el('div', 'card' + (entry.review ? ' reviewed' : ''));
+  const head = el('div', 'card-head');
+  head.appendChild(el('span', 'id', entry.id));
+  head.appendChild(el('span', 'badge cat', entry.category || ''));
+  head.appendChild(el('span', 'badge lang', entry.language));
+  const scoreText = (entry.bleu != null && entry.cosine != null)
+    ? `BLEU ${Number(entry.bleu).toFixed(3)} · cos ${Number(entry.cosine).toFixed(3)}`
+    : 'API error';
+  head.appendChild(el('span', 'badge scores', scoreText));
+  card.appendChild(head);
+
+  if (entry.flag_reasons?.length) {
+    card.appendChild(field('Flag reasons', entry.flag_reasons.join('; ')));
+  }
+  card.appendChild(field('Question (' + entry.language + ')', entry.question));
+  card.appendChild(field('System answer', entry.system_answer || '(no answer)'));
+  card.appendChild(field('Reference answer (verified)', entry.reference_answer, true));
+
+  const form = document.createElement('form');
+
+  const acc = el('div', 'input-group');
+  acc.appendChild(el('label', null, 'Accuracy (1–5)'));
+  const accSel = el('select');
+  for (let i = 1; i <= 5; i++) {
+    const o = el('option', null, String(i));
+    o.value = i;
+    accSel.appendChild(o);
+  }
+  acc.appendChild(accSel);
+  form.appendChild(acc);
+
+  const flu = el('div', 'input-group');
+  flu.appendChild(el('label', null, 'Fluency (1–5)'));
+  const fluSel = el('select');
+  for (let i = 1; i <= 5; i++) {
+    const o = el('option', null, String(i));
+    o.value = i;
+    fluSel.appendChild(o);
+  }
+  flu.appendChild(fluSel);
+  form.appendChild(flu);
+
+  const leg = el('div', 'input-group');
+  leg.appendChild(el('label', null, 'Legal meaning preserved'));
+  const legSel = el('select');
+  for (const [v, t] of [['', '— choose —'], ['pass', 'Pass'], ['fail', 'Fail']]) {
+    const o = el('option', null, t);
+    o.value = v;
+    legSel.appendChild(o);
+  }
+  leg.appendChild(legSel);
+  form.appendChild(leg);
+
+  const reviewer = el('div', 'input-group');
+  reviewer.appendChild(el('label', null, 'Reviewer (optional)'));
+  const revInput = el('input');
+  revInput.type = 'text';
+  revInput.placeholder = 'name';
+  reviewer.appendChild(revInput);
+  form.appendChild(reviewer);
+
+  const btn = el('button', null, 'Save review');
+  form.appendChild(btn);
+  const status = el('span', 'saved');
+  form.appendChild(status);
+
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    if (!legSel.value) { status.textContent = ''; status.className = 'error'; status.textContent = 'Choose Pass or Fail for legal meaning.'; return; }
+    btn.disabled = true;
+    status.className = 'saved';
+    status.textContent = 'Saving…';
+    try {
+      const res = await fetch(API + '/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          entry_id: entry.id,
+          language: entry.language,
+          accuracy: parseInt(accSel.value, 10),
+          fluency: parseInt(fluSel.value, 10),
+          legal_meaning: legSel.value,
+          reviewer: revInput.value.trim(),
+        }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || res.status);
+      status.textContent = 'Saved ✓';
+      btn.textContent = 'Update review';
+      card.classList.add('reviewed');
+    } catch (err) {
+      status.className = 'error';
+      status.textContent = 'Save failed: ' + err.message;
+    }
+    btn.disabled = false;
+  });
+
+  // Prefill an existing review if the reviewer already scored this entry
+  if (entry.review) {
+    accSel.value = String(entry.review.accuracy);
+    fluSel.value = String(entry.review.fluency);
+    legSel.value = entry.review.legal_meaning;
+    revInput.value = entry.review.reviewer || '';
+    status.textContent = 'Previously reviewed ✓';
+    btn.textContent = 'Update review';
+  }
+
+  card.appendChild(form);
+  return card;
+}
+
+async function load() {
+  const list = document.getElementById('list');
+  try {
+    const res = await fetch(API + '/flagged');
+    const data = await res.json();
+    if (!res.ok) {
+      list.innerHTML = '';
+      list.appendChild(el('div', 'empty', data.error || 'Failed to load flagged entries.'));
+      return;
+    }
+    renderSummary(data);
+    list.innerHTML = '';
+    if (data.flagged.length === 0) {
+      list.appendChild(el('div', 'empty', 'No flagged translations — every entry is above threshold. 🎉'));
+      return;
+    }
+    for (const entry of data.flagged) list.appendChild(renderCard(entry));
+  } catch (err) {
+    list.innerHTML = '';
+    list.appendChild(el('div', 'empty', 'Could not reach the review API: ' + err.message));
+  }
+}
+
+load();
+</script>
+</body>
+</html>

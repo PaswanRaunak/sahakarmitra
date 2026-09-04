@@ -10,6 +10,7 @@ import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
 import chatRoutes from './routes/chat.js';
+import reviewRoutes from './routes/review.js';
 import { isLlmConfigured } from './services/llm.js';
 import { getAllDocumentChunks } from './services/retrieval.js';
 
@@ -18,8 +19,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ── Simple in-memory rate limiter (per IP, fixed window) ─────
+// RATE_LIMIT_MAX is env-overridable so bulk validation runs
+// (validate:citations / validate:translations) can go through /api/chat.
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-const RATE_LIMIT_MAX = 60;
+const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX || '60', 10);
 
 const rateBuckets = new Map(); // ip -> { count, resetAt }
 
@@ -74,6 +77,12 @@ app.get('/api/health', (req, res) => {
 
 // Rate-limited API surface (chat = LLM cost, feedback = write path)
 app.use('/api/chat', rateLimit, chatRoutes);
+
+// ── HITL Translation Review (admin) ────────────────────────────
+app.use('/api/review', reviewRoutes);
+app.get('/admin/review', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'review.html'));
+});
 
 // ── Knowledge Repository Endpoint ──────────────────────────────
 // Retrieves ALL documents/chunks currently stored in ChromaDB
@@ -170,11 +179,21 @@ app.post('/api/feedback', rateLimit, (req, res) => {
   return res.json({ ok: true });
 });
 
+// ── Scheduled legal-document monitoring (Module 2) ─────────────
+// Opt-in: set ENABLE_CRON=true to run the scraper + diff engine on a
+// cron schedule inside this process (see scripts/scheduled-check.js).
+if (process.env.ENABLE_CRON === 'true') {
+  import('./scripts/scheduled-check.js')
+    .then(({ startCron }) => startCron())
+    .catch((err) => console.warn('[server] Could not start update-check scheduler:', err.message));
+}
+
 app.listen(PORT, () => {
   console.log(`SahakarMitra backend running on http://localhost:${PORT}`);
   console.log(`  Health check : http://localhost:${PORT}/api/health`);
   console.log(`  Chat endpoint: http://localhost:${PORT}/api/chat`);
   console.log(`  Library API  : http://localhost:${PORT}/api/library`);
   console.log(`  Rate limit   : ${RATE_LIMIT_MAX} requests / ${RATE_LIMIT_WINDOW_MS / 60000} min per IP`);
+  console.log(`  Review (HITL): http://localhost:${PORT}/admin/review`);
 });
 

@@ -18,6 +18,17 @@ node_modules/
 # Local databases, OCR traineddata & Vector cache
 chroma_data/
 .embeddings_cache.json
+parents.json
+parents-*.json
+active-collection.json
+citation-report.json
+validation-results.json
+manifest.json
+review-scores.json
+**/data/raw/
+**/data/pending-ingestion/
+**/data/updates/
+**/data/updates-applied/
 *.embeddings_cache.json
 *.traineddata
 *.sqlite3

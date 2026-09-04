@@ -1,0 +1,22 @@
+{
+  "_comment": [
+    "Legal document sources monitored by scripts/scheduled-check.js.",
+    "Each source is one HTML page that links to the acts/rules/notifications (PDFs).",
+    "Set \"enabled\": true when a real URL is confirmed; disabled sources are skipped.",
+    "The scraper extracts every <a href> ending in .pdf (case-insensitive) from the page."
+  ],
+  "sources": [
+    {
+      "name": "ministry-of-cooperation",
+      "url": "https://cooperation.gov.in/",
+      "enabled": false,
+      "description": "Ministry of Cooperation — acts, rules and notifications directory"
+    },
+    {
+      "name": "maharashtra-coop-department",
+      "url": "https://cooperation.maharashtra.gov.in/",
+      "enabled": false,
+      "description": "Maharashtra State Cooperative Department — MCS Act 1960 amendments & circulars"
+    }
+  ]
+}

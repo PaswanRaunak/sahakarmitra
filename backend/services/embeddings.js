@@ -50,3 +50,31 @@ export async function generateEmbeddings(texts) {
   }
   return result;
 }
+
+/**
+ * Hybrid child-chunk embedding for the parent-child pipeline.
+ *
+ * Blends each text's own embedding with the embedding of its
+ * context-prefixed variant (section heading + body), 50/50, then
+ * re-normalizes. Heading-phrased queries ("what are the effects of
+ * registration?") match via the context component, while body-phrased
+ * queries ("can I inspect the registers, books and accounts…") still
+ * match the sub-clause text itself — pure concatenation breaks the
+ * latter when a heading shares keywords with the query.
+ *
+ * @param {string[]} texts            Child chunk bodies
+ * @param {string[]} contextPrefixed  Same texts, each prefixed with its parent heading
+ * @returns {number[][]} Array of 384-dim normalized vectors
+ */
+export async function generateChildEmbeddings(texts, contextPrefixed) {
+  if (texts.length !== contextPrefixed.length) {
+    throw new Error('generateChildEmbeddings: texts and contextPrefixed must have equal length');
+  }
+  const bodyEmb = await generateEmbeddings(texts);
+  const ctxEmb = await generateEmbeddings(contextPrefixed);
+  return bodyEmb.map((a, i) => {
+    const blended = a.map((x, j) => 0.5 * x + 0.5 * ctxEmb[i][j]);
+    const norm = Math.hypot(...blended) || 1;
+    return blended.map((x) => x / norm);
+  });
+}
