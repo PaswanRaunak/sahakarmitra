@@ -115,19 +115,36 @@ export default function LandingPage({ onOpenAuth, onStartChatting, onToggleLangu
           <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
 
             <div className="lg:col-span-6 space-y-7 animate-slide-up">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#a03612]">
-                Aligned with the MCS Act 1960
-              </p>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100/90 text-[#a03612] text-xs font-extrabold uppercase tracking-wider border border-amber-200">
+                <span className="w-2 h-2 rounded-full bg-[#a03612] animate-pulse"></span>
+                <span>Multi-State Cooperative Intelligence</span>
+              </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-stone-900 tracking-tight leading-[1.08] text-balance">
                 Cooperative law, <span className="text-[#a03612]">answered</span> in plain language.
               </h1>
 
               <p className="text-base sm:text-lg text-stone-600 max-w-xl leading-relaxed">
-                SahakarMitra gives Maharashtra housing societies verified answers straight from the statute, in English, हिंदी, and मराठी, with human legal experts one tap away.
+                SahakarMitra gives cooperative housing societies and urban banks across Maharashtra, Gujarat, Karnataka, and Multi-State jurisdictions verified answers straight from statute, in English, हिंदी, and मराठी.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
+              {/* Supported Jurisdictions Pills */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                <span className="px-2.5 py-1 bg-white border border-stone-200 rounded-lg text-[11px] font-bold text-stone-700 shadow-xs flex items-center gap-1.5">
+                  <span>🏛️</span> Maharashtra (MCS Act)
+                </span>
+                <span className="px-2.5 py-1 bg-white border border-stone-200 rounded-lg text-[11px] font-bold text-stone-700 shadow-xs flex items-center gap-1.5">
+                  <span>🏢</span> Gujarat (GCS Act)
+                </span>
+                <span className="px-2.5 py-1 bg-white border border-stone-200 rounded-lg text-[11px] font-bold text-stone-700 shadow-xs flex items-center gap-1.5">
+                  <span>🏛️</span> Karnataka (KCS Act)
+                </span>
+                <span className="px-2.5 py-1 bg-white border border-stone-200 rounded-lg text-[11px] font-bold text-stone-700 shadow-xs flex items-center gap-1.5">
+                  <span>🇮🇳</span> Central Multi-State
+                </span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
                 <button
                   onClick={onStartChatting}
                   className="px-7 py-4 bg-[#a03612] hover:bg-[#882c0e] text-white font-extrabold text-sm rounded-2xl shadow-md hover:shadow-lg transition-[transform,box-shadow,background-color] flex items-center justify-center gap-2.5 transform hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612] focus-visible:ring-offset-2"
@@ -146,10 +163,14 @@ export default function LandingPage({ onOpenAuth, onStartChatting, onToggleLangu
                 </a>
               </div>
 
-              <dl className="pt-8 border-t border-stone-200/70 grid grid-cols-3 gap-6">
+              <dl className="pt-8 border-t border-stone-200/70 grid grid-cols-4 gap-4">
                 <div>
                   <dt className="text-[11px] text-stone-500 font-semibold order-2">Cited answers</dt>
                   <dd className="text-2xl sm:text-3xl font-black text-[#a03612] tabular-nums">100%</dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] text-stone-500 font-semibold">States & Acts</dt>
+                  <dd className="text-2xl sm:text-3xl font-black text-stone-900 tabular-nums">4</dd>
                 </div>
                 <div>
                   <dt className="text-[11px] text-stone-500 font-semibold">Languages</dt>

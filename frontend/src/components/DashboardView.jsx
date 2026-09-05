@@ -3,7 +3,7 @@ import { makeT } from '../i18n.js';
 
 // Live knowledge-base figures for the currently ingested corpus
 // (parents-*.json / legal_docs_v*). Keep in step with `npm run ingest`.
-const CORPUS = { sections: 33, clauses: 48, languages: 3 };
+const CORPUS = { sections: 64, clauses: 95, languages: 3, states: 4 };
 
 export default function DashboardView({
   user,
@@ -38,7 +38,7 @@ export default function DashboardView({
     { label: t('statChats'), value: chats.length },
     { label: t('statSections') || 'Statute sections', value: CORPUS.sections },
     { label: t('statClauses') || 'Indexed clauses', value: CORPUS.clauses },
-    { label: t('statLanguages') || 'Languages', value: CORPUS.languages },
+    { label: 'Jurisdictions', value: CORPUS.states },
   ];
 
   const GUIDES = [
