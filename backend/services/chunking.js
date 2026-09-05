@@ -78,14 +78,46 @@ export function splitSentences(text) {
 }
 
 /**
+ * Infer state and statutory Act name from file name and document header.
+ */
+export function inferDocumentMetadata(text = '', sourceFile = '') {
+  const fileLower = String(sourceFile).toLowerCase();
+  const firstLine = (text.split('\n')[0] || '').toLowerCase();
+
+  if (fileLower.includes('gujarat') || firstLine.includes('gujarat')) {
+    return {
+      state: 'Gujarat',
+      act_name: 'Gujarat Co-operative Societies Act, 1961',
+    };
+  }
+  if (fileLower.includes('karnataka') || firstLine.includes('karnataka')) {
+    return {
+      state: 'Karnataka',
+      act_name: 'Karnataka Co-operative Societies Act, 1959',
+    };
+  }
+  if (fileLower.includes('multistate') || fileLower.includes('multi-state') || firstLine.includes('multi-state')) {
+    return {
+      state: 'Multi-State',
+      act_name: 'Multi-State Co-operative Societies Act, 2002',
+    };
+  }
+  // Default is Maharashtra
+  return {
+    state: 'Maharashtra',
+    act_name: 'Maharashtra Cooperative Societies Act, 1960',
+  };
+}
+
+/**
  * Build parent and child chunks for one legal document.
  *
  * @param {string} text       Full document text
  * @param {string} sourceFile File name, used as the id namespace
  * @param {object} opts
  * @param {number} opts.childTokenTarget  Target size of each child's body (~100 tokens)
- * @returns {{ parents: Array<{parent_id, source_file, section_title, text}>,
- *              children: Array<{child_id, parent_id, text}> }}
+ * @returns {{ parents: Array<{parent_id, source_file, section_title, act_name, state, text}>,
+ *              children: Array<{child_id, parent_id, text, state, act_name}> }}
  *
  * child.text is the section BODY only (no heading). The heading is still
  * baked into the embedding, generateChildEmbeddings() blends a
@@ -97,6 +129,7 @@ export function splitSentences(text) {
 export function buildParentChildChunks(text, sourceFile, { childTokenTarget = 100 } = {}) {
   const parents = [];
   const children = [];
+  const { state, act_name } = inferDocumentMetadata(text, sourceFile);
 
   const sections = splitIntoSections(text);
   sections.forEach((section, sIdx) => {
@@ -104,6 +137,8 @@ export function buildParentChildChunks(text, sourceFile, { childTokenTarget = 10
       parent_id: `${sourceFile}::p${sIdx}`,
       source_file: sourceFile,
       section_title: section.title,
+      act_name,
+      state,
       text: `${section.title}\n${section.text}`,
     };
     parents.push(parent);
@@ -118,6 +153,8 @@ export function buildParentChildChunks(text, sourceFile, { childTokenTarget = 10
         children.push({
           child_id: `${parent.parent_id}::c${childIdx++}`,
           parent_id: parent.parent_id,
+          state,
+          act_name,
           text: childText.trim(),
         });
       }

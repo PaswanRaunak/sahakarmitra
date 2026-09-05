@@ -4,6 +4,8 @@ import { makeT } from '../i18n.js';
 export default function DashboardHeader({
   language,
   setLanguage,
+  selectedState = 'Maharashtra',
+  onOpenStatePicker,
   user,
   onLogout,
   onGoHome,
@@ -105,6 +107,20 @@ export default function DashboardHeader({
             <span className={`w-2 h-2 rounded-full ${statusColor}`} aria-hidden="true"></span>
             <span className="hidden lg:inline">{statusText}</span>
           </div>
+
+          {/* State / Jurisdiction Selector */}
+          <button
+            onClick={onOpenStatePicker}
+            aria-label={t('selectState') || 'Select State'}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-stone-200 rounded-full text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-[#a03612]/40 transition shadow-xs active:scale-95"
+            title={`${t('stateSelectorLabel') || 'State'}: ${selectedState}`}
+          >
+            <span className="text-[#a03612] text-xs">📍</span>
+            <span className="font-bold text-stone-800">{selectedState}</span>
+            <svg className="w-3.5 h-3.5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
 
           {/* Language Switcher */}
           <button

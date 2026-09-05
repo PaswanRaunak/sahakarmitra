@@ -15,6 +15,7 @@ import WelcomeModal    from './components/WelcomeModal.jsx';
 import SettingsView    from './components/SettingsView.jsx';
 import ExpertsView     from './components/ExpertsView.jsx';
 import LibraryView     from './components/LibraryView.jsx';
+import StateModal      from './components/StateModal.jsx';
 import { makeT }       from './i18n.js';
 
 const EXAMPLE_QUESTIONS = {
@@ -61,6 +62,24 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [settingsSubTab, setSettingsSubTab] = useState('profile');
 
+  // State / Legal Jurisdiction Management
+  const [selectedState, setSelectedState] = useState(() => {
+    try {
+      return localStorage.getItem('sahakar_selected_state') || 'Maharashtra';
+    } catch {
+      return 'Maharashtra';
+    }
+  });
+  const [stateConfirmed, setStateConfirmed] = useState(() => {
+    try {
+      return localStorage.getItem('sahakar_state_confirmed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [detectedState, setDetectedState] = useState(null);
+  const [showGeoBanner, setShowGeoBanner] = useState(false);
+  const [showStateModal, setShowStateModal] = useState(false);
 
   // Multi-Chat Sessions & Sidebar State
   const [chats, setChats]               = useState([]);
@@ -79,11 +98,38 @@ export default function App() {
   // Stream abort ref
   const streamAbortRef = useRef(null);
 
+  // Privacy-first geolocation state detection (suggests without forced locking)
+  useEffect(() => {
+    if (stateConfirmed) return;
+
+    fetch('/api/geo/detect-state')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.state) {
+          setDetectedState(data.state);
+          setShowGeoBanner(true);
+          // Set selected state default to detected state if not explicitly configured
+          try {
+            if (!localStorage.getItem('sahakar_selected_state')) {
+              setSelectedState(data.state);
+            }
+          } catch {}
+        }
+      })
+      .catch(() => {
+        // Silently fall back to default
+      });
+  }, [stateConfirmed]);
+
   // Load stored User and Chat History on startup
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem('sahakar_user');
-      if (savedUser) setCurrentUser(JSON.parse(savedUser));
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        setCurrentUser(parsed);
+        if (parsed.state) setSelectedState(parsed.state);
+      }
 
       const savedChats = localStorage.getItem('sahakar_chats');
       if (savedChats) {
@@ -151,11 +197,44 @@ export default function App() {
     if (updatedUser.preferredLang) {
       setLanguage(updatedUser.preferredLang);
     }
+    if (updatedUser.state) {
+      setSelectedState(updatedUser.state);
+      try {
+        localStorage.setItem('sahakar_selected_state', updatedUser.state);
+        localStorage.setItem('sahakar_state_confirmed', 'true');
+        setStateConfirmed(true);
+        setShowGeoBanner(false);
+      } catch {}
+    }
     try {
       localStorage.setItem('sahakar_user', JSON.stringify(updatedUser));
     } catch {
       // Ignore
     }
+  };
+
+  const handleSelectState = (newState) => {
+    setSelectedState(newState);
+    setStateConfirmed(true);
+    setShowGeoBanner(false);
+    setShowStateModal(false);
+    try {
+      localStorage.setItem('sahakar_selected_state', newState);
+      localStorage.setItem('sahakar_state_confirmed', 'true');
+    } catch {}
+  };
+
+  const handleConfirmGeoState = () => {
+    setStateConfirmed(true);
+    setShowGeoBanner(false);
+    try {
+      localStorage.setItem('sahakar_selected_state', selectedState);
+      localStorage.setItem('sahakar_state_confirmed', 'true');
+    } catch {}
+  };
+
+  const handleDismissGeoBanner = () => {
+    setShowGeoBanner(false);
   };
 
   const activeChat = chats.find(c => c.id === activeChatId) || chats[0];
@@ -185,6 +264,11 @@ export default function App() {
 
   const handleAuthSuccess = (user) => {
     setCurrentUser(user);
+    if (user?.state) {
+      setSelectedState(user.state);
+      setStateConfirmed(true);
+      setShowGeoBanner(false);
+    }
     try {
       localStorage.setItem('sahakar_user', JSON.stringify(user));
     } catch {
@@ -202,6 +286,7 @@ export default function App() {
       email: 'guest@sahakarmitra.local',
       societyName: 'Guest Session',
       role: 'Guest',
+      state: selectedState || 'Maharashtra',
       token: 'guest-' + Date.now(),
     });
   };
@@ -311,7 +396,13 @@ export default function App() {
       const res = await fetch('/api/chat/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, language, history, attachments: payloadAttachments }),
+        body: JSON.stringify({
+          message: text,
+          language,
+          state: selectedState,
+          history,
+          attachments: payloadAttachments,
+        }),
         signal: controller.signal,
       });
 
@@ -440,6 +531,8 @@ export default function App() {
           <DashboardHeader
             language={language}
             setLanguage={setLanguage}
+            selectedState={selectedState}
+            onOpenStatePicker={() => setShowStateModal(true)}
             user={currentUser}
             onLogout={handleLogout}
             onGoHome={() => setCurrentView('landing')}
@@ -449,6 +542,48 @@ export default function App() {
             onNewChat={handleNewChat}
             backendStatus={backendStatus}
           />
+
+          {/* Non-blocking Geolocation Suggestion Banner */}
+          {showGeoBanner && detectedState && (
+            <div className="bg-gradient-to-r from-amber-500/10 via-amber-100/80 to-amber-500/10 border-b border-amber-200 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs text-stone-800 z-20 animate-fade-in">
+              <div className="flex items-center gap-2">
+                <span className="p-1 rounded-lg bg-amber-200/80 text-[#a03612]">📍</span>
+                <span>
+                  {t('geoBannerText', { state: detectedState }) ||
+                    `Based on your location, we've set your region to ${detectedState}.`}
+                </span>
+                <span className="hidden md:inline text-[10px] text-stone-500 font-mono">
+                  (Privacy protected: no IP logging)
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleConfirmGeoState}
+                  className="px-3 py-1 bg-[#a03612] hover:bg-[#882e0f] text-white text-xs font-bold rounded-lg transition shadow-xs"
+                >
+                  {t('confirmRegion') || 'Confirm'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowStateModal(true)}
+                  className="px-3 py-1 bg-white hover:bg-stone-100 border border-stone-200 text-stone-700 text-xs font-bold rounded-lg transition shadow-xs"
+                >
+                  {t('changeRegion') || 'Change'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDismissGeoBanner}
+                  aria-label="Dismiss banner"
+                  className="p-1 text-stone-400 hover:text-stone-700 rounded transition ml-1"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Main Dashboard Layout */}
           <div className="flex-1 flex overflow-hidden relative">
@@ -502,12 +637,14 @@ export default function App() {
                 <LibraryView
                   language={language}
                   initialCategory="all"
+                  initialStateFilter={selectedState}
                   initialShowBookmarksOnly={false}
                 />
               ) : activeTab === 'bookmarks' ? (
                 <LibraryView
                   language={language}
                   initialCategory="all"
+                  initialStateFilter={selectedState}
                   initialShowBookmarksOnly={true}
                 />
               ) : (
@@ -532,6 +669,15 @@ export default function App() {
 
         </div>
       )}
+
+      {/* STATE / JURISDICTION MODAL */}
+      <StateModal
+        isOpen={showStateModal}
+        onClose={() => setShowStateModal(false)}
+        selectedState={selectedState}
+        onSelectState={handleSelectState}
+        language={language}
+      />
 
       {/* FULLPAGE AUTH VIEWS */}
       {authModal && (

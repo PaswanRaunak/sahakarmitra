@@ -5,6 +5,7 @@ import { LEGAL_TRANSLATIONS } from '../legalTranslations.js';
 export default function LibraryView({
   language = 'en',
   initialCategory = 'all',
+  initialStateFilter = 'all',
   initialShowBookmarksOnly = false,
 }) {
   const t = makeT(language);
@@ -13,6 +14,7 @@ export default function LibraryView({
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [selectedStateFilter, setSelectedStateFilter] = useState(initialStateFilter);
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(initialShowBookmarksOnly);
   const [copiedId, setCopiedId] = useState(null);
   const [bookmarks, setBookmarks] = useState(() => {
@@ -27,8 +29,9 @@ export default function LibraryView({
   // Sync initial parameters if props change
   useEffect(() => {
     if (initialCategory) setSelectedCategory(initialCategory);
+    if (initialStateFilter) setSelectedStateFilter(initialStateFilter);
     if (initialShowBookmarksOnly !== undefined) setShowBookmarksOnly(initialShowBookmarksOnly);
-  }, [initialCategory, initialShowBookmarksOnly]);
+  }, [initialCategory, initialStateFilter, initialShowBookmarksOnly]);
 
   // Save bookmarks to localStorage and sync with backend POST /api/bookmarks
   const saveBookmarksState = (newBookmarks) => {
@@ -91,7 +94,8 @@ export default function LibraryView({
     }).catch(() => {});
   };
 
-  const getActName = (lang) => {
+  const getActName = (doc, lang) => {
+    if (doc.act_name) return doc.act_name;
     if (lang === 'mr') return 'महाराष्ट्र सहकारी संस्था अधिनियम, १९६०';
     if (lang === 'hi') return 'महाराष्ट्र सहकारी समिति अधिनियम, 1960';
     return 'Maharashtra Cooperative Societies Act, 1960';
@@ -122,7 +126,7 @@ export default function LibraryView({
     if (translation) {
       return {
         ...doc,
-        act_name: getActName(lang),
+        act_name: translation.act_name || doc.act_name || getActName(doc, lang),
         section_title: translation.section_title || doc.section_title,
         full_text: translation.full_text || doc.full_text,
         isTranslated: true,
@@ -130,14 +134,14 @@ export default function LibraryView({
     }
     return {
       ...doc,
-      act_name: getActName(lang),
+      act_name: doc.act_name || getActName(doc, lang),
       isTranslated: false,
     };
   };
 
   const handleCopyCitation = (doc, lang = language) => {
     const secNumber = extractSectionNumber(doc.section_title, doc.full_text, lang);
-    const actName = getActName(lang);
+    const actName = doc.act_name || getActName(doc, lang);
     const citationText = `"${secNumber}, ${actName}"`;
 
     navigator.clipboard.writeText(citationText).then(() => {
@@ -145,6 +149,14 @@ export default function LibraryView({
       setTimeout(() => setCopiedId(null), 2000);
     }).catch(() => {});
   };
+
+  const STATES = [
+    { key: 'all', label: t('stateFilterAll') || 'All States' },
+    { key: 'Maharashtra', label: t('stateMaharashtra') || 'Maharashtra' },
+    { key: 'Gujarat', label: t('stateGujarat') || 'Gujarat' },
+    { key: 'Karnataka', label: t('stateKarnataka') || 'Karnataka' },
+    { key: 'Multi-State', label: t('stateMultiState') || 'Multi-State' },
+  ];
 
   const CATEGORIES = [
     { key: 'all', label: t('allCategories') || 'All Categories' },
@@ -159,6 +171,10 @@ export default function LibraryView({
   const filteredDocuments = useMemo(() => {
     let list = showBookmarksOnly ? bookmarks : documents;
 
+    if (selectedStateFilter !== 'all') {
+      list = list.filter((doc) => (doc.state || 'Maharashtra').toLowerCase() === selectedStateFilter.toLowerCase());
+    }
+
     if (selectedCategory !== 'all') {
       list = list.filter((doc) => doc.category === selectedCategory);
     }
@@ -170,6 +186,7 @@ export default function LibraryView({
         return (
           (doc.section_title || '').toLowerCase().includes(q) ||
           (doc.full_text || '').toLowerCase().includes(q) ||
+          (doc.state || '').toLowerCase().includes(q) ||
           (trDoc.section_title || '').toLowerCase().includes(q) ||
           (trDoc.full_text || '').toLowerCase().includes(q) ||
           (trDoc.act_name || '').toLowerCase().includes(q) ||
@@ -179,10 +196,10 @@ export default function LibraryView({
     }
 
     return list.map((doc) => getTranslatedDoc(doc, language));
-  }, [documents, bookmarks, selectedCategory, searchQuery, showBookmarksOnly, language]);
+  }, [documents, bookmarks, selectedCategory, selectedStateFilter, searchQuery, showBookmarksOnly, language]);
 
   const groupedDocuments = useMemo(() => {
-    if (selectedCategory !== 'all' || searchQuery.trim() || showBookmarksOnly) {
+    if (selectedCategory !== 'all' || selectedStateFilter !== 'all' || searchQuery.trim() || showBookmarksOnly) {
       return null;
     }
     const groups = {};
@@ -192,7 +209,7 @@ export default function LibraryView({
       groups[cat].push(doc);
     }
     return groups;
-  }, [filteredDocuments, selectedCategory, searchQuery, showBookmarksOnly]);
+  }, [filteredDocuments, selectedCategory, selectedStateFilter, searchQuery, showBookmarksOnly]);
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-y-auto bg-[#faf8f5] p-4 sm:p-6 md:p-8">
@@ -278,13 +295,46 @@ export default function LibraryView({
             )}
           </div>
 
+          {/* State Filter Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            <span className="text-xs font-bold text-stone-500 mr-1 flex items-center gap-1">
+              <span>📍</span>
+              <span className="hidden sm:inline">{t('stateSelectorLabel') || 'Jurisdiction'}:</span>
+            </span>
+            {STATES.map((st) => {
+              const isActive = selectedStateFilter === st.key;
+              const count = st.key === 'all'
+                ? documents.length
+                : documents.filter((d) => (d.state || 'Maharashtra').toLowerCase() === st.key.toLowerCase()).length;
+
+              return (
+                <button
+                  key={st.key}
+                  onClick={() => setSelectedStateFilter(st.key)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition flex items-center gap-1.5 ${
+                    isActive
+                      ? 'bg-[#a03612] text-white shadow-xs'
+                      : 'bg-white text-stone-700 border border-stone-200 hover:bg-stone-100 hover:border-stone-300'
+                  }`}
+                >
+                  <span>{st.label}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                    isActive ? 'bg-[#882c0e] text-white' : 'bg-stone-100 text-stone-600'
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
           {/* Category Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
             {CATEGORIES.map((cat) => {
               const isActive = selectedCategory === cat.key;
               const count = cat.key === 'all'
-                ? documents.length
-                : documents.filter((d) => d.category === cat.key).length;
+                ? (selectedStateFilter === 'all' ? documents.length : documents.filter(d => (d.state || 'Maharashtra').toLowerCase() === selectedStateFilter.toLowerCase()).length)
+                : documents.filter((d) => d.category === cat.key && (selectedStateFilter === 'all' || (d.state || 'Maharashtra').toLowerCase() === selectedStateFilter.toLowerCase())).length;
 
               return (
                 <button
@@ -425,7 +475,8 @@ function SectionCard({
   // If user toggles to show original English, get the untranslated text
   const currentTitle = showOriginal ? (FALLBACK_DOCUMENTS.find(f => f.id === doc.id)?.section_title || doc.section_title) : doc.section_title;
   const currentText = showOriginal ? (FALLBACK_DOCUMENTS.find(f => f.id === doc.id)?.full_text || doc.full_text) : doc.full_text;
-  const currentActName = showOriginal ? 'Maharashtra Cooperative Societies Act, 1960' : doc.act_name;
+  const currentActName = showOriginal ? (doc.act_name || 'Cooperative Societies Act') : doc.act_name;
+  const state = doc.state || 'Maharashtra';
 
   const secNum = extractSectionNumber(currentTitle, currentText, showOriginal ? 'en' : language);
   const cleanTitle = (currentTitle || '').replace(/—/g, ':');
@@ -433,11 +484,14 @@ function SectionCard({
   return (
     <div className="border border-stone-200/90 rounded-2xl bg-white overflow-hidden shadow-soft hover:shadow-md transition duration-200 flex flex-col justify-between">
       
-      {/* Card Header: Act Name + Exact Section Number */}
+      {/* Card Header: Act Name + State + Exact Section Number */}
       <div className="p-4 bg-stone-50/80 border-b border-stone-200/80 flex items-start justify-between gap-3">
         <div className="space-y-1 min-w-0 flex-1">
-          {/* Act Badge & Category */}
+          {/* Act Badge, State & Category */}
           <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
+            <span className="px-2 py-0.5 rounded-md bg-amber-100 text-[#a03612] font-bold">
+              📍 {state}
+            </span>
             <span className="px-2 py-0.5 rounded-md bg-[#a03612]/10 text-[#a03612] font-bold tracking-tight">
               {currentActName}
             </span>

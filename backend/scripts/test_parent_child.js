@@ -156,10 +156,32 @@ check('Knowledge base lists whole sections (not ~100-token fragments)',
     !d.section_title.startsWith('Section') || d.full_text.split(/\s+/).length > 15),
   `${docs.length} document(s)`);
 
+// ── 4. Multi-State Filtered Retrieval Checks ──
+console.log('\n── 4. Multi-State Filtered Retrieval & Cross-State Fallback ──');
+
+// Gujarat Filter Test
+const gujaratRes = await retrieveRelevantChunks('audit of accounts of societies by registrar', 3, { state: 'Gujarat' });
+check('Gujarat filtered search returns Gujarat Co-op Act section',
+  gujaratRes.some(r => r.metadata?.state === 'Gujarat' && r.metadata?.section_title?.includes('Section 84')),
+  `got states: ${gujaratRes.map(r => `${r.metadata?.state}:${r.metadata?.section_title}`).join(', ')}`);
+
+// Karnataka Filter Test
+const karnatakaRes = await retrieveRelevantChunks('term of office of committee members is five years', 3, { state: 'Karnataka' });
+check('Karnataka filtered search returns Karnataka Section 28A',
+  karnatakaRes.some(r => r.metadata?.state === 'Karnataka' && r.metadata?.section_title?.includes('Section 28A')),
+  `got states: ${karnatakaRes.map(r => `${r.metadata?.state}:${r.metadata?.section_title}`).join(', ')}`);
+
+// Multi-State Act Inclusion Test
+const multiStateRes = await retrieveRelevantChunks('application to central registrar signed by fifty persons from each state', 3, { state: 'Multi-State' });
+check('Multi-State search returns Multi-State Section 7',
+  multiStateRes.some(r => r.metadata?.state === 'Multi-State' && r.metadata?.section_title?.includes('Section 7')),
+  `got: ${multiStateRes.map(r => `${r.metadata?.state}:${r.metadata?.section_title}`).join(', ')}`);
+
 console.log('\n──────────────────────────────────');
 if (failures === 0) {
-  console.log('✅ ALL CHECKS PASSED, sub-clause queries return full parent sections with accurate citations.');
+  console.log('✅ ALL CHECKS PASSED, sub-clause queries & multi-state retrieval verified successfully.');
 } else {
   console.log(`❌ ${failures} check(s) FAILED.`);
   process.exit(1);
 }
+

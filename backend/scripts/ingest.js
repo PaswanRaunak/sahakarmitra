@@ -54,13 +54,16 @@ export function buildCorpus() {
 
     for (const p of parents) allParents.set(p.parent_id, p);
     for (const c of children) {
+      const parent = allParents.get(c.parent_id);
       allChildren.push({
         ...c,
-        source_file: file,
-        section_title: allParents.get(c.parent_id)?.section_title || 'Untitled',
+        source_file:   file,
+        section_title: parent?.section_title || 'Untitled',
+        act_name:      parent?.act_name || 'Cooperative Societies Act',
+        state:         parent?.state || 'Maharashtra',
       });
     }
-    console.log(`- ${file}: ${parents.length} section(s) → ${parents.length} parent(s), ${children.length} child chunk(s)`);
+    console.log(`- ${file}: ${parents.length} section(s) → ${parents.length} parent(s), ${children.length} child chunk(s) [State: ${parents[0]?.state || 'Maharashtra'}]`);
   }
 
   return { allParents, allChildren, files };
@@ -79,7 +82,7 @@ export async function ingestToCollection({ collectionName } = {}) {
     || process.env.TARGET_COLLECTION
     || getActiveCollectionName();
 
-  console.log(`── SahakarMitra ingestion (parent-child) ──`);
+  console.log(`── SahakarMitra ingestion (multi-state parent-child) ──`);
   console.log(`Data dir:      ${dataDir}`);
   console.log(`ChromaDB URL:  ${CHROMA_URL}`);
   console.log(`Target:        ${target}${collectionName ? '  (explicit)' : '  (active collection)'}`);
@@ -112,7 +115,7 @@ export async function ingestToCollection({ collectionName } = {}) {
 
   const collection = await client.createCollection({
     name: target,
-    metadata: { description: 'Maharashtra Cooperative Societies Act, child chunks (parent-child ingestion)' },
+    metadata: { description: 'Multi-State Cooperative Societies Act & State Laws (parent-child ingestion)' },
   });
 
   console.log(`Embedding ${allChildren.length} child chunk(s) (hybrid body+heading)...`);
@@ -127,6 +130,8 @@ export async function ingestToCollection({ collectionName } = {}) {
     metadatas:  allChildren.map(c => ({
       source_file:   c.source_file,
       section_title: c.section_title,   // parent heading → citation stays section-accurate
+      act_name:      c.act_name,
+      state:         c.state,
       parent_id:     c.parent_id,
       chunk_type:    'child',
     })),

@@ -16,20 +16,31 @@ const LANGUAGE_NAMES = {
 /**
  * Build the system prompt that grounds the LLM in retrieved law text and user attachments.
  */
-function buildSystemPrompt(retrievedChunks, language, attachmentContext = '') {
+function buildSystemPrompt(retrievedChunks, language, attachmentContext = '', state = 'Maharashtra') {
   const langName = LANGUAGE_NAMES[language] || 'English';
+
+  const hasCrossStateChunks = (retrievedChunks || []).some(c => c.isCrossState || (c.metadata?.state && c.metadata.state !== state && c.metadata.state !== 'Multi-State'));
 
   const contextText = (retrievedChunks || [])
     .map((chunk, i) => {
-      const source  = chunk.metadata?.source_file   || 'unknown';
-      const section = chunk.metadata?.section_title || 'unknown';
-      return `[Statutory Source ${i + 1}, file: ${source}, section: ${section}]\n${chunk.text}`;
+      const source   = chunk.metadata?.source_file   || 'unknown';
+      const section  = chunk.metadata?.section_title || 'unknown';
+      const actName  = chunk.metadata?.act_name      || 'Cooperative Societies Act';
+      const chunkState = chunk.metadata?.state       || state;
+      const isCross  = chunk.isCrossState ? ' [CROSS-STATE FALLBACK]' : '';
+      return `[Statutory Source ${i + 1}${isCross}, State: ${chunkState}, Act: ${actName}, Section: ${section}, file: ${source}]\n${chunk.text}`;
     })
     .join('\n\n---\n\n');
 
-  let prompt = `You are SahakarMitra, an expert AI legal assistant for Indian cooperative societies (specializing in the Maharashtra Cooperative Societies Act, 1960).
+  let prompt = `You are SahakarMitra, an expert AI legal assistant for Indian cooperative societies.
+The user is inquiring about cooperative societies under the jurisdiction of **${state}** (along with applicable provisions from the Multi-State Co-operative Societies Act, 2002).
 
-Answer the user's inquiry directly using the provided statutory legal provisions${attachmentContext ? ' and the content extracted from the user\'s attached document/screenshot' : ''}. Always cite the specific section/source you relied on, e.g. "According to <section_title>, ...".`;
+Answer the user's inquiry directly using the provided statutory legal provisions${attachmentContext ? ' and the content extracted from the user\'s attached document/screenshot' : ''}.
+Always cite the specific statutory section, State, and Act name you relied on, e.g. "According to Section <number>, <Act Name> (<State>), ...".`;
+
+  if (hasCrossStateChunks) {
+    prompt += `\n\n── CROSS-STATE PROVISION NOTICE ──\nSome retrieved provisions are from another state's Act because an exact matching clause was not found under the selected state (${state}). If you reference a cross-state provision, you MUST explicitly state in your answer:\n"This appears to be specific to {other state}'s Act ({Act Name}) — please confirm which state's regulations apply to your society."`;
+  }
 
   if (attachmentContext) {
     prompt += `\n\n── USER ATTACHED DOCUMENT / SCREENSHOT EXTRACTED CONTENT ──\n${attachmentContext}\n\n── INSTRUCTIONS FOR ATTACHED DOCUMENTS/SCREENSHOTS ──\n1. Analyze the user's document/screenshot against the statutory legal provisions provided below.\n2. Address whether the notice, meeting, election, audit, dispute, or bylaw in the attachment aligns with the legal requirements.\n3. Directly reference key facts from the attachment (e.g. notice period, agenda, voting threshold, authority) and explain their legal validity.\n4. Provide concrete, actionable legal recommendations.`;
@@ -49,9 +60,9 @@ ${contextText}`;
  * Build the full message array sent to LLM:
  * system prompt → recent chat history → current question.
  */
-function buildMessages(question, retrievedChunks, language, history = [], attachmentContext = '') {
+function buildMessages(question, retrievedChunks, language, history = [], attachmentContext = '', state = 'Maharashtra') {
   const messages = [
-    { role: 'system', content: buildSystemPrompt(retrievedChunks, language, attachmentContext) },
+    { role: 'system', content: buildSystemPrompt(retrievedChunks, language, attachmentContext, state) },
   ];
 
   const cleanHistory = (Array.isArray(history) ? history : [])
@@ -67,23 +78,24 @@ function buildMessages(question, retrievedChunks, language, history = [], attach
 
   const userQuery = (question && question.trim().length > 0)
     ? question.trim()
-    : (attachmentContext ? 'Please analyze the attached document/screenshot in detail under the Maharashtra Cooperative Societies Act, 1960 and provide a legal assessment with section references.' : 'Hello');
+    : (attachmentContext ? `Please analyze the attached document/screenshot in detail under the ${state} cooperative society legal framework and provide a legal assessment with section references.` : 'Hello');
 
   messages.push({ role: 'user', content: userQuery });
   return messages;
 }
 
-function buildFallbackAnswer(question, retrievedChunks, language, attachmentContext = '') {
+function buildFallbackAnswer(question, retrievedChunks, language, attachmentContext = '', state = 'Maharashtra') {
   const primary = retrievedChunks?.[0];
-  const section = primary?.metadata?.section_title || 'Maharashtra Cooperative Societies Act, 1960';
+  const section = primary?.metadata?.section_title || `${state} Cooperative Societies Act`;
+  const actName = primary?.metadata?.act_name || `${state} Cooperative Societies Act`;
   const file = primary?.metadata?.source_file || 'law_document';
   
   if (language === 'hi') {
-    return `धारा [${section}] (${file}) के अनुसार:\n\n${primary?.text || 'विधिक ज्ञानकोष के अनुसार जानकारी उपलब्ध है।'}`;
+    return `धारा [${section}] (${actName}, ${file}) के अनुसार:\n\n${primary?.text || 'विधिक ज्ञानकोष के अनुसार जानकारी उपलब्ध है।'}`;
   } else if (language === 'mr') {
-    return `कलम [${section}] (${file}) नुसार:\n\n${primary?.text || 'कायदेशीर ज्ञानकोषानुसार माहिती उपलब्ध आहे.'}`;
+    return `कलम [${section}] (${actName}, ${file}) नुसार:\n\n${primary?.text || 'कायदेशीर ज्ञानकोषानुसार माहिती उपलब्ध आहे.'}`;
   } else {
-    return `According to ${section} (${file}):\n\n${primary?.text || 'Statutory provisions retrieved from the knowledge base.'}`;
+    return `According to ${section} (${actName}, ${file}):\n\n${primary?.text || 'Statutory provisions retrieved from the knowledge base.'}`;
   }
 }
 
@@ -195,12 +207,12 @@ export async function translateToEnglish(text) {
 /**
  * Call LLM blocking response with automatic multi-provider fallback.
  */
-export async function generateAnswer(question, retrievedChunks, language = 'en', history = [], attachmentContext = '') {
-  const messages = buildMessages(question, retrievedChunks, language, history, attachmentContext);
+export async function generateAnswer(question, retrievedChunks, language = 'en', history = [], attachmentContext = '', state = 'Maharashtra') {
+  const messages = buildMessages(question, retrievedChunks, language, history, attachmentContext, state);
 
   for (const prov of getProviders()) {
     try {
-      console.log(`[llm] Calling ${prov.name} (model: ${prov.model})...`);
+      console.log(`[llm] Calling ${prov.name} (model: ${prov.model}) [State: ${state}]...`);
       const response = await callChatApi({
         url: prov.url,
         headers: prov.headers,
@@ -226,18 +238,18 @@ export async function generateAnswer(question, retrievedChunks, language = 'en',
     }
   }
 
-  return buildFallbackAnswer(question, retrievedChunks, language, attachmentContext);
+  return buildFallbackAnswer(question, retrievedChunks, language, attachmentContext, state);
 }
 
 /**
  * Stream LLM tokens with automatic provider fallback.
  */
-export async function generateAnswerStream(question, retrievedChunks, language = 'en', history = [], onToken = () => {}, attachmentContext = '') {
-  const messages = buildMessages(question, retrievedChunks, language, history, attachmentContext);
+export async function generateAnswerStream(question, retrievedChunks, language = 'en', history = [], onToken = () => {}, attachmentContext = '', state = 'Maharashtra') {
+  const messages = buildMessages(question, retrievedChunks, language, history, attachmentContext, state);
 
   for (const prov of getProviders()) {
     try {
-      console.log(`[llm-stream] Calling ${prov.name} stream (model: ${prov.model})...`);
+      console.log(`[llm-stream] Calling ${prov.name} stream (model: ${prov.model}) [State: ${state}]...`);
       const response = await callChatApi({
         url: prov.url,
         headers: prov.headers,
@@ -290,7 +302,7 @@ export async function generateAnswerStream(question, retrievedChunks, language =
   }
 
   // Fallback if streaming produced no tokens
-  const fallback = buildFallbackAnswer(question, retrievedChunks, language, attachmentContext);
+  const fallback = buildFallbackAnswer(question, retrievedChunks, language, attachmentContext, state);
   onToken(fallback);
   return fallback;
 }

@@ -30,7 +30,7 @@ const MAX_ATTACHMENTS = 5;
 
 // ── Shared request validation ────────────────────────────────
 function parseChatRequest(req) {
-  const { message = '', language = 'en', history = [], attachments = [] } = req.body ?? {};
+  const { message = '', language = 'en', state = 'Maharashtra', history = [], attachments = [] } = req.body ?? {};
 
   const cleanMessage = typeof message === 'string' ? message.trim().slice(0, MAX_MESSAGE_LENGTH) : '';
   const validAttachments = Array.isArray(attachments)
@@ -53,7 +53,7 @@ function parseChatRequest(req) {
         .map((m) => ({ role: m.role, text: m.text.slice(0, MAX_HISTORY_TEXT) }))
     : [];
 
-  return { message: cleanMessage, language, history: cleanHistory, attachments: validAttachments };
+  return { message: cleanMessage, language, state: typeof state === 'string' ? state.trim() : 'Maharashtra', history: cleanHistory, attachments: validAttachments };
 }
 
 // ── Relevance filter: drop chunks above the cosine-distance cutoff ──
@@ -66,8 +66,8 @@ function filterRelevant(chunks) {
 // model is English-only). Short follow-up questions like "and the
 // secretary's duties?" are prefixed with the previous user message so
 // they retrieve against the full intent, not the bare fragment.
-async function buildRetrievalQuery(message, attachmentContext, language, history) {
-  let query = message || attachmentContext.slice(0, 300) || 'Maharashtra cooperative societies rules';
+async function buildRetrievalQuery(message, attachmentContext, language, history, state = 'Maharashtra') {
+  let query = message || attachmentContext.slice(0, 300) || `${state} cooperative societies rules`;
 
   if (message && language !== 'en') {
     const translated = await translateToEnglish(message);
@@ -87,15 +87,19 @@ async function buildRetrievalQuery(message, attachmentContext, language, history
     }
   }
 
-  return query.trim() || 'Maharashtra cooperative societies rules';
+  return query.trim() || `${state} cooperative societies rules`;
 }
 
 // ── Format sources for the frontend ──────────────────────────
 function formatSources(chunks) {
   return chunks.map((c) => ({
-    section:      c.metadata?.section_title || 'Unknown section',
-    source_file:  c.metadata?.source_file   || 'unknown',
-    excerpt:      c.text.slice(0, 220) + (c.text.length > 220 ? '...' : ''),
+    section:       c.metadata?.section_title || 'Unknown section',
+    act_name:      c.metadata?.act_name      || 'Cooperative Societies Act',
+    state:         c.metadata?.state         || 'Maharashtra',
+    source_file:   c.metadata?.source_file   || 'unknown',
+    isCrossState:  !!c.isCrossState,
+    matchedState:  c.matchedState || c.metadata?.state,
+    excerpt:       c.text.slice(0, 220) + (c.text.length > 220 ? '...' : ''),
   }));
 }
 
@@ -112,23 +116,23 @@ router.post('/', async (req, res) => {
     if (parsed.error) {
       return res.status(400).json({ error: parsed.error });
     }
-    const { message, language, history, attachments } = parsed;
+    const { message, language, state, history, attachments } = parsed;
 
-    console.log(`[chat] q="${message.slice(0, 80)}" attachments=${attachments.length} lang=${language}`);
+    console.log(`[chat] q="${message.slice(0, 80)}" state=${state} attachments=${attachments.length} lang=${language}`);
 
     // Parse attachments (OCR images, parse PDFs, decode text files)
     const { combinedText: attachmentContext, parsedFiles } = await parseAllAttachments(attachments);
 
     // Build retrieval query (translate + follow-up context), then filter by relevance
-    const retrievalQuery = await buildRetrievalQuery(message, attachmentContext, language, history);
-    const chunks = filterRelevant(await retrieveRelevantChunks(retrievalQuery, 3));
+    const retrievalQuery = await buildRetrievalQuery(message, attachmentContext, language, history, state);
+    const chunks = filterRelevant(await retrieveRelevantChunks(retrievalQuery, 3, { state }));
 
     if (chunks.length === 0) {
       console.log(`[chat] No relevant chunks (cutoff=${MAX_RELEVANCE_DISTANCE}) — returning no-match answer.`);
       return res.json({ answer: NO_MATCH_ANSWERS[language] || NO_MATCH_ANSWERS.en, sources: [], parsedFiles });
     }
 
-    const answer = await generateAnswer(message, chunks, language, history, attachmentContext);
+    const answer = await generateAnswer(message, chunks, language, history, attachmentContext, state);
     const sources = formatSources(chunks);
 
     console.log(`[chat] OK  answer_len=${answer.length}  sources=${sources.length}`);
@@ -148,7 +152,7 @@ router.post('/stream', async (req, res) => {
   if (parsed.error) {
     return res.status(400).json({ error: parsed.error });
   }
-  const { message, language, history, attachments } = parsed;
+  const { message, language, state, history, attachments } = parsed;
 
   res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
   res.setHeader('Cache-Control', 'no-cache');
@@ -158,7 +162,7 @@ router.post('/stream', async (req, res) => {
   const send = (obj) => res.write(`data: ${JSON.stringify(obj)}\n\n`);
 
   try {
-    console.log(`[chat-stream] q="${message.slice(0, 80)}" attachments=${attachments.length} lang=${language}`);
+    console.log(`[chat-stream] q="${message.slice(0, 80)}" state=${state} attachments=${attachments.length} lang=${language}`);
 
     if (attachments.length > 0) {
       send({ type: 'status', text: 'Processing attachments & OCR...' });
@@ -168,8 +172,8 @@ router.post('/stream', async (req, res) => {
     const { combinedText: attachmentContext } = await parseAllAttachments(attachments);
 
     // Build retrieval query (translate + follow-up context), then filter by relevance
-    const retrievalQuery = await buildRetrievalQuery(message, attachmentContext, language, history);
-    const chunks = filterRelevant(await retrieveRelevantChunks(retrievalQuery, 3));
+    const retrievalQuery = await buildRetrievalQuery(message, attachmentContext, language, history, state);
+    const chunks = filterRelevant(await retrieveRelevantChunks(retrievalQuery, 3, { state }));
 
     if (chunks.length === 0) {
       console.log(`[chat-stream] No relevant chunks (cutoff=${MAX_RELEVANCE_DISTANCE}) — sending no_match.`);
@@ -182,7 +186,7 @@ router.post('/stream', async (req, res) => {
       if (token) {
         send({ type: 'token', text: token });
       }
-    }, attachmentContext);
+    }, attachmentContext, state);
 
     send({ type: 'done', sources: formatSources(chunks) });
     console.log(`[chat-stream] OK`);

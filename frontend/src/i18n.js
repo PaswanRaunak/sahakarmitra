@@ -113,6 +113,22 @@ export const STRINGS = {
     backendDegraded: 'Limited mode, AI provider or knowledge base missing',
     backendChecking: 'Checking connection…',
 
+    // Multi-State & Geolocation
+    geoBannerText: "Based on your location, we've set your region to",
+    confirmRegion: 'Confirm',
+    changeRegion: 'Change',
+    selectState: 'Select State / Jurisdiction',
+    stateSelectorLabel: 'State / Region',
+    currentJurisdiction: 'Jurisdiction',
+    stateMaharashtra: 'Maharashtra',
+    stateGujarat: 'Gujarat',
+    stateKarnataka: 'Karnataka',
+    stateMultiState: 'Multi-State (Central Act 2002)',
+    stateAll: 'All States / Central Acts',
+    stateFilterAll: 'All States',
+    stateBadge: 'State',
+    crossStateNotice: "Notice: This provision appears to be specific to {state}'s Act. Please verify the regulations applicable to your state.",
+
     // Dashboard view
     goodMorning: 'Good morning',
     goodAfternoon: 'Good afternoon',
@@ -355,6 +371,22 @@ export const STRINGS = {
     backendDegraded: 'सीमित मोड, AI प्रदाता या ज्ञान कोश अनुपलब्ध',
     backendChecking: 'कनेक्शन जाँचा जा रहा है…',
 
+    // Multi-State & Geolocation
+    geoBannerText: 'आपके स्थान के आधार पर, हमने आपका क्षेत्र निर्धारित किया है:',
+    confirmRegion: 'पुष्टि करें',
+    changeRegion: 'बदलें',
+    selectState: 'राज्य / क्षेत्राधिकार चुनें',
+    stateSelectorLabel: 'राज्य / क्षेत्र',
+    currentJurisdiction: 'क्षेत्राधिकार',
+    stateMaharashtra: 'महाराष्ट्र',
+    stateGujarat: 'गुजरात',
+    stateKarnataka: 'कर्नाटक',
+    stateMultiState: 'मल्टी-स्टेट (केंद्रीय अधिनियम 2002)',
+    stateAll: 'सभी राज्य / केंद्रीय अधिनियम',
+    stateFilterAll: 'सभी राज्य',
+    stateBadge: 'राज्य',
+    crossStateNotice: 'सूचना: यह प्रावधान {state} के अधिनियम से संबंधित प्रतीत होता है। कृपया अपने राज्य के नियमों की पुष्टि करें।',
+
     goodMorning: 'सुप्रभात',
     goodAfternoon: 'नमस्कार',
     goodEvening: 'शुभ संध्या',
@@ -591,6 +623,22 @@ export const STRINGS = {
     backendOffline: 'बॅकएंड ऑफलाइन, उत्तरे उपलब्ध नाहीत',
     backendDegraded: 'मर्यादित मोड, AI प्रदाता किंवा ज्ञानकोश नाही',
     backendChecking: 'कनेक्शन तपासले जात आहे…',
+
+    // Multi-State & Geolocation
+    geoBannerText: 'तुमच्या स्थानावर आधारित, आम्ही तुमचा प्रदेश निवडला आहे:',
+    confirmRegion: 'पुष्टी करा',
+    changeRegion: 'बदला',
+    selectState: 'राज्य / अधिकारक्षेत्र निवडा',
+    stateSelectorLabel: 'राज्य / प्रदेश',
+    currentJurisdiction: 'अधिकारक्षेत्र',
+    stateMaharashtra: 'महाराष्ट्र',
+    stateGujarat: 'गुजरात',
+    stateKarnataka: 'कर्नाटक',
+    stateMultiState: 'मल्टी-स्टेट (केंद्रीय कायदा २००२)',
+    stateAll: 'सर्व राज्ये / केंद्रीय कायदे',
+    stateFilterAll: 'सर्व राज्ये',
+    stateBadge: 'राज्य',
+    crossStateNotice: 'सूचना: ही तरतूद {state} च्या कायद्याशी संबंधित दिसते. कृपया तुमच्या राज्याला लागू असलेले नियम तपासा.',
 
     goodMorning: 'शुभ प्रभात',
     goodAfternoon: 'नमस्कार',

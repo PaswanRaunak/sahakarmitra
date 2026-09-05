@@ -88,6 +88,8 @@ function parentRecord(p) {
     parent_id: p.parent_id,
     source_file: p.source_file,
     section_title: p.section_title,
+    act_name: p.act_name || 'Maharashtra Cooperative Societies Act, 1960',
+    state: p.state || 'Maharashtra',
     text: p.text,
   };
 }
@@ -122,6 +124,8 @@ async function initLocalStore() {
         metadata: {
           source_file:   file,
           section_title: parent?.section_title || 'Untitled',
+          act_name:      parent?.act_name || 'Maharashtra Cooperative Societies Act, 1960',
+          state:         parent?.state || 'Maharashtra',
           parent_id:     c.parent_id,
           chunk_type:    'child',
           chunk_text:    c.text,
@@ -147,9 +151,6 @@ async function initLocalStore() {
     }
   }
 
-  // Cache is reusable only when ids, texts AND the embedding recipe all
-  // match, chunk ids stay stable across strategy changes, so without the
-  // recipe check stale vectors would be reused silently.
   const canUseCache = cachedData &&
     Array.isArray(cachedData) &&
     cachedData.length === allChunks.length &&
@@ -166,7 +167,6 @@ async function initLocalStore() {
   }
 
   console.log(`[retrieval] Generating hybrid embeddings for ${allChunks.length} child chunks...`);
-  // Same recipe as scripts/ingest.js: body ⊕ section-heading (50/50).
   const localChildren = allChunks.map(c => ({ text: c.metadata.chunk_text, section_title: c.metadata.section_title }));
   const embeddings = await generateChildEmbeddings(
     localChildren.map(c => c.text),
@@ -192,10 +192,7 @@ async function initLocalStore() {
 
 /**
  * Resolve the ACTIVE ChromaDB collection, on every call. The pointer is
- * read from data/active-collection.json (mtime-cached), which is exactly
- * what makes the blue-green swap live without a server restart. A missing
- * collection or down server backs off for CHROMA_RETRY_TTL_MS, then the
- * next request retries automatically.
+ * read from data/active-collection.json (mtime-cached).
  */
 async function getChromaCollection() {
   if (Date.now() < chromaDownUntil) return null;
@@ -212,12 +209,6 @@ async function getChromaCollection() {
 
 /**
  * Resolve matched child chunks to their PARENT sections.
- *   - Looks up parent records via parent_id (in-memory map in local
- *     mode, parents.json in Chroma mode).
- *   - Deduplicates: multiple matched children sharing a parent yield
- *     that parent once, ranked by its best-matching child's distance.
- *   - Children with no resolvable parent (e.g. a legacy index without
- *     parent metadata) pass through unchanged so retrieval never breaks.
  */
 async function resolveParents(childMatches) {
   const parentSource = localParentMap && localParentMap.size > 0
@@ -244,13 +235,14 @@ async function resolveParents(childMatches) {
         metadata: {
           source_file:   parent.source_file,
           section_title: parent.section_title,
+          act_name:      parent.act_name || match.metadata?.act_name || 'Maharashtra Cooperative Societies Act, 1960',
+          state:         parent.state || match.metadata?.state || 'Maharashtra',
           parent_id:     parentId,
           chunk_type:    'parent',
         },
         distance: match.distance,
       });
     } else {
-      // Parent record missing, degrade to the child fragment
       console.warn(`[retrieval] Parent "${parentId}" not found in parent store, returning child fragment.`);
       results.push(match);
     }
@@ -260,25 +252,26 @@ async function resolveParents(childMatches) {
 }
 
 /**
- * Retrieve the top-K most relevant law PARENT sections for the query.
- *
- * Vector search matches against child chunks (fetching extra children
- * so that parent deduplication still leaves enough distinct sections),
- * then returns up to topK full parent sections as
- * { text, metadata, distance }, ranked by best matching child.
+ * Perform raw vector query either on Chroma or Local Store.
  */
-export async function retrieveRelevantChunks(query, topK = 3) {
-  const queryEmbedding = await generateEmbedding(query);
-  const nChildren = Math.min(topK * 3, 12);
+async function queryVectorStore(queryEmbedding, nChildren, stateFilter = null) {
   let childMatches = [];
 
-  // 1. Try ChromaDB first
+  // Try ChromaDB
   try {
     const col = await getChromaCollection();
     if (col) {
+      let whereClause = undefined;
+      if (stateFilter && Array.isArray(stateFilter) && stateFilter.length > 0) {
+        whereClause = stateFilter.length === 1
+          ? { state: stateFilter[0] }
+          : { state: { "$in": stateFilter } };
+      }
+
       const results = await col.query({
         queryEmbeddings: [queryEmbedding],
         nResults: nChildren,
+        ...(whereClause ? { where: whereClause } : {}),
       });
 
       const docs      = results.documents?.[0] ?? [];
@@ -295,12 +288,20 @@ export async function retrieveRelevantChunks(query, topK = 3) {
     console.warn('[retrieval] ChromaDB query failed, falling back to local store:', chromaErr.message);
   }
 
-  // 2. Fallback to local in-memory vector store
+  // Fallback to local in-memory store
   if (childMatches.length === 0) {
     const store = await initLocalStore();
     if (!store || store.length === 0) return [];
 
-    childMatches = store
+    let candidates = store;
+    if (stateFilter && Array.isArray(stateFilter) && stateFilter.length > 0) {
+      candidates = store.filter(item => {
+        const itemState = item.metadata?.state || 'Maharashtra';
+        return stateFilter.includes(itemState);
+      });
+    }
+
+    childMatches = candidates
       .map(item => ({
         text: item.text,
         metadata: item.metadata,
@@ -310,7 +311,58 @@ export async function retrieveRelevantChunks(query, topK = 3) {
       .slice(0, nChildren);
   }
 
-  const parents = await resolveParents(childMatches);
+  return childMatches;
+}
+
+/**
+ * Retrieve the top-K most relevant law PARENT sections for the query.
+ * Filters by user's selected state + Multi-State Act.
+ * Falls back to cross-state search if no relevant match is found in the selected state.
+ *
+ * @param {string} query
+ * @param {number} topK
+ * @param {object} [options]
+ * @param {string} [options.state] 'Maharashtra' | 'Gujarat' | 'Karnataka' | 'Multi-State' | 'All'
+ */
+export async function retrieveRelevantChunks(query, topK = 3, options = {}) {
+  const requestedState = options.state || 'Maharashtra';
+  const queryEmbedding = await generateEmbedding(query);
+  const nChildren = Math.min(topK * 3, 12);
+  const maxDistanceCutoff = parseFloat(process.env.RELEVANCE_MAX_DISTANCE || '1.5');
+
+  // 1. Primary Search: Filtered to requested state + Multi-State
+  let allowedStates = null;
+  if (requestedState && requestedState !== 'All') {
+    allowedStates = requestedState === 'Multi-State'
+      ? ['Multi-State']
+      : [requestedState, 'Multi-State'];
+  }
+
+  let childMatches = await queryVectorStore(queryEmbedding, nChildren, allowedStates);
+  let parents = await resolveParents(childMatches);
+
+  // Check if primary results have a good match within distance cutoff
+  const hasGoodMatch = parents.some(p => p.distance == null || p.distance <= maxDistanceCutoff);
+
+  // 2. Cross-State Fallback: If no good match within selected state, search other states
+  if ((!hasGoodMatch || parents.length === 0) && requestedState !== 'All') {
+    console.log(`[retrieval] No strong match in state "${requestedState}", executing cross-state search...`);
+    const fallbackChildren = await queryVectorStore(queryEmbedding, nChildren, null);
+    const fallbackParents = await resolveParents(fallbackChildren);
+
+    const validFallback = fallbackParents.filter(p => p.distance == null || p.distance <= maxDistanceCutoff);
+    if (validFallback.length > 0) {
+      // Mark as cross-state match
+      const crossStateResults = validFallback.slice(0, topK).map(p => ({
+        ...p,
+        isCrossState: true,
+        requestedState,
+        matchedState: p.metadata?.state || 'Another State',
+      }));
+      return crossStateResults;
+    }
+  }
+
   return parents.slice(0, topK);
 }
 
@@ -319,32 +371,33 @@ function determineCategory(sourceFile = '', sectionTitle = '', fullText = '') {
   const title = String(sectionTitle).toLowerCase();
   const text = String(fullText).toLowerCase();
 
-  if (file.includes('election') || title.includes('election')) {
+  if (file.includes('election') || title.includes('election') || text.includes('election of')) {
     return 'Elections';
   }
-  if (title.includes('agm') || title.includes('annual general meeting') || text.includes('annual general meeting') || title.includes('section 81a') || text.includes('section 81a')) {
+  if (title.includes('agm') || title.includes('annual general meeting') || text.includes('annual general meeting') || title.includes('section 81a') || title.includes('section 77') || title.includes('section 27')) {
     return 'AGM';
   }
-  if (file.includes('audit') || title.includes('audit') || text.includes('auditor')) {
+  if (file.includes('audit') || title.includes('audit') || text.includes('auditor') || title.includes('section 84') || title.includes('section 63') || title.includes('section 70')) {
     return 'Auditing';
   }
-  if (file.includes('registration') || title.includes('registration') || title.includes('section 5') || title.includes('section 6')) {
+  if (file.includes('registration') || title.includes('registration') || title.includes('section 4') || title.includes('section 5') || title.includes('section 6') || title.includes('section 7') || title.includes('section 9')) {
     return 'Registration';
   }
-  if (file.includes('member_rights') || title.includes('member') || title.includes('rights') || title.includes('privilege') || title.includes('section 24')) {
+  if (file.includes('member') || title.includes('member') || title.includes('rights') || title.includes('privilege') || title.includes('section 22') || title.includes('section 24') || title.includes('section 25') || title.includes('section 28') || title.includes('section 29') || title.includes('section 36')) {
     return 'Member Rights';
   }
-  if (file.includes('dispute') || file.includes('winding') || title.includes('dispute') || title.includes('appeal') || title.includes('winding')) {
+  if (file.includes('dispute') || file.includes('winding') || title.includes('dispute') || title.includes('appeal') || title.includes('winding') || title.includes('section 96') || title.includes('section 107') || title.includes('section 72') || title.includes('section 84') || title.includes('section 86')) {
     return 'Disputes';
   }
   return 'Registration';
 }
 
-function parentsToDocuments(parents, actName) {
+function parentsToDocuments(parents) {
   return [...parents].map(p => ({
     id: p.parent_id,
     section_title: p.section_title,
-    act_name: actName,
+    act_name: p.act_name || 'Maharashtra Cooperative Societies Act, 1960',
+    state: p.state || 'Maharashtra',
     full_text: p.text,
     category: determineCategory(p.source_file, p.section_title, p.text),
     source_file: p.source_file,
@@ -352,53 +405,59 @@ function parentsToDocuments(parents, actName) {
 }
 
 /**
- * Retrieve ALL parent sections currently in the knowledge base
- * (parents are the full legal sections, what the /library endpoint
- * displays, not the small searchable child fragments).
- * Reads the parent store written by ingest; falls back to the local
- * in-memory store when ChromaDB is not running.
- * Returns array of { id, section_title, act_name, full_text, category, source_file }.
+ * Retrieve ALL parent sections currently in the knowledge base.
+ * @param {object} [options]
+ * @param {string} [options.state] 'all' or specific state name
  */
-export async function getAllDocumentChunks() {
-  const actName = 'Maharashtra Cooperative Societies Act, 1960';
+export async function getAllDocumentChunks(options = {}) {
+  let allDocs = [];
 
-  // 1. ChromaDB mode, parents come from the ingest-written parent store
+  // 1. ChromaDB mode
   try {
     const col = await getChromaCollection();
     if (col) {
       const parentStore = await loadParentFileStore();
       if (parentStore && parentStore.size > 0) {
-        return parentsToDocuments(parentStore.values(), actName);
+        allDocs = parentsToDocuments(parentStore.values());
+      } else {
+        const getRes = await col.get({ include: ['documents', 'metadatas'] });
+        if (getRes && getRes.ids && getRes.ids.length > 0) {
+          allDocs = getRes.ids.map((id, i) => {
+            const doc = getRes.documents?.[i] || '';
+            const meta = getRes.metadatas?.[i] || {};
+            const text = doc || meta.chunk_text || '';
+            const sectionTitle = meta.section_title || 'Untitled';
+            const sourceFile = meta.source_file || id.split('::')[0] || '';
+            const state = meta.state || 'Maharashtra';
+            const actName = meta.act_name || 'Maharashtra Cooperative Societies Act, 1960';
+            return {
+              id,
+              section_title: sectionTitle,
+              act_name: actName,
+              state,
+              full_text: text,
+              category: determineCategory(sourceFile, sectionTitle, text),
+              source_file: sourceFile,
+            };
+          });
+        }
       }
-
-      // Legacy index (no parent store): return whatever Chroma has
-      console.warn('[retrieval] Parent store missing, listing legacy chunks from ChromaDB. Re-run "npm run ingest".');
-      const getRes = await col.get({ include: ['documents', 'metadatas'] });
-      if (getRes && getRes.ids && getRes.ids.length > 0) {
-        return getRes.ids.map((id, i) => {
-          const doc = getRes.documents?.[i] || '';
-          const meta = getRes.metadatas?.[i] || {};
-          const text = doc || meta.chunk_text || '';
-          const sectionTitle = meta.section_title || 'Untitled';
-          const sourceFile = meta.source_file || id.split('::')[0] || '';
-          return {
-            id,
-            section_title: sectionTitle,
-            act_name: actName,
-            full_text: text,
-            category: determineCategory(sourceFile, sectionTitle, text),
-            source_file: sourceFile,
-          };
-        });
-      }
-      return [];
     }
   } catch (err) {
     console.warn('[retrieval] ChromaDB get failed, falling back to local vector store:', err.message);
   }
 
-  // 2. Local mode, build parents in memory from the same chunking
-  await initLocalStore();
-  if (!localParentMap || localParentMap.size === 0) return [];
-  return parentsToDocuments(localParentMap.values(), actName);
+  // 2. Local mode fallback
+  if (allDocs.length === 0) {
+    await initLocalStore();
+    if (localParentMap && localParentMap.size > 0) {
+      allDocs = parentsToDocuments(localParentMap.values());
+    }
+  }
+
+  if (options.state && options.state.toLowerCase() !== 'all') {
+    return allDocs.filter(d => (d.state || 'Maharashtra').toLowerCase() === options.state.toLowerCase());
+  }
+
+  return allDocs;
 }

@@ -11,6 +11,7 @@ import express from 'express';
 import cors from 'cors';
 import chatRoutes from './routes/chat.js';
 import reviewRoutes from './routes/review.js';
+import geoRoutes from './routes/geo.js';
 import { isLlmConfigured } from './services/llm.js';
 import { getAllDocumentChunks } from './services/retrieval.js';
 
@@ -77,6 +78,7 @@ app.get('/api/health', (req, res) => {
 
 // Rate-limited API surface (chat = LLM cost, feedback = write path)
 app.use('/api/chat', rateLimit, chatRoutes);
+app.use('/api/geo', geoRoutes);
 
 // ── HITL Translation Review (admin) ────────────────────────────
 app.use('/api/review', reviewRoutes);
@@ -88,7 +90,8 @@ app.get('/admin/review', (req, res) => {
 // Retrieves ALL documents/chunks currently stored in ChromaDB
 app.get('/api/library', async (req, res) => {
   try {
-    const documents = await getAllDocumentChunks();
+    const { state } = req.query;
+    const documents = await getAllDocumentChunks({ state });
     res.json(documents);
   } catch (err) {
     console.error('[library] Failed to fetch documents:', err.message);

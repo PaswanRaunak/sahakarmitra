@@ -12,6 +12,13 @@ export default function SettingsView({ user, onUpdateUser, language = 'en', init
   const [registrationNo, setRegNo]    = useState(user?.registrationNo || 'BOM/HSG/12345/2012');
   const [memberRole, setMemberRole]   = useState(user?.role || 'Managing Committee / Secretary');
   const [unitNo, setUnitNo]           = useState(user?.unitNo || 'Flat A-402');
+  const [selectedState, setSelectedState] = useState(() => {
+    try {
+      return user?.state || localStorage.getItem('sahakar_selected_state') || 'Maharashtra';
+    } catch {
+      return 'Maharashtra';
+    }
+  });
   const [preferredLang, setLang]      = useState(user?.preferredLang || language);
 
   // Preferences & Security Toggles
@@ -38,9 +45,13 @@ export default function SettingsView({ user, onUpdateUser, language = 'en', init
     if (initialSubTab) setActiveSubTab(initialSubTab);
   }, [initialSubTab]);
 
-
   function handleProfileSubmit(e) {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+    try {
+      localStorage.setItem('sahakar_selected_state', selectedState);
+      localStorage.setItem('sahakar_state_confirmed', 'true');
+    } catch {}
+
     const updated = {
       ...user,
       name,
@@ -48,6 +59,7 @@ export default function SettingsView({ user, onUpdateUser, language = 'en', init
       mobile,
       societyName,
       registrationNo,
+      state: selectedState,
       role: memberRole,
       unitNo,
       preferredLang,
@@ -360,6 +372,28 @@ export default function SettingsView({ user, onUpdateUser, language = 'en', init
                       className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#a03612] transition"
                     />
                   </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-stone-700 flex items-center justify-between">
+                    <span>{t('stateJurisdiction')}</span>
+                    <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 font-semibold">
+                      Legal Act Matching
+                    </span>
+                  </label>
+                  <select
+                    value={selectedState}
+                    onChange={(e) => setSelectedState(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#a03612] transition"
+                  >
+                    <option value="Maharashtra">Maharashtra (MCS Act 1960)</option>
+                    <option value="Gujarat">Gujarat (GCS Act 1961)</option>
+                    <option value="Karnataka">Karnataka (KCS Act 1959)</option>
+                    <option value="Multi-State">Multi-State / Central (MSCS Act 2002)</option>
+                  </select>
+                  <p className="text-[11px] text-stone-400">
+                    Determines which state's Co-operative Societies Act and legal bye-laws SahakarMitra references during advisory queries.
+                  </p>
                 </div>
               </div>
 
