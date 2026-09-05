@@ -24,6 +24,7 @@ export default function WelcomeModal({ onClose, onStartChat, language = 'en' }) 
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
+      aria-labelledby="welcome-title"
     >
       <div className="bg-[#faf8f5] border border-stone-200/90 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-6 relative animate-scale-in">
 
@@ -45,7 +46,7 @@ export default function WelcomeModal({ onClose, onStartChat, language = 'en' }) 
             alt="SahakarMitra Logo"
             className="w-16 h-16 rounded-2xl shadow-md border border-amber-200 object-cover mx-auto"
           />
-          <h2 className="text-2xl font-black text-stone-900 tracking-tight">
+          <h2 id="welcome-title" className="text-2xl font-black text-stone-900 tracking-tight">
             {t('welcomeModalTitle')}
           </h2>
           <p className="text-xs sm:text-sm text-stone-600 font-normal">
@@ -57,9 +58,10 @@ export default function WelcomeModal({ onClose, onStartChat, language = 'en' }) 
         <div className="space-y-3">
 
           {/* Feature 1 */}
-          <div
+          <button
+            type="button"
             onClick={() => { onStartChat(); onClose(); }}
-            className="p-3.5 rounded-2xl bg-white border border-stone-200/80 hover:border-[#a03612]/40 flex items-start gap-3.5 cursor-pointer transition shadow-xs hover:shadow-soft group"
+            className="w-full text-left p-3.5 rounded-2xl bg-white border border-stone-200/80 hover:border-[#a03612]/40 flex items-start gap-3.5 cursor-pointer transition shadow-xs hover:shadow-soft group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
           >
             <div className="p-2 rounded-xl bg-amber-50 text-[#a03612] group-hover:bg-[#a03612] group-hover:text-white transition">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -74,12 +76,13 @@ export default function WelcomeModal({ onClose, onStartChat, language = 'en' }) 
                 {t('feature1Body')}
               </p>
             </div>
-          </div>
+          </button>
 
           {/* Feature 2 */}
-          <div
+          <button
+            type="button"
             onClick={() => { onStartChat(); onClose(); }}
-            className="p-3.5 rounded-2xl bg-white border border-stone-200/80 hover:border-[#2d6a68]/40 flex items-start gap-3.5 cursor-pointer transition shadow-xs hover:shadow-soft group"
+            className="w-full text-left p-3.5 rounded-2xl bg-white border border-stone-200/80 hover:border-[#2d6a68]/40 flex items-start gap-3.5 cursor-pointer transition shadow-xs hover:shadow-soft group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
           >
             <div className="p-2 rounded-xl bg-teal-50 text-[#2d6a68] group-hover:bg-[#2d6a68] group-hover:text-white transition">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -94,12 +97,13 @@ export default function WelcomeModal({ onClose, onStartChat, language = 'en' }) 
                 {t('feature2Body')}
               </p>
             </div>
-          </div>
+          </button>
 
           {/* Feature 3 */}
-          <div
+          <button
+            type="button"
             onClick={() => { onStartChat(); onClose(); }}
-            className="p-3.5 rounded-2xl bg-white border border-stone-200/80 hover:border-stone-400 flex items-start gap-3.5 cursor-pointer transition shadow-xs hover:shadow-soft group"
+            className="w-full text-left p-3.5 rounded-2xl bg-white border border-stone-200/80 hover:border-stone-400 flex items-start gap-3.5 cursor-pointer transition shadow-xs hover:shadow-soft group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
           >
             <div className="p-2 rounded-xl bg-cyan-50 text-cyan-700 group-hover:bg-cyan-700 group-hover:text-white transition">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -114,7 +118,7 @@ export default function WelcomeModal({ onClose, onStartChat, language = 'en' }) 
                 {t('feature3Body')}
               </p>
             </div>
-          </div>
+          </button>
 
         </div>
 

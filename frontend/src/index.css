@@ -12,12 +12,39 @@
     --charcoal-dark: #1c1917;
   }
 
+  html {
+    color-scheme: light;
+  }
+
   body {
     background-color: var(--bg-cream);
     color: var(--charcoal-dark);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
+}
+
+/* ── Reduced motion: disable decorative & infinite animations ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Editorial utilities ─────────────────────────────────── */
+.text-balance {
+  text-wrap: balance;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Custom Keyframe Animations ────────────────────────────── */
@@ -42,8 +69,8 @@
 }
 
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(160, 54, 18, 0.2); }
-  50%      { box-shadow: 0 0 0 8px rgba(160, 54, 18, 0); }
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.82; transform: scale(0.99); }
 }
 
 @keyframes shimmer {
@@ -90,6 +117,15 @@
 
 .animate-mic-ring {
   animation: micPulseRing 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.stagger {
+  animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 80ms);
+}
+
+.shadow-diffuse {
+  box-shadow: 0 20px 40px -15px rgba(28, 25, 23, 0.06);
 }
 
 .shimmer-bg {

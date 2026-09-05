@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// Embeddings service — turns text into 384-dim vectors
+// Embeddings service, turns text into 384-dim vectors
 // using the all-MiniLM-L6-v2 model (sentence-transformers)
 // running fully locally via @xenova/transformers.
 //
@@ -59,7 +59,7 @@ export async function generateEmbeddings(texts) {
  * re-normalizes. Heading-phrased queries ("what are the effects of
  * registration?") match via the context component, while body-phrased
  * queries ("can I inspect the registers, books and accounts…") still
- * match the sub-clause text itself — pure concatenation breaks the
+ * match the sub-clause text itself, pure concatenation breaks the
  * latter when a heading shares keywords with the query.
  *
  * @param {string[]} texts            Child chunk bodies

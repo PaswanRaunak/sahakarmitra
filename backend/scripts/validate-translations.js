@@ -1,13 +1,13 @@
 // ─────────────────────────────────────────────
-// Translation quality validator — BLEU + semantic alignment.
+// Translation quality validator, BLEU + semantic alignment.
 //
 // For every Golden Dataset entry, sends the Hindi and Marathi question
 // through the LIVE /api/chat endpoint (language=hi/mr), then scores the
 // system's actual response against the human-verified reference answer:
 //
-//   1. BLEU (1–4 grams, clipped precision + brevity penalty) —
+//   1. BLEU (1–4 grams, clipped precision + brevity penalty),
 //      n-gram overlap with the reference translation.
-//   2. Semantic similarity — both texts embedded with the SAME
+//   2. Semantic similarity, both texts embedded with the SAME
 //      all-MiniLM-L6-v2 model used for RAG; cosine similarity of the
 //      two embeddings verifies the core legal meaning survived
 //      translation.
@@ -217,7 +217,7 @@ async function main() {
   console.log('');
 
   if (flagged.length > 0) {
-    console.log('── Flagged cases (below threshold — send to /admin/review) ──');
+    console.log('── Flagged cases (below threshold, send to /admin/review) ──');
     for (const f of flagged) {
       console.log(`  [${f.id}] (${f.language}) ${f.flag_reasons.join('; ')}`);
     }

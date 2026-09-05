@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SahakarMitra — Translation Review (HITL)</title>
+<title>SahakarMitra, Translation Review (HITL)</title>
 <style>
   :root {
     --bg: #f4f6f8; --card: #ffffff; --ink: #1c2b33; --muted: #5c6f7a;
@@ -62,7 +62,7 @@
 </head>
 <body>
 <header>
-  <h1>SahakarMitra — Translation Review (Human-in-the-Loop)</h1>
+  <h1>SahakarMitra, Translation Review (Human-in-the-Loop)</h1>
   <p>Flagged low-scoring translations from the latest Golden Dataset run. Score each one: Accuracy (1–5), Fluency (1–5), and whether the legal meaning is preserved.</p>
 </header>
 
@@ -103,7 +103,7 @@ function renderSummary(data) {
     box.appendChild(d);
   }
   const run = el('div');
-  run.appendChild(el('span', null, 'Validation run: ' + (data.generated_at || '—')));
+  run.appendChild(el('span', null, 'Validation run: ' + (data.generated_at || '-')));
   box.appendChild(run);
 }
 
@@ -129,8 +129,9 @@ function renderCard(entry) {
   const form = document.createElement('form');
 
   const acc = el('div', 'input-group');
-  acc.appendChild(el('label', null, 'Accuracy (1–5)'));
+  acc.appendChild(el('label', null, 'Accuracy (1–5)')).htmlFor = 'rev-accuracy';
   const accSel = el('select');
+  accSel.id = 'rev-accuracy';
   for (let i = 1; i <= 5; i++) {
     const o = el('option', null, String(i));
     o.value = i;
@@ -140,8 +141,9 @@ function renderCard(entry) {
   form.appendChild(acc);
 
   const flu = el('div', 'input-group');
-  flu.appendChild(el('label', null, 'Fluency (1–5)'));
+  flu.appendChild(el('label', null, 'Fluency (1–5)')).htmlFor = 'rev-fluency';
   const fluSel = el('select');
+  fluSel.id = 'rev-fluency';
   for (let i = 1; i <= 5; i++) {
     const o = el('option', null, String(i));
     o.value = i;
@@ -151,9 +153,10 @@ function renderCard(entry) {
   form.appendChild(flu);
 
   const leg = el('div', 'input-group');
-  leg.appendChild(el('label', null, 'Legal meaning preserved'));
+  leg.appendChild(el('label', null, 'Legal meaning preserved')).htmlFor = 'rev-legal';
   const legSel = el('select');
-  for (const [v, t] of [['', '— choose —'], ['pass', 'Pass'], ['fail', 'Fail']]) {
+  legSel.id = 'rev-legal';
+  for (const [v, t] of [['', '- choose,'], ['pass', 'Pass'], ['fail', 'Fail']]) {
     const o = el('option', null, t);
     o.value = v;
     legSel.appendChild(o);
@@ -162,8 +165,9 @@ function renderCard(entry) {
   form.appendChild(leg);
 
   const reviewer = el('div', 'input-group');
-  reviewer.appendChild(el('label', null, 'Reviewer (optional)'));
+  reviewer.appendChild(el('label', null, 'Reviewer (optional)')).htmlFor = 'rev-reviewer';
   const revInput = el('input');
+  revInput.id = 'rev-reviewer';
   revInput.type = 'text';
   revInput.placeholder = 'name';
   reviewer.appendChild(revInput);
@@ -172,6 +176,7 @@ function renderCard(entry) {
   const btn = el('button', null, 'Save review');
   form.appendChild(btn);
   const status = el('span', 'saved');
+  status.setAttribute('aria-live', 'polite');
   form.appendChild(status);
 
   form.addEventListener('submit', async (ev) => {
@@ -232,7 +237,7 @@ async function load() {
     renderSummary(data);
     list.innerHTML = '';
     if (data.flagged.length === 0) {
-      list.appendChild(el('div', 'empty', 'No flagged translations — every entry is above threshold. 🎉'));
+      list.appendChild(el('div', 'empty', 'No flagged translations. Every entry is above threshold.'));
       return;
     }
     for (const entry of data.flagged) list.appendChild(renderCard(entry));

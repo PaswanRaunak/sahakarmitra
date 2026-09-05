@@ -1,9 +1,9 @@
 // ─────────────────────────────────────────────
-// Reindex — zero-downtime (blue-green) re-ingestion, Module 3.
+// Reindex, zero-downtime (blue-green) re-ingestion, Module 3.
 //
 // Triggered when Module 2's diff engine has flagged changed documents
 // into data/pending-ingestion/ (also safe to run manually after any
-// chunking change — an empty pending dir just rebuilds the corpus).
+// chunking change, an empty pending dir just rebuilds the corpus).
 //
 //   a. Prepare updates: extract text from pending documents (.txt read
 //      directly, .pdf via the same parser as chat attachments), keep only
@@ -17,7 +17,7 @@
 //      against the new collection directly; the expected section must be
 //      retrievable. Accuracy must be ≥ REINDEX_MIN_ACCURACY (default 0.9).
 //   d. PASS  → swap: active-collection.json now points at the new
-//      collection. Instant, one JSON write — running servers pick it up
+//      collection. Instant, one JSON write, running servers pick it up
 //      on their next request (services/vectorStore.js).
 //   e. FAIL  → no swap: the old collection stays live, the failed build
 //      is deleted, and any applied updates are rolled back (updates
@@ -74,7 +74,7 @@ async function extractText(filePath) {
       data: buf.toString('base64'),
       size: buf.length,
     });
-    // parseAttachment wraps failures in bracketed notices — treat those as no text
+    // parseAttachment wraps failures in bracketed notices, treat those as no text
     return /^\[.*\]$/.test(parsed.extractedText.trim()) ? '' : parsed.extractedText;
   }
   return buf.toString('utf-8');
@@ -127,7 +127,7 @@ async function prepareUpdates() {
   return { applied, skipped };
 }
 
-/** Undo prepareUpdates() — used when validation fails and we must not swap. */
+/** Undo prepareUpdates(), used when validation fails and we must not swap. */
 function rollbackUpdates(applied) {
   for (const u of applied) {
     try {
@@ -210,31 +210,31 @@ export async function runReindex() {
   console.log('');
 
   // a. Apply flagged updates (no-op when pending-ingestion/ is empty)
-  console.log('Step A — preparing flagged updates:');
+  console.log('Step A, preparing flagged updates:');
   const { applied, skipped } = await prepareUpdates();
   for (const s of skipped) console.log(`  – skipped ${s.file}: ${s.reason}`);
-  if (applied.length === 0 && skipped.length === 0) console.log('  (no pending documents — full corpus rebuild)');
+  if (applied.length === 0 && skipped.length === 0) console.log('  (no pending documents, full corpus rebuild)');
 
   // b. Build the new collection (never touches the active one)
   console.log('');
-  console.log('Step B — building new collection:');
+  console.log('Step B, building new collection:');
   const built = await ingestToCollection({ collectionName: next });
   if (built.childCount === 0) {
-    throw new Error('New collection is empty — aborting before validation.');
+    throw new Error('New collection is empty, aborting before validation.');
   }
 
   // c. Validate the new collection in isolation
   console.log('');
-  console.log('Step C — validating against golden dataset:');
+  console.log('Step C, validating against golden dataset:');
   const validation = await validateCollection(next);
   console.log(`  ${validation.pass}/${validation.total} questions retrieve their expected section (accuracy ${(validation.accuracy * 100).toFixed(1)}%)`);
   for (const f of validation.failures.slice(0, 5)) console.log(`    ✗ ${f}`);
 
-  // d/e. Swap — or roll the whole build back
+  // d/e. Swap, or roll the whole build back
   if (validation.accuracy < MIN_ACCURACY) {
     console.error('');
     console.error(`❌ Validation FAILED (accuracy ${(validation.accuracy * 100).toFixed(1)}% < ${(MIN_ACCURACY * 100).toFixed(0)}% required).`);
-    console.error(`   Active collection remains "${active}" — NO swap performed.`);
+    console.error(`   Active collection remains "${active}", NO swap performed.`);
     rollbackUpdates(applied);
     try {
       const client = new ChromaClient({ path: CHROMA_URL });
@@ -249,16 +249,16 @@ export async function runReindex() {
   }
 
   console.log('');
-  console.log('Step D — swap:');
+  console.log('Step D, swap:');
   setActiveCollectionName(next);
 
   console.log('');
-  console.log('Step F — pruning old collections (keeping new + previous):');
+  console.log('Step F, pruning old collections (keeping new + previous):');
   const pruned = await pruneOldCollections({ keep: [next, active] });
 
   console.log('');
   console.log('════════ REINDEX SUMMARY ════════');
-  console.log(`  Updates applied : ${applied.length}${applied.length ? ` — ${applied.map((u) => u.base).join(', ')}` : ''}`);
+  console.log(`  Updates applied : ${applied.length}${applied.length ? `, ${applied.map((u) => u.base).join(', ')}` : ''}`);
   console.log(`  New collection  : ${next} (${built.childCount} child chunks / ${built.parentCount} parent sections)`);
   console.log(`  Validation      : PASSED (${(validation.accuracy * 100).toFixed(1)}%)`);
   console.log(`  Swap            : active-collection.json → "${next}" (live on next request, no restart)`);

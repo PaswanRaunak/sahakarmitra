@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// Ingestion — parent-child chunking pipeline.
+// Ingestion, parent-child chunking pipeline.
 //
 // For every corpus file (data/*.txt + data/updates/*.txt):
 //   1. Split into PARENT chunks = whole legal sections.
@@ -90,7 +90,7 @@ export async function ingestToCollection({ collectionName } = {}) {
     throw new Error('No .txt corpus files found (data/ and data/updates/).');
   }
   if (allChildren.length === 0) {
-    throw new Error('No chunks produced from the corpus files — nothing to ingest.');
+    throw new Error('No chunks produced from the corpus files, nothing to ingest.');
   }
 
   // Parent lookup table for this collection (full sections, no embeddings)
@@ -107,12 +107,12 @@ export async function ingestToCollection({ collectionName } = {}) {
     await client.deleteCollection({ name: target });
     console.log(`Deleted existing collection "${target}".`);
   } catch {
-    // Collection didn't exist — that's fine.
+    // Collection didn't exist, that's fine.
   }
 
   const collection = await client.createCollection({
     name: target,
-    metadata: { description: 'Maharashtra Cooperative Societies Act — child chunks (parent-child ingestion)' },
+    metadata: { description: 'Maharashtra Cooperative Societies Act, child chunks (parent-child ingestion)' },
   });
 
   console.log(`Embedding ${allChildren.length} child chunk(s) (hybrid body+heading)...`);

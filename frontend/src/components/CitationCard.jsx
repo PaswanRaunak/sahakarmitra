@@ -14,7 +14,7 @@ export default function CitationCard({ source, index, language = 'en' }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="w-full text-left px-3.5 py-2.5 font-semibold flex items-center justify-between hover:bg-stone-100/80 transition text-stone-800"
+        className="w-full text-left px-3.5 py-2.5 font-semibold flex items-center justify-between hover:bg-stone-100/80 transition-colors text-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
         aria-expanded={open}
       >
         <span className="flex items-center gap-2">

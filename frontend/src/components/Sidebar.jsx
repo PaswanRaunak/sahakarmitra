@@ -91,6 +91,7 @@ export default function Sidebar({
       {isOpen && (
         <div
           onClick={onClose}
+          aria-hidden="true"
           className="md:hidden fixed inset-0 z-40 bg-stone-900/50 backdrop-blur-xs transition-opacity animate-fade-in"
         />
       )}
@@ -162,12 +163,12 @@ export default function Sidebar({
           {showSearch && (
             <div className="md:hidden pt-1">
               <input
-                type="text"
+                type="search"
                 value={searchFilter}
                 onChange={(e) => setSearchFilter(e.target.value)}
-                placeholder="Search conversations..."
+                placeholder="Search conversations…"
+                aria-label="Search conversations"
                 className="w-full px-3 py-1.5 text-xs bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#a03612]"
-                autoFocus
               />
             </div>
           )}
@@ -260,17 +261,27 @@ export default function Sidebar({
             const displayTitle = (chat.title && chat.title.trim().length > 0)
               ? chat.title
               : (chat.messages && chat.messages.length > 0 && chat.messages[0]?.text)
-              ? chat.messages[0].text.slice(0, 30) + '...'
+              ? chat.messages[0].text.slice(0, 30) + '…'
               : t('newQuery');
 
             return (
               <div
                 key={chat.id}
+                role="button"
+                tabIndex={0}
                 onClick={() => {
                   onSelectChat(chat.id);
                   handleNav('chat');
                 }}
-                className={`group flex items-center justify-between p-2 rounded-xl text-xs font-semibold cursor-pointer transition ${
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelectChat(chat.id);
+                    handleNav('chat');
+                  }
+                }}
+                aria-current={isActive ? 'true' : undefined}
+                className={`group flex items-center justify-between p-2 rounded-xl text-xs font-semibold cursor-pointer transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612] ${
                   isActive
                     ? 'bg-white text-[#a03612] shadow-soft border border-stone-200/80 font-bold'
                     : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900'
@@ -296,7 +307,7 @@ export default function Sidebar({
                       onDeleteChat(chat.id);
                     }}
                     aria-label={t('deleteChat')}
-                    className="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-rose-600 p-1 transition"
+                    className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-stone-400 hover:text-rose-600 p-1 transition rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -317,8 +328,11 @@ export default function Sidebar({
               
               {/* Menu Top: User Profile Tile */}
               <div
+                role="button"
+                tabIndex={0}
                 onClick={() => handleOpenSubTab('profile')}
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#faf8f5] cursor-pointer transition border border-stone-100 mb-1"
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenSubTab('profile'); } }}
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#faf8f5] cursor-pointer transition border border-stone-100 mb-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-8 h-8 rounded-full bg-[#2d6a68] text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
@@ -421,7 +435,9 @@ export default function Sidebar({
               {/* Mobile User Avatar Circle (Toggles Popup Menu) */}
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="w-10 h-10 rounded-full bg-[#2d6a68] text-white flex items-center justify-center font-bold text-xs shadow-sm border-2 border-white flex-shrink-0 transition active:scale-95 hover:brightness-110"
+                aria-label={`${userName}, open profile menu`}
+                aria-expanded={showUserMenu}
+                className="w-10 h-10 rounded-full bg-[#2d6a68] text-white flex items-center justify-center font-bold text-xs shadow-sm border-2 border-white flex-shrink-0 transition active:scale-95 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
                 title={userName}
               >
                 {userName[0]?.toUpperCase() || 'A'}
@@ -445,8 +461,12 @@ export default function Sidebar({
             {/* Desktop User Profile Card (Clicking toggles the menu) */}
             {!isCollapsed && (
               <div
+                role="button"
+                tabIndex={0}
+                aria-expanded={showUserMenu}
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className={`flex items-center gap-2.5 p-2 rounded-xl bg-white border border-stone-200/80 shadow-xs cursor-pointer hover:bg-stone-50 transition active:scale-98 ${
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowUserMenu(!showUserMenu); } }}
+                className={`flex items-center gap-2.5 p-2 rounded-xl bg-white border border-stone-200/80 shadow-xs cursor-pointer hover:bg-stone-50 transition active:scale-98 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612] ${
                   showUserMenu ? 'ring-2 ring-[#a03612]/30 border-[#a03612]' : ''
                 }`}
               >

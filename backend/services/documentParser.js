@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// Document Parser service — extracts readable text from user attachments:
+// Document Parser service, extracts readable text from user attachments:
 //   - Images / Screenshots (PNG, JPG, WEBP, etc.) via OCR (Tesseract.js)
 //   - PDF documents via PDFParse (pdfjs-dist engine)
 //   - Text / Markdown / CSV / JSON files via UTF-8 decoder

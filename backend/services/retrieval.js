@@ -1,15 +1,15 @@
 // ─────────────────────────────────────────────
-// Retrieval service — parent-child vector search over the legal
+// Retrieval service, parent-child vector search over the legal
 // knowledge base.
 //
 // Search runs against CHILD chunks (~100-token sub-clauses, precise
 // matching against the user's intent). Each matched child is then
 // resolved to its PARENT section via parent_id, deduplicated, and the
-// FULL parent text is returned — so the LLM always receives complete
+// FULL parent text is returned, so the LLM always receives complete
 // legal context and citations reference the whole section.
 //
 // Supports:
-//   1. ChromaDB (when running at CHROMA_URL) — children live in the
+//   1. ChromaDB (when running at CHROMA_URL), children live in the
 //      ACTIVE collection (services/vectorStore.js reads
 //      data/active-collection.json per request, enabling zero-downtime
 //      blue-green swaps), parents in data/parents-{collection}.json
@@ -39,7 +39,7 @@ const CHILD_EMBEDDING_RECIPE = 'hybrid-body-heading-50';
 
 const client = new ChromaClient({ path: CHROMA_URL });
 // When Chroma (or the active collection) is unreachable we back off for a
-// short TTL instead of latching failure forever — the active collection can
+// short TTL instead of latching failure forever, the active collection can
 // change under us at any moment via the blue-green swap.
 const CHROMA_RETRY_TTL_MS = 30_000;
 let chromaDownUntil = 0;
@@ -52,7 +52,7 @@ let localParentMap = null; // parent_id → parent record (local mode)
 let parentFileCache = null; // { path, mtimeMs, map }
 
 async function loadParentFileStore() {
-  // The parent store belongs to the ACTIVE collection — resolved per call
+  // The parent store belongs to the ACTIVE collection, resolved per call
   // so a blue-green swap repoints both the collection and its parents at once.
   const storePath = findParentStorePath(getActiveCollectionName());
   if (!storePath) return null;
@@ -66,7 +66,7 @@ async function loadParentFileStore() {
     parentFileCache = { path: storePath, mtimeMs, map };
     return map;
   } catch {
-    return null; // parent store unreadable — caller degrades gracefully
+    return null; // parent store unreadable, caller degrades gracefully
   }
 }
 
@@ -148,7 +148,7 @@ async function initLocalStore() {
   }
 
   // Cache is reusable only when ids, texts AND the embedding recipe all
-  // match — chunk ids stay stable across strategy changes, so without the
+  // match, chunk ids stay stable across strategy changes, so without the
   // recipe check stale vectors would be reused silently.
   const canUseCache = cachedData &&
     Array.isArray(cachedData) &&
@@ -191,7 +191,7 @@ async function initLocalStore() {
 }
 
 /**
- * Resolve the ACTIVE ChromaDB collection — on every call. The pointer is
+ * Resolve the ACTIVE ChromaDB collection, on every call. The pointer is
  * read from data/active-collection.json (mtime-cached), which is exactly
  * what makes the blue-green swap live without a server restart. A missing
  * collection or down server backs off for CHROMA_RETRY_TTL_MS, then the
@@ -205,7 +205,7 @@ async function getChromaCollection() {
     return await client.getCollection({ name });
   } catch (err) {
     chromaDownUntil = Date.now() + CHROMA_RETRY_TTL_MS;
-    console.log(`[retrieval] ChromaDB not reachable or active collection missing (${err.message}) — using built-in local vector search (retrying in ${CHROMA_RETRY_TTL_MS / 1000}s).`);
+    console.log(`[retrieval] ChromaDB not reachable or active collection missing (${err.message}), using built-in local vector search (retrying in ${CHROMA_RETRY_TTL_MS / 1000}s).`);
     return null;
   }
 }
@@ -250,8 +250,8 @@ async function resolveParents(childMatches) {
         distance: match.distance,
       });
     } else {
-      // Parent record missing — degrade to the child fragment
-      console.warn(`[retrieval] Parent "${parentId}" not found in parent store — returning child fragment.`);
+      // Parent record missing, degrade to the child fragment
+      console.warn(`[retrieval] Parent "${parentId}" not found in parent store, returning child fragment.`);
       results.push(match);
     }
   }
@@ -353,8 +353,8 @@ function parentsToDocuments(parents, actName) {
 
 /**
  * Retrieve ALL parent sections currently in the knowledge base
- * (parents are the full legal sections — what the /library endpoint
- * displays — not the small searchable child fragments).
+ * (parents are the full legal sections, what the /library endpoint
+ * displays, not the small searchable child fragments).
  * Reads the parent store written by ingest; falls back to the local
  * in-memory store when ChromaDB is not running.
  * Returns array of { id, section_title, act_name, full_text, category, source_file }.
@@ -362,7 +362,7 @@ function parentsToDocuments(parents, actName) {
 export async function getAllDocumentChunks() {
   const actName = 'Maharashtra Cooperative Societies Act, 1960';
 
-  // 1. ChromaDB mode — parents come from the ingest-written parent store
+  // 1. ChromaDB mode, parents come from the ingest-written parent store
   try {
     const col = await getChromaCollection();
     if (col) {
@@ -372,7 +372,7 @@ export async function getAllDocumentChunks() {
       }
 
       // Legacy index (no parent store): return whatever Chroma has
-      console.warn('[retrieval] Parent store missing — listing legacy chunks from ChromaDB. Re-run "npm run ingest".');
+      console.warn('[retrieval] Parent store missing, listing legacy chunks from ChromaDB. Re-run "npm run ingest".');
       const getRes = await col.get({ include: ['documents', 'metadatas'] });
       if (getRes && getRes.ids && getRes.ids.length > 0) {
         return getRes.ids.map((id, i) => {
@@ -397,7 +397,7 @@ export async function getAllDocumentChunks() {
     console.warn('[retrieval] ChromaDB get failed, falling back to local vector store:', err.message);
   }
 
-  // 2. Local mode — build parents in memory from the same chunking
+  // 2. Local mode, build parents in memory from the same chunking
   await initLocalStore();
   if (!localParentMap || localParentMap.size === 0) return [];
   return parentsToDocuments(localParentMap.values(), actName);

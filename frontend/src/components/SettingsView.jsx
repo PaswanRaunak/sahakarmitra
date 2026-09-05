@@ -331,7 +331,7 @@ export default function SettingsView({ user, onUpdateUser, language = 'en', init
                       type="text"
                       value={registrationNo}
                       onChange={(e) => setRegNo(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#a03612] transition"
+                      className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#a03612] transition" spellCheck={false} autoCapitalize="off" autoCorrect="off"
                     />
                   </div>
                 </div>
@@ -582,8 +582,10 @@ export default function SettingsView({ user, onUpdateUser, language = 'en', init
 
                 <div className="flex items-center justify-between gap-4 p-4 bg-stone-50 rounded-2xl border border-stone-200">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-amber-100 text-[#a03612] flex items-center justify-center font-bold">
-                      🔐
+                    <div className="w-9 h-9 rounded-xl bg-amber-100 text-[#a03612] flex items-center justify-center">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
                     </div>
                     <div>
                       <p className="text-xs font-bold text-stone-900">{t('enable2FA')}</p>

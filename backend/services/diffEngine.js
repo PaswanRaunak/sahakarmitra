@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// Change-detection ("diff") engine — Module 2 of the data re-ingestion
+// Change-detection ("diff") engine, Module 2 of the data re-ingestion
 // pipeline.
 //
 // On every monitoring run, each downloaded document in data/raw/ is
@@ -14,7 +14,7 @@
 // Manifest shape: { [ "<source_name>/<filename>"]: { source_name,
 // filename, source_url, md5_hash, last_checked, last_changed } }
 //
-// NOTE: this module never triggers re-ingestion — it only detects and
+// NOTE: this module never triggers re-ingestion, it only detects and
 // flags changes.
 // ─────────────────────────────────────────────
 
@@ -63,7 +63,7 @@ function timestampSlug(date = new Date()) {
 
 /**
  * Run change detection over everything currently in data/raw/.
- * Sources that failed scraping simply contribute no files — they are
+ * Sources that failed scraping simply contribute no files, they are
  * absent from the scan, never treated as deletions.
  *
  * @param {Map<string,string>} [sourceUrls] optional map source_name → page URL,
@@ -103,7 +103,7 @@ export async function detectChanges(sourceUrls = new Map()) {
         const entry = manifest[key];
 
         if (!entry) {
-          // First sighting — record the baseline, no change flag
+          // First sighting, record the baseline, no change flag
           manifest[key] = {
             source_name: sourceName.name,
             filename: file,
@@ -119,7 +119,7 @@ export async function detectChanges(sourceUrls = new Map()) {
         entry.last_checked = now;
         if (entry.md5_hash !== md5) {
           const oldHash = entry.md5_hash;
-          // Amendment / notification change — move the new version out of
+          // Amendment / notification change, move the new version out of
           // raw/ into pending-ingestion/ with a timestamp so successive
           // amendments never overwrite each other
           const pendingName = `${path.parse(file).name}__${timestampSlug()}${path.extname(file)}`;

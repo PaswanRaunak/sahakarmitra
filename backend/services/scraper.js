@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// Government source scraper — Module 2 of the data re-ingestion pipeline.
+// Government source scraper, Module 2 of the data re-ingestion pipeline.
 //
 // For every enabled source in data/sources.json:
 //   1. Fetch the configured HTML page (axios, polite User-Agent).
@@ -9,7 +9,7 @@
 // All outbound requests pass through a process-wide rate limiter
 // (max 1 request / 2 seconds) so government portals are never hammered.
 //
-// This module only downloads — change detection & flagging live in
+// This module only downloads, change detection & flagging live in
 // services/diffEngine.js, and re-ingestion is a later (blue-green) module.
 // ─────────────────────────────────────────────
 
@@ -90,7 +90,7 @@ export function extractPdfLinks(html, baseUrl) {
     try {
       absolute = new URL(trimmed, baseUrl).toString();
     } catch {
-      return; // malformed href — skip
+      return; // malformed href, skip
     }
     if (seen.has(absolute)) return;
     seen.add(absolute);
@@ -125,7 +125,7 @@ async function downloadPdf(url, destPath) {
 /**
  * Scrape one source: fetch its page(s), download every linked PDF
  * into data/raw/{source.name}/.
- * Never throws — failures are captured in the returned summary.
+ * Never throws, failures are captured in the returned summary.
  * @returns {{ source, ok, pages, pdf_links, downloaded, failed, errors: string[] }}
  */
 export async function scrapeSource(source) {
@@ -162,7 +162,7 @@ export async function scrapeSource(source) {
       } catch (err) {
         summary.failed += 1;
         summary.errors.push(`download ${link.url}: ${err.message}`);
-        console.warn(`    ✗ download failed: ${filename} — ${err.message}`);
+        console.warn(`    ✗ download failed: ${filename}, ${err.message}`);
       }
     }
 

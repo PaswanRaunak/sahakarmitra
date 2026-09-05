@@ -141,6 +141,11 @@ export default function App() {
 
   useEffect(() => () => streamAbortRef.current?.abort(), []);
 
+  // Keep <html lang> in sync so screen readers switch pronunciation with the UI
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   const handleUpdateUser = (updatedUser) => {
     setCurrentUser(updatedUser);
     if (updatedUser.preferredLang) {
@@ -270,7 +275,7 @@ export default function App() {
     if (isFirstMessage) {
       const titleCandidate = text || (hasAttachments ? (attachments[0].isImage ? 'Screenshot Inquiry' : attachments[0].name) : 'Legal Inquiry');
       setChats(prev => prev.map(c => (c.id === currentChatId
-        ? { ...c, title: titleCandidate.slice(0, 30) + (titleCandidate.length > 30 ? '...' : '') }
+        ? { ...c, title: titleCandidate.slice(0, 30) + (titleCandidate.length > 30 ? '…' : '') }
         : c)));
     }
 
@@ -409,6 +414,13 @@ export default function App() {
   return (
     <div className={`min-h-screen bg-[#faf8f5] text-[#1c1917] flex flex-col font-sans ${isDevanagari ? 'lang-dev' : ''}`}>
 
+      {/* Skip link, first focusable element on the page */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-white focus:text-[#a03612] focus:border focus:border-[#a03612] focus:px-4 focus:py-2 focus:rounded-xl focus:text-xs focus:font-bold focus:shadow-md"
+      >
+        Skip to content
+      </a>
 
       {/* VIEW 1: LANDING PAGE */}
       {currentView === 'landing' && (
@@ -422,7 +434,7 @@ export default function App() {
 
       {/* VIEW 2: AI COOPERATIVE DASHBOARD WORKSPACE */}
       {currentView === 'dashboard' && (
-        <div className="h-screen flex flex-col bg-[#faf8f5] overflow-hidden">
+        <div className="h-[100dvh] flex flex-col bg-[#faf8f5] overflow-hidden">
 
           {/* Header */}
           <DashboardHeader
@@ -463,7 +475,7 @@ export default function App() {
 
 
             {/* Main Workspace Area */}
-            <div className="flex-1 flex flex-col min-w-0 bg-[#faf8f5]">
+            <div id="main-content" className="flex-1 flex flex-col min-w-0 bg-[#faf8f5]">
 
               {activeTab === 'dashboard' ? (
                 <DashboardView

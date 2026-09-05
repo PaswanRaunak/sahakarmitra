@@ -308,11 +308,19 @@ export default function LibraryView({
           </div>
         </div>
 
-        {/* Loading Spinner */}
+        {/* Loading skeletons (match the card layout) */}
         {loading && (
-          <div className="py-16 text-center space-y-3">
-            <div className="w-8 h-8 border-3 border-[#a03612] border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-xs text-stone-500 font-medium">Loading statutory chunks...</p>
+          <div role="status" aria-label="Loading sections" className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="border border-stone-200/90 rounded-2xl bg-white overflow-hidden shadow-soft">
+                <div className="h-16 shimmer-bg" />
+                <div className="p-4 space-y-2.5">
+                  <div className="h-3 w-2/3 rounded shimmer-bg" />
+                  <div className="h-3 w-full rounded shimmer-bg" />
+                  <div className="h-3 w-4/5 rounded shimmer-bg" />
+                </div>
+              </div>
+            ))}
           </div>
         )}
 

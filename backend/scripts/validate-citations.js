@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// Citation accuracy validator — the Golden Dataset regression gate.
+// Citation accuracy validator, the Golden Dataset regression gate.
 //
 // Runs every question_en from data/golden-dataset.json through the
 // LIVE /api/chat endpoint and checks that the cited section (from the
@@ -145,7 +145,7 @@ async function main() {
       console.log('');
       console.log(`  [${f.id}] (${f.category})`);
       console.log(`    Q        : ${f.question}`);
-      console.log(`    Expected : ${f.expected_section}${f.error ? `  — API ERROR: ${f.error}` : ''}`);
+      console.log(`    Expected : ${f.expected_section}${f.error ? ` , API ERROR: ${f.error}` : ''}`);
       console.log(`    Actual   : ${f.cited_sections.length ? f.cited_sections.join(' | ') : '(no sources returned)'}`);
     }
     console.log('');

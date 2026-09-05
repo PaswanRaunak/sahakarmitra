@@ -34,7 +34,7 @@ export default function ExampleChips({ questions, onSelect }) {
           key={i}
           type="button"
           onClick={() => onSelect(q)}
-          className="flex items-center gap-3.5 bg-white hover:bg-stone-50 border border-stone-200/90 hover:border-stone-300 text-stone-800 text-xs sm:text-sm font-semibold px-4 py-4 rounded-2xl shadow-soft hover:shadow-md transition-all duration-200 text-left group transform hover:-translate-y-0.5 active:translate-y-0 animate-slide-up"
+          className="flex items-center gap-3.5 bg-white hover:bg-stone-50 border border-stone-200/90 hover:border-stone-300 text-stone-800 text-xs sm:text-sm font-semibold px-4 py-4 rounded-2xl shadow-soft hover:shadow-md transition-[transform,box-shadow,background-color,border-color] duration-200 text-left group transform hover:-translate-y-0.5 active:translate-y-0 animate-slide-up focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
           style={{ animationDelay: `${i * 0.08}s` }}
         >
           <span className="p-2 rounded-xl bg-stone-100/80 group-hover:bg-white group-hover:shadow-xs transition">

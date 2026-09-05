@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeT } from '../i18n.js';
 
 const EXPERTS_DATA = [
@@ -217,6 +217,19 @@ export default function ExpertsView({ language = 'en' }) {
     }, 2800);
   };
 
+  // Escape closes whichever expert modal is open
+  useEffect(() => {
+    if (!profileModalExpert && !bookingModalExpert) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        setProfileModalExpert(null);
+        setBookingModalExpert(null);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [profileModalExpert, bookingModalExpert]);
+
   return (
     <div className="h-full overflow-y-auto bg-[#faf8f5] p-4 sm:p-6 lg:p-8 space-y-6">
       
@@ -277,7 +290,7 @@ export default function ExpertsView({ language = 'en' }) {
             <button
               key={tag}
               onClick={() => setSelectedTag(tag)}
-              className={`px-3.5 py-1.5 rounded-xl font-medium whitespace-nowrap transition-all duration-200 ${
+              className={`px-3.5 py-1.5 rounded-xl font-medium whitespace-nowrap transition-colors duration-200 ${
                 selectedTag === tag
                   ? 'bg-[#a03612] text-white font-bold shadow-xs scale-105'
                   : 'bg-stone-100 text-stone-600 hover:bg-stone-200/80 hover:text-stone-900'
@@ -292,8 +305,10 @@ export default function ExpertsView({ language = 'en' }) {
       {/* Expert Cards Grid */}
       {filteredExperts.length === 0 ? (
         <div className="bg-white rounded-3xl p-12 text-center border border-stone-200 shadow-soft space-y-3">
-          <div className="w-12 h-12 rounded-full bg-stone-100 text-stone-400 flex items-center justify-center mx-auto text-xl font-bold">
-            🔍
+          <div className="w-12 h-12 rounded-full bg-stone-100 text-stone-400 flex items-center justify-center mx-auto">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
           <h3 className="text-base font-bold text-stone-800">No matching experts found</h3>
           <p className="text-xs text-stone-500 max-w-sm mx-auto">
@@ -307,105 +322,79 @@ export default function ExpertsView({ language = 'en' }) {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredExperts.map((expert) => (
+        <div className="divide-y divide-stone-200/70 border-t border-stone-200/70">
+          {filteredExperts.map((expert, idx) => (
             <div
               key={expert.id}
-              className="bg-white rounded-3xl border border-stone-200/90 shadow-soft hover:shadow-card transition-all duration-300 flex flex-col justify-between overflow-hidden group"
+              className="stagger py-6 grid md:grid-cols-12 gap-4 md:gap-6 items-center"
+              style={{ '--i': Math.min(idx, 8) }}
             >
-              <div className="p-6 space-y-4">
-                
-                {/* Header: Avatar, Name & Availability */}
-                <div className="flex items-start gap-4">
-                  <div className="relative flex-shrink-0">
-                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-tr ${expert.avatarBg} text-white font-black text-lg flex items-center justify-center shadow-md group-hover:scale-105 transition-transform`}>
-                      {expert.avatarInitials}
-                    </div>
-                    <span
-                      title={expert.availability}
-                      className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${
-                        expert.availabilityStatus === 'online'
-                          ? 'bg-emerald-500'
-                          : expert.availabilityStatus === 'away'
-                          ? 'bg-amber-500'
-                          : 'bg-stone-400'
-                      }`}
-                    ></span>
+              {/* Identity */}
+              <div className="md:col-span-4 flex items-center gap-4 min-w-0">
+                <div className="relative flex-shrink-0">
+                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-tr ${expert.avatarBg} text-white font-black text-lg flex items-center justify-center shadow-md`}>
+                    {expert.avatarInitials}
                   </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <h3 className="text-sm font-bold text-stone-900 truncate group-hover:text-[#a03612] transition-colors">
-                        {expert.name}
-                      </h3>
-                      <span className="text-amber-500 font-bold text-xs" title={t('verifiedExpert')}>✓</span>
-                    </div>
-
-                    <p className="text-[11px] text-stone-500 font-medium line-clamp-2 mt-0.5">
-                      {expert.designation}
-                    </p>
-
-                    <div className="flex items-center gap-2 mt-2 text-[11px] text-stone-600">
-                      <span className="flex items-center gap-1 font-bold text-stone-900 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200/60">
-                        <span className="text-amber-500">★</span>
-                        <span>{expert.rating}</span>
-                        <span className="text-stone-400 font-normal">({expert.reviewsCount})</span>
-                      </span>
-                      <span className="text-stone-400">•</span>
-                      <span className="font-semibold text-stone-700">{expert.experience} {t('yearsExp')}</span>
-                    </div>
-                  </div>
+                  <span
+                    title={expert.availability}
+                    aria-label={expert.availability}
+                    className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${
+                      expert.availabilityStatus === 'online'
+                        ? 'bg-emerald-500'
+                        : expert.availabilityStatus === 'away'
+                        ? 'bg-amber-500'
+                        : 'bg-stone-400'
+                    }`}
+                  ></span>
                 </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="text-sm font-bold text-stone-900 truncate">{expert.name}</h3>
+                    <span className="text-[#2d6a68] font-bold text-xs" title={t('verifiedExpert')} aria-label={t('verifiedExpert')}>✓</span>
+                  </div>
+                  <p className="text-[11px] text-stone-500 font-medium truncate">{expert.designation}</p>
+                  <p className="text-[11px] text-stone-600 mt-1 tabular-nums">
+                    <span className="text-amber-500 font-bold">★ {expert.rating}</span>
+                    <span className="text-stone-400"> ({expert.reviewsCount})</span>
+                    <span className="text-stone-400 mx-1.5">·</span>
+                    <span className="font-semibold text-stone-700">{expert.experience} {t('yearsExp')}</span>
+                  </p>
+                </div>
+              </div>
 
-                {/* Short Bio */}
-                <p className="text-xs text-stone-600 line-clamp-3 leading-relaxed">
-                  "{expert.bio}"
+              {/* Expertise */}
+              <div className="md:col-span-4 min-w-0">
+                <div className="flex flex-wrap gap-1.5">
+                  {expert.expertise.slice(0, 3).map((exp, eidx) => (
+                    <span key={eidx} className="px-2.5 py-1 bg-stone-100 text-stone-700 rounded-lg text-[10px] font-semibold">
+                      {exp}
+                    </span>
+                  ))}
+                </div>
+                <p className="text-[11px] text-stone-500 mt-2 truncate">
+                  <span className="font-medium text-stone-400">{t('languagesSpoken')}: </span>
+                  <span className="font-semibold text-stone-700">{expert.languages.join(', ')}</span>
                 </p>
-
-                {/* Expertise Badges */}
-                <div className="space-y-1.5">
-                  <p className="text-[10px] uppercase tracking-wider font-bold text-stone-400">Key Expertise</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {expert.expertise.map((exp, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2.5 py-1 bg-stone-100 text-stone-700 rounded-lg text-[10px] font-semibold"
-                      >
-                        {exp}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Spoken Languages & Modes */}
-                <div className="pt-2 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-500">
-                  <div>
-                    <span className="font-medium text-stone-400">{t('languagesSpoken')}: </span>
-                    <span className="font-semibold text-stone-800">{expert.languages.join(', ')}</span>
-                  </div>
-                  <div className="font-bold text-[#a03612]">
-                    {expert.fee}
-                  </div>
-                </div>
-
               </div>
 
-              {/* Action Buttons Footer */}
-              <div className="p-4 bg-stone-50/80 border-t border-stone-200/70 flex items-center gap-2.5">
-                <button
-                  onClick={() => setProfileModalExpert(expert)}
-                  className="flex-1 py-2 px-3 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 rounded-xl text-xs font-bold transition shadow-xs"
-                >
-                  {t('viewProfile')}
-                </button>
-                <button
-                  onClick={() => handleOpenBooking(expert)}
-                  className="flex-1 py-2 px-3 bg-[#a03612] hover:bg-[#882c0e] text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center justify-center gap-1 active:scale-95"
-                >
-                  <span>{t('bookConsultation')}</span>
-                </button>
+              {/* Rate + actions */}
+              <div className="md:col-span-4 flex md:flex-col md:items-end gap-3 md:gap-2">
+                <p className="text-sm font-extrabold text-[#a03612] tabular-nums md:order-1">{expert.fee}</p>
+                <div className="flex items-center gap-2 md:order-2">
+                  <button
+                    onClick={() => setProfileModalExpert(expert)}
+                    className="flex-1 py-2 px-3 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 rounded-xl text-xs font-bold transition-colors shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
+                  >
+                    {t('viewProfile')}
+                  </button>
+                  <button
+                    onClick={() => handleOpenBooking(expert)}
+                    className="flex-1 py-2 px-3 bg-[#a03612] hover:bg-[#882c0e] text-white rounded-xl text-xs font-bold transition-colors shadow-xs active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612] focus-visible:ring-offset-2"
+                  >
+                    {t('bookConsultation')}
+                  </button>
+                </div>
               </div>
-
             </div>
           ))}
         </div>
@@ -413,7 +402,12 @@ export default function ExpertsView({ language = 'en' }) {
 
       {/* EXPERT PROFILE MODAL */}
       {profileModalExpert && (
-        <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Profile: ${profileModalExpert.name}`}
+          onClick={(e) => { if (e.target === e.currentTarget) setProfileModalExpert(null); }}
+          className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in overscroll-contain">
           <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-stone-200 shadow-2xl p-6 sm:p-8 space-y-6 animate-scale-in">
             
             {/* Modal Header */}
@@ -503,7 +497,12 @@ export default function ExpertsView({ language = 'en' }) {
 
       {/* BOOK CONSULTATION MODAL */}
       {bookingModalExpert && (
-        <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Book consultation: ${bookingModalExpert.name}`}
+          onClick={(e) => { if (e.target === e.currentTarget) setBookingModalExpert(null); }}
+          className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in overscroll-contain">
           <div className="bg-white rounded-3xl max-w-lg w-full border border-stone-200 shadow-2xl p-6 sm:p-8 space-y-5 animate-scale-in relative">
             
             <button

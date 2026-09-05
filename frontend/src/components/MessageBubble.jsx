@@ -305,7 +305,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard unavailable (e.g. insecure context) — ignore
+      // Clipboard unavailable (e.g. insecure context), ignore
     }
   };
 
@@ -345,7 +345,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
   const handleFeedback = (value) => {
     setFeedback(value);
     try {
-      // Persist feedback server-side (best-effort — UI never blocks on it)
+      // Persist feedback server-side (best-effort, UI never blocks on it)
       fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -367,7 +367,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
     <>
       <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} animate-fade-in`}>
         <div
-          className={`max-w-[92%] sm:max-w-[85%] rounded-2xl px-5 py-4 shadow-soft transition-all duration-200 ${
+          className={`max-w-[92%] sm:max-w-[85%] rounded-2xl px-5 py-4 shadow-soft ${
             isUser
               ? 'bg-[#a03612] text-white rounded-tr-none shadow-md'
               : isError
@@ -390,26 +390,28 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
                   const isImg = att.isImage || (att.type && att.type.startsWith('image/')) || (att.data && att.data.startsWith('data:image/'));
                   if (isImg) {
                     return (
-                      <div
+                      <button
                         key={idx}
+                        type="button"
                         onClick={() => setPreviewImage(att)}
-                        className="group relative cursor-pointer overflow-hidden rounded-xl border border-white/20 shadow-md bg-black/20 hover:border-amber-300/80 transition"
+                        aria-label={`${t('previewImage') || 'Preview'}: ${att.name || 'Screenshot'}`}
+                        className="group relative cursor-pointer overflow-hidden rounded-xl border border-white/20 shadow-md bg-black/20 hover:border-amber-300/80 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
                       >
                         <img
                           src={att.data}
                           alt={att.name || 'Screenshot'}
                           className="h-28 w-40 object-cover group-hover:scale-105 transition duration-200"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-2 opacity-90 group-hover:opacity-100">
+                        <span className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-2 opacity-90 group-hover:opacity-100">
                           <span className="text-[10px] font-medium text-white truncate max-w-[130px] flex items-center gap-1">
-                            <svg className="w-3 h-3 text-amber-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-3 h-3 text-amber-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
                             {att.name || 'Screenshot'}
                           </span>
-                        </div>
-                      </div>
+                        </span>
+                      </button>
                     );
                   }
 
@@ -439,9 +441,9 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
 
           {/* Streaming indicator */}
           {message.streaming && (
-            <div className="flex items-center gap-1.5 mt-2 text-xs font-semibold text-[#a03612] animate-pulse">
+            <div role="status" className="flex items-center gap-1.5 mt-2 text-xs font-semibold text-[#a03612] animate-pulse">
               <div className="w-2 h-2 rounded-full bg-[#a03612] animate-ping" />
-              <span>Generating legal answer...</span>
+              <span>{t('chatLoading')}</span>
             </div>
           )}
 
@@ -487,7 +489,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
                 <button
                   type="button"
                   onClick={handleToggleSpeech}
-                  className={`p-1.5 rounded-lg transition-all flex items-center gap-1 ${
+                  className={`p-1.5 rounded-lg transition-colors flex items-center gap-1 ${
                     isPlayingSpeech
                       ? 'text-[#a03612] bg-amber-50 font-bold animate-pulse'
                       : 'text-stone-400 hover:text-stone-800 hover:bg-stone-100'
@@ -509,7 +511,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
                 <button
                   type="button"
                   onClick={handleCopy}
-                  className={`p-1.5 rounded-lg transition-all flex items-center gap-1 ${
+                  className={`p-1.5 rounded-lg transition-colors flex items-center gap-1 ${
                     copied
                       ? 'text-emerald-600 bg-emerald-50 font-bold'
                       : 'text-stone-400 hover:text-stone-800 hover:bg-stone-100'
@@ -528,7 +530,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
                   <button
                     type="button"
                     onClick={() => onRegenerate(message)}
-                    className="p-1.5 text-stone-400 hover:text-stone-800 hover:bg-stone-100 rounded-lg transition-all"
+                    className="p-1.5 text-stone-400 hover:text-stone-800 hover:bg-stone-100 rounded-lg transition-colors"
                     title={t('regenerate')}
                     aria-label={t('regenerate')}
                   >
@@ -545,7 +547,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
                 <button
                   type="button"
                   onClick={() => handleFeedback('up')}
-                  className={`p-1.5 rounded-lg transition-all ${
+                  className={`p-1.5 rounded-lg transition-colors ${
                     feedback === 'up'
                       ? 'text-emerald-600 bg-emerald-50 font-bold'
                       : 'text-stone-400 hover:text-stone-800 hover:bg-stone-100'
@@ -560,7 +562,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
                 <button
                   type="button"
                   onClick={() => handleFeedback('down')}
-                  className={`p-1.5 rounded-lg transition-all ${
+                  className={`p-1.5 rounded-lg transition-colors ${
                     feedback === 'down'
                       ? 'text-rose-600 bg-rose-50 font-bold'
                       : 'text-stone-400 hover:text-stone-800 hover:bg-stone-100'

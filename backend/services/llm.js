@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// LLM service — resilient multi-provider AI engine (OpenRouter + Groq)
+// LLM service, resilient multi-provider AI engine (OpenRouter + Groq)
 // Supports instant token streaming, document/screenshot analysis,
 // automatic provider fallback, and 100% grounded legal citations.
 // ─────────────────────────────────────────────
@@ -23,7 +23,7 @@ function buildSystemPrompt(retrievedChunks, language, attachmentContext = '') {
     .map((chunk, i) => {
       const source  = chunk.metadata?.source_file   || 'unknown';
       const section = chunk.metadata?.section_title || 'unknown';
-      return `[Statutory Source ${i + 1} — file: ${source}, section: ${section}]\n${chunk.text}`;
+      return `[Statutory Source ${i + 1}, file: ${source}, section: ${section}]\n${chunk.text}`;
     })
     .join('\n\n---\n\n');
 
@@ -35,7 +35,7 @@ Answer the user's inquiry directly using the provided statutory legal provisions
     prompt += `\n\n── USER ATTACHED DOCUMENT / SCREENSHOT EXTRACTED CONTENT ──\n${attachmentContext}\n\n── INSTRUCTIONS FOR ATTACHED DOCUMENTS/SCREENSHOTS ──\n1. Analyze the user's document/screenshot against the statutory legal provisions provided below.\n2. Address whether the notice, meeting, election, audit, dispute, or bylaw in the attachment aligns with the legal requirements.\n3. Directly reference key facts from the attachment (e.g. notice period, agenda, voting threshold, authority) and explain their legal validity.\n4. Provide concrete, actionable legal recommendations.`;
   }
 
-  prompt += `\n\nIf the retrieved text does not contain enough information to answer, state clearly what is known from the knowledge base and what requires legal counsel — do NOT invent section numbers or facts.
+  prompt += `\n\nIf the retrieved text does not contain enough information to answer, state clearly what is known from the knowledge base and what requires legal counsel, do NOT invent section numbers or facts.
 
 Keep answers structured, clear, and actionable with exact section citations. Use clean Markdown headers (###), bullet points (- item), and bold text (**text**). Do NOT output raw HTML tags like <br> or pseudo-pipe syntax (| text |). Do NOT output internal scratchpads, thinking steps, or preambles like "Here's a thinking process:". Begin directly with your legal assessment. Respond in ${langName}.
 
@@ -153,7 +153,7 @@ export function isLlmConfigured() {
 /**
  * Translate a non-English query to English so it can be embedded
  * against the (English-only) law knowledge base. Falls back to the
- * original text on any failure — retrieval quality degrades, but
+ * original text on any failure, retrieval quality degrades, but
  * the request never breaks.
  */
 export async function translateToEnglish(text) {
@@ -170,7 +170,7 @@ export async function translateToEnglish(text) {
         messages: [
           {
             role: 'system',
-            content: 'You translate user questions to English. Reply with ONLY the English translation of the question — no explanations, no quotes, no extra text.',
+            content: 'You translate user questions to English. Reply with ONLY the English translation of the question, no explanations, no quotes, no extra text.',
           },
           { role: 'user', content: text },
         ],

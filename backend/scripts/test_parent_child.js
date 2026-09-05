@@ -13,7 +13,7 @@
 //   node scripts/test_parent_child.js
 //
 // Uses the local in-memory vector store when ChromaDB is not running,
-// and the ChromaDB index when it is — same assertions either way.
+// and the ChromaDB index when it is, same assertions either way.
 // ─────────────────────────────────────────────
 
 import fs from 'fs';
@@ -32,7 +32,7 @@ let failures = 0;
 function check(name, condition, detail = '') {
   const status = condition ? 'PASS' : 'FAIL';
   if (!condition) failures++;
-  console.log(`  [${status}] ${name}${detail ? ` — ${detail}` : ''}`);
+  console.log(`  [${status}] ${name}${detail ? `, ${detail}` : ''}`);
 }
 
 // ── 1. Chunking structure ────────────────────────────────────────
@@ -67,12 +67,12 @@ check('Child chunks are dense (~100 tokens, well under the old 250-word chunks)'
   sec24Children.map(c => `~${estimateTokens(c.text)}t`).join(', '));
 
 // ── 2. Retrieval: sub-clause queries must return the FULL parent ──
-console.log('\n── 2. Retrieval — sub-clause queries resolve to full parent sections ──');
+console.log('\n── 2. Retrieval, sub-clause queries resolve to full parent sections ──');
 
 const queries = [
   {
     q: 'Can I inspect the registers, books and accounts of my society?',
-    hitChild: 'sub-clause (b) — inspection of registers',
+    hitChild: 'sub-clause (b), inspection of registers',
     // Both are legally correct: Section 24 (paper inspection) normally wins,
     // but when the digital-access amendment is in the corpus (blue-green
     // reindex applied data/updates/), Section 24A is the more on-point match.
@@ -85,7 +85,7 @@ const queries = [
     q: 'Am I entitled to a dividend or bonus on my share capital?',
     expectSection: 'Section 24',
     expectInText: ['(a)', '(b)', '(c)', '(d)'],
-    hitChild: 'sub-clause (d) — dividend on share capital',
+    hitChild: 'sub-clause (d), dividend on share capital',
   },
   {
     q: 'How much notice do I have to give to withdraw my membership?',
@@ -109,7 +109,7 @@ const queries = [
     q: 'What are the effects of registration of a society?',
     expectSection: 'Section 10',
     expectInText: ['body corporate', 'perpetual succession'],
-    hitChild: 'heading-phrased query — regression guard: body-only embeddings ranked Section 10 outside the top-3',
+    hitChild: 'heading-phrased query, regression guard: body-only embeddings ranked Section 10 outside the top-3',
   },
 ];
 
@@ -133,7 +133,7 @@ for (const query of queries) {
 
   check(`Top result cites an accepted section (${accept.map((a) => a.expectSection).join(' or ')}) with the FULL parent text`,
     !!matched,
-    `got "${top.metadata?.section_title}" — text ${top.text.length} chars, starts "${top.text.slice(0, 70).replace(/\n/g, ' ')}..."`);
+    `got "${top.metadata?.section_title}", text ${top.text.length} chars, starts "${top.text.slice(0, 70).replace(/\n/g, ' ')}..."`);
 
   check('Result metadata records it as a resolved parent',
     top.metadata?.chunk_type === 'parent',
@@ -158,7 +158,7 @@ check('Knowledge base lists whole sections (not ~100-token fragments)',
 
 console.log('\n──────────────────────────────────');
 if (failures === 0) {
-  console.log('✅ ALL CHECKS PASSED — sub-clause queries return full parent sections with accurate citations.');
+  console.log('✅ ALL CHECKS PASSED, sub-clause queries return full parent sections with accurate citations.');
 } else {
   console.log(`❌ ${failures} check(s) FAILED.`);
   process.exit(1);

@@ -1,22 +1,22 @@
 // ─────────────────────────────────────────────
-// Scheduled legal-document update check — orchestrates the monitoring
+// Scheduled legal-document update check, orchestrates the monitoring
 // pipeline (Module 2):
 //
-//   1. scrapeAllSources()  — download latest PDFs from data/sources.json
-//   2. detectChanges()     — MD5-diff against data/manifest.json, flag
+//   1. scrapeAllSources() , download latest PDFs from data/sources.json
+//   2. detectChanges()    , MD5-diff against data/manifest.json, flag
 //                            changed documents into data/pending-ingestion/
-//   3. log results         — console summary + append to
+//   3. log results        , console summary + append to
 //                            data/update-check-log.jsonl
 //
 // Three ways to run:
 //   • Standalone / cron CLI :  npm run check:updates
 //   • In-process scheduler  :  start with server.js (ENABLE_CRON=true,
 //                              schedule via CRON_SCHEDULE, default 3 AM daily)
-//   • Serverless / Lambda   :  import { runUpdateCheck } and call it —
+//   • Serverless / Lambda   :  import { runUpdateCheck } and call it,
 //                              no timers, one shot, returns the summary
 //
 // Error policy: a failing source is logged and skipped, never fatal.
-// NOTE: this module does NOT trigger re-ingestion — flagged documents
+// NOTE: this module does NOT trigger re-ingestion, flagged documents
 // sit in data/pending-ingestion/ for the blue-green module.
 // ─────────────────────────────────────────────
 
@@ -38,7 +38,7 @@ const LOG_FILE = path.join(__dirname, '..', 'data', 'update-check-log.jsonl');
 export async function runUpdateCheck() {
   const startedAt = new Date().toISOString();
   const t0 = Date.now();
-  console.log(`── SahakarMitra legal-document update check — ${startedAt} ──`);
+  console.log(`── SahakarMitra legal-document update check, ${startedAt} ──`);
 
   // 1. Scrape (per-source failures are captured in each summary)
   const scrapeSummaries = await scrapeAllSources();
@@ -72,8 +72,8 @@ export async function runUpdateCheck() {
   console.log('');
   console.log('════════ UPDATE CHECK SUMMARY ════════');
   console.log(`  Documents scanned : ${diff.scanned}`);
-  console.log(`  New (baseline)    : ${diff.new_docs.length}${diff.new_docs.length ? ` — ${diff.new_docs.join(', ')}` : ''}`);
-  console.log(`  CHANGED (flagged) : ${diff.changed.length}${diff.changed.length ? ` — ${diff.changed.join(', ')}` : ''}`);
+  console.log(`  New (baseline)    : ${diff.new_docs.length}${diff.new_docs.length ? `, ${diff.new_docs.join(', ')}` : ''}`);
+  console.log(`  CHANGED (flagged) : ${diff.changed.length}${diff.changed.length ? `, ${diff.changed.join(', ')}` : ''}`);
   console.log(`  Unchanged         : ${diff.unchanged}`);
   console.log(`  Sources skipped   : ${unreachable.map((s) => s.source).join(', ') || 'none'}`);
   if (diff.errors.length || scrapeSummaries.some((s) => s.errors.length)) {
@@ -81,7 +81,7 @@ export async function runUpdateCheck() {
     for (const s of scrapeSummaries) for (const e of s.errors) console.log(`    [${s.source}] ${e}`);
     for (const e of diff.errors) console.log(`    [diff] ${e}`);
   }
-  console.log('  (Changed documents moved to data/pending-ingestion/ — re-ingestion NOT triggered.)');
+  console.log('  (Changed documents moved to data/pending-ingestion/, re-ingestion NOT triggered.)');
 
   try {
     fs.appendFileSync(LOG_FILE, JSON.stringify(summary) + '\n', 'utf-8');

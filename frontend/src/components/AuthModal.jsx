@@ -19,7 +19,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Escape closes the modal — baseline modal keyboard behaviour.
+  // Escape closes the modal, baseline modal keyboard behaviour.
   useEffect(() => {
     const handleKey = (e) => {
       if (e.key === 'Escape') onClose();
@@ -240,11 +240,13 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
             </div>
 
             {/* Tab Pills */}
-            <div className="grid grid-cols-2 gap-2 bg-stone-200/60 p-1.5 rounded-2xl text-xs font-bold">
+            <div role="tablist" aria-label="Authentication mode" className="grid grid-cols-2 gap-2 bg-stone-200/60 p-1.5 rounded-2xl text-xs font-bold">
               <button
                 type="button"
+                role="tab"
+                aria-selected={mode === 'login'}
                 onClick={() => { setMode('login'); setError(''); }}
-                className={`py-2 rounded-xl transition ${
+                className={`py-2 rounded-xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612] ${
                   mode === 'login'
                     ? 'bg-white text-[#a03612] shadow-xs'
                     : 'text-stone-600 hover:text-stone-900'
@@ -255,8 +257,10 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
 
               <button
                 type="button"
+                role="tab"
+                aria-selected={mode === 'register'}
                 onClick={() => { setMode('register'); setError(''); }}
-                className={`py-2 rounded-xl transition ${
+                className={`py-2 rounded-xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612] ${
                   mode === 'register'
                     ? 'bg-white text-[#a03612] shadow-xs'
                     : 'text-stone-600 hover:text-stone-900'
@@ -266,15 +270,15 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
               </button>
             </div>
 
-            {/* Demo-mode honesty note — the mock auth accepts anything, so say so. */}
+            {/* Demo-mode honesty note, the mock auth accepts anything, so say so. */}
             <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 font-semibold">
-              ℹ️ {t('demoModeNote')}
+              {t('demoModeNote')}
             </p>
           </div>
 
           {/* Error Alert Toast */}
           {error && (
-            <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl text-xs font-bold flex items-center gap-2 animate-scale-in">
+            <div role="alert" className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl text-xs font-bold flex items-center gap-2 animate-scale-in">
               <svg className="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -295,6 +299,9 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                   <input
                     id="auth-email"
                     type="text"
+                    inputMode="email"
+                    autoComplete="username"
+                    spellCheck={false}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="e.g. ramesh.patil@society.org"
@@ -322,9 +329,10 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                   <input
                     id="auth-password"
                     type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder={t('passwordHint')}
                     className="w-full pl-10 pr-10 py-2.5 bg-white border border-stone-200/90 rounded-xl text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#a03612] shadow-xs"
                     required
                   />
@@ -354,7 +362,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                 )}
               </button>
 
-              {/* Guest path — removes the login wall for first-time users / judges */}
+              {/* Guest path, removes the login wall for first-time users / judges */}
               {onGuest && (
                 <button
                   type="button"
@@ -376,14 +384,14 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                     onClick={() => handleDemoLogin('anya.foger@society.org', 'Anya Foger', 'Shivaji Housing Society')}
                     className="p-2 bg-stone-100 hover:bg-amber-50 border border-stone-200 hover:border-amber-200 rounded-xl text-[11px] text-stone-800 font-bold transition text-left truncate"
                   >
-                    👤 Anya Foger
+                    Anya Foger
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDemoLogin('ramesh.patil@society.org', 'Ramesh Patil', 'Sahakar Housing Society')}
                     className="p-2 bg-stone-100 hover:bg-amber-50 border border-stone-200 hover:border-amber-200 rounded-xl text-[11px] text-stone-800 font-bold transition text-left truncate"
                   >
-                    🏛️ Ramesh Patil
+                    Ramesh Patil
                   </button>
                 </div>
               </div>
@@ -401,6 +409,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                   <input
                     id="reg-name"
                     type="text"
+                    autoComplete="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Priya Sharma"
@@ -413,7 +422,9 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                   <label htmlFor="reg-mobile" className="text-xs font-bold text-stone-700">{t('mobileLabel')}</label>
                   <input
                     id="reg-mobile"
-                    type="text"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
                     placeholder="+91 9876543210"
@@ -427,6 +438,8 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                 <input
                   id="reg-email"
                   type="email"
+                  autoComplete="email"
+                  spellCheck={false}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="e.g. priya.sharma@society.org"
@@ -453,6 +466,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                 <input
                   id="reg-password"
                   type="password"
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={t('passwordHint')}
@@ -504,6 +518,8 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                     <input
                       id="forgot-email"
                       type="email"
+                      autoComplete="email"
+                      spellCheck={false}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="e.g. ramesh.patil@society.org"

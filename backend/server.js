@@ -58,7 +58,7 @@ app.use(cors());                                  // allow the Vite dev server (
 app.use(express.json({ limit: '25mb' }));         // parse JSON bodies (chat messages & attachments)
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
-// Health-check endpoint — reports real readiness, not just liveness:
+// Health-check endpoint, reports real readiness, not just liveness:
 //   llm: whether at least one AI provider key is configured
 //   knowledgeBase: how many law text files are available for retrieval
 app.get('/api/health', (req, res) => {
@@ -151,7 +151,7 @@ app.delete('/api/bookmarks/:id', (req, res) => {
   res.json(bookmarks);
 });
 
-// ── Feedback endpoint — persists thumbs up/down for later analysis ──
+// ── Feedback endpoint, persists thumbs up/down for later analysis ──
 const feedbackPath = path.join(__dirname, 'data', 'feedback.jsonl');
 
 app.post('/api/feedback', rateLimit, (req, res) => {

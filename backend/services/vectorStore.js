@@ -1,15 +1,15 @@
 // ─────────────────────────────────────────────
-// Vector store registry — the blue-green "swap" primitive.
+// Vector store registry, the blue-green "swap" primitive.
 //
 // The ACTIVE ChromaDB collection is whatever data/active-collection.json
 // says: { "active": "legal_docs_v1" }. Retrieval resolves the collection
 // through getActiveCollectionName() on EVERY request (mtime-cached file
-// read, never latched at server startup), so rewriting this one file —
-// e.g. by scripts/reindex.js after a validated build — instantly
+// read, never latched at server startup), so rewriting this one file,
+// e.g. by scripts/reindex.js after a validated build, instantly
 // redirects all traffic to the new collection with zero downtime.
 //
 // The parent store (full legal sections) is derived from the SAME
-// pointer — data/parents-{collection}.json — so the collection and its
+// pointer, data/parents-{collection}.json, so the collection and its
 // parent store always swap together as one atomic unit.
 // ─────────────────────────────────────────────
 
@@ -28,7 +28,7 @@ let activeCache = { mtimeMs: -1, value: null };
 
 /**
  * Name of the currently live collection. Falls back to DEFAULT_COLLECTION
- * (with a one-time warning) when the pointer file is missing/unreadable —
+ * (with a one-time warning) when the pointer file is missing/unreadable,
  * a fresh clone with a plain "npm run ingest" keeps working.
  * @returns {string}
  */
@@ -45,7 +45,7 @@ export function getActiveCollectionName() {
     return activeCache.value;
   } catch {
     if (activeCache.value === null) {
-      console.warn(`[vectorStore] No valid active-collection pointer (${path.basename(ACTIVE_COLLECTION_FILE)}) — using legacy default "${DEFAULT_COLLECTION}".`);
+      console.warn(`[vectorStore] No valid active-collection pointer (${path.basename(ACTIVE_COLLECTION_FILE)}), using legacy default "${DEFAULT_COLLECTION}".`);
     }
     return DEFAULT_COLLECTION;
   }

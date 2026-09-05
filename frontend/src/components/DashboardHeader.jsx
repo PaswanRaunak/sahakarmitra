@@ -48,7 +48,7 @@ export default function DashboardHeader({
     : backendStatus === 'degraded'
     ? t('backendDegraded')
     : t('backendChecking');
-  const statusTitle = `${statusText} — /api/health`;
+  const statusTitle = `${statusText}, /api/health`;
 
   return (
     <header className="bg-[#faf8f5]/95 backdrop-blur-md border-b border-stone-200/80 px-4 sm:px-6 py-3 flex-shrink-0 z-30 shadow-xs">
@@ -97,7 +97,7 @@ export default function DashboardHeader({
         {/* Right Side: Backend Status + Language Switcher + User Profile */}
         <div className="flex items-center gap-3">
 
-          {/* Backend health indicator — surfaces a dead Chroma/Groq backend BEFORE the user types */}
+          {/* Backend health indicator, surfaces a dead Chroma/Groq backend BEFORE the user types */}
           <div
             className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-white border border-stone-200/90 rounded-full text-xs font-semibold text-stone-600 shadow-xs"
             title={statusTitle}

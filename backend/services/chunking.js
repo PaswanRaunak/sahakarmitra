@@ -40,7 +40,7 @@ export function splitIntoSections(text) {
     } else if (current) {
       current.text += line + '\n';
     } else {
-      // Preamble — starts with the document title line
+      // Preamble, starts with the document title line
       current = { title: '', text: line + '\n' };
     }
   }
@@ -88,8 +88,8 @@ export function splitSentences(text) {
  *              children: Array<{child_id, parent_id, text}> }}
  *
  * child.text is the section BODY only (no heading). The heading is still
- * baked into the embedding — generateChildEmbeddings() blends a
- * title-prefixed embedding with the body embedding — so queries phrased
+ * baked into the embedding, generateChildEmbeddings() blends a
+ * title-prefixed embedding with the body embedding, so queries phrased
  * after the heading ("what are the effects of registration?") match
  * Section 10 without heading keywords crowding out body-phrased queries
  * ("can I inspect the registers, books and accounts…").
