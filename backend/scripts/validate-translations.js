@@ -1,21 +1,29 @@
 // ─────────────────────────────────────────────
-// Translation quality validator, BLEU + semantic alignment.
+// Translation quality validator — STYLE-MATCHED BLEU + semantic alignment.
 //
-// For every Golden Dataset entry, sends the Hindi and Marathi question
-// through the LIVE /api/chat endpoint (language=hi/mr), then scores the
-// system's actual response against the human-verified reference answer:
+// For every Golden Dataset entry, each language STYLE is tested through
+// the LIVE /api/chat endpoint:
 //
-//   1. BLEU (1–4 grams, clipped precision + brevity penalty),
-//      n-gram overlap with the reference translation.
-//   2. Semantic similarity, both texts embedded with the SAME
-//      all-MiniLM-L6-v2 model used for RAG; cosine similarity of the
-//      two embeddings verifies the core legal meaning survived
-//      translation.
+//   en          → question_en            (lang: en)
+//   hi_pure     → question_hi_pure       (lang: hi)
+//   hinglish    → question_hinglish      (lang: hi)
+//   mr_pure     → question_mr_pure       (lang: mr)
+//   mr_english  → question_mr_english    (lang: mr)
 //
-// Entries scoring below BLEU 0.78 or cosine 0.85 are flagged for
-// manual review in the HITL interface (/admin/review).
+// The server DETECTS the input style and mirrors it in the response, so
+// each system answer is scored against the reference answer of the SAME
+// style — comparing a Hinglish response to a pure-Hindi reference would
+// always score low even when the answer is correct.
 //
-// Re-run any time the RAG pipeline, translation layer, or ingestion
+// Scoring:
+//   1. BLEU (1-4 grams, clipped precision + brevity penalty)
+//   2. Semantic similarity — both texts embedded with the SAME
+//      all-MiniLM-L6-v2 model used for RAG; cosine similarity.
+//
+// Entries below BLEU 0.78 or cosine 0.85 are flagged for manual review
+// in the HITL interface (/admin/review).
+//
+// Re-run any time the RAG pipeline, language-style logic, or ingestion
 // changes:
 //   npm run validate:translations
 //
@@ -41,7 +49,11 @@ const REQUEST_TIMEOUT_MS = 180_000;
 
 const BLEU_THRESHOLD = 0.78;   // from the validation matrix spec
 const COSINE_THRESHOLD = 0.85; // semantic meaning-preservation floor
-const LANGS = ['hi', 'mr'];
+
+// The test matrix is DATA-DRIVEN: every entry lists its supported styles
+// under `variants` ({ "<lang>[_form]": { question, reference_answer } }).
+// Adding a language to validation = adding a variant key to the dataset.
+// The language code for the API call is the prefix before the first "_".
 
 // ── BLEU ────────────────────────────────────────────────────────
 // Standard sentence-level BLEU-4: clipped n-gram precisions (1..4),
@@ -51,7 +63,7 @@ const LANGS = ['hi', 'mr'];
 function tokenize(text) {
   return String(text || '')
     .toLowerCase()
-    // \p{L}/\p{N} keep Devanagari and Latin letters alike, drop markdown & punctuation
+    // \p{L}/\p{N} keep Devanagari, Latin and digits alike; drop markdown & punctuation
     .replace(/[^\p{L}\p{N}\s]/gu, ' ')
     .split(/\s+/)
     .filter(Boolean);
@@ -133,13 +145,12 @@ async function mapWithConcurrency(items, limit, fn) {
 // ── Main ────────────────────────────────────────────────────────
 
 async function main() {
-  console.log('── SahakarMitra translation validation (Golden Dataset) ──');
+  console.log('── SahakarMitra translation validation (style-matched) ──');
   console.log(`Server: ${SERVER_URL}`);
   console.log(`Thresholds: BLEU ≥ ${BLEU_THRESHOLD}, cosine ≥ ${COSINE_THRESHOLD}`);
   console.log('');
 
   const dataset = JSON.parse(fs.readFileSync(DATASET_FILE, 'utf-8'));
-  console.log(`Loaded ${dataset.length} golden entries × ${LANGS.length} language(s).`);
 
   try {
     const health = await fetch(`${SERVER_URL}/api/health`, { signal: AbortSignal.timeout(5000) });
@@ -150,23 +161,25 @@ async function main() {
     process.exit(1);
   }
 
-  // Load the embedding model once before the run
-  console.log('Preloading embedding model for semantic scoring...');
-  await generateEmbedding('warmup');
-  console.log('');
-
+  // Build the test matrix from the dataset's variants structure
   const jobs = [];
   for (const entry of dataset) {
-    for (const lang of LANGS) jobs.push({ entry, lang });
+    for (const [variantKey, v] of Object.entries(entry.variants || {})) {
+      if (v?.question && v?.reference_answer) {
+        jobs.push({ entry, variantKey, lang: variantKey.split('_')[0], question: v.question, reference: v.reference_answer });
+      }
+    }
   }
-  console.log(`Testing ${jobs.length} question(s) through /api/chat (concurrency ${CONCURRENCY})...`);
+  console.log(`Testing ${jobs.length} style-matched question(s) through /api/chat (concurrency ${CONCURRENCY})...`);
 
-  const results = await mapWithConcurrency(jobs, CONCURRENCY, async ({ entry, lang }) => {
-    const question = lang === 'hi' ? entry.question_hi : entry.question_mr;
-    const reference = lang === 'hi' ? entry.reference_answer_hi : entry.reference_answer_mr;
+  const results = await mapWithConcurrency(jobs, CONCURRENCY, async (job) => {
+    const { entry, variantKey, lang } = job;
+    const question = job.question;
+    const reference = job.reference;
     const base = {
       id: entry.id,
       category: entry.category,
+      style: variantKey,
       language: lang,
       question,
       reference_answer: reference,
@@ -202,24 +215,23 @@ async function main() {
   const flagged = results.filter((r) => r.flagged);
 
   console.log('');
-  console.log('════════ TRANSLATION QUALITY REPORT ════════');
+  console.log('════════ TRANSLATION QUALITY REPORT (style-matched) ════════');
   console.log(`  Total tested      : ${results.length}`);
   console.log(`  Scored            : ${scored.length}`);
   console.log(`  Average BLEU      : ${avgBleu.toFixed(3)}   (target ≥ ${BLEU_THRESHOLD})`);
   console.log(`  Average cosine    : ${avgCosine.toFixed(3)}   (target ≥ ${COSINE_THRESHOLD})`);
-  for (const lang of LANGS) {
-    const rs = scored.filter((r) => r.language === lang);
-    if (rs.length) {
-      console.log(`    ${lang}: BLEU ${avg(rs, 'bleu').toFixed(3)} | cosine ${avg(rs, 'cosine').toFixed(3)}`);
-    }
+  const variantKeys = [...new Set(scored.map((r) => r.style))];
+  for (const vk of variantKeys) {
+    const rs = scored.filter((r) => r.style === vk);
+    console.log(`    ${vk.padEnd(14)}: BLEU ${avg(rs, 'bleu').toFixed(3)} | cosine ${avg(rs, 'cosine').toFixed(3)} | n=${rs.length}`);
   }
   console.log(`  Flagged for review: ${flagged.length}`);
   console.log('');
 
   if (flagged.length > 0) {
-    console.log('── Flagged cases (below threshold, send to /admin/review) ──');
+    console.log('── Flagged cases (below threshold — send to /admin/review) ──');
     for (const f of flagged) {
-      console.log(`  [${f.id}] (${f.language}) ${f.flag_reasons.join('; ')}`);
+      console.log(`  [${f.id}] (${f.style}) ${f.flag_reasons.join('; ')}`);
     }
     console.log('');
   }
@@ -234,10 +246,10 @@ async function main() {
       flagged_count: flagged.length,
       avg_bleu: parseFloat(avgBleu.toFixed(4)),
       avg_cosine: parseFloat(avgCosine.toFixed(4)),
-      by_language: Object.fromEntries(
-        LANGS.map((lang) => {
-          const rs = scored.filter((r) => r.language === lang);
-          return [lang, {
+      by_variant: Object.fromEntries(
+        [...new Set(scored.map((r) => r.style))].sort().map((vk) => {
+          const rs = scored.filter((r) => r.style === vk);
+          return [vk, {
             count: rs.length,
             avg_bleu: parseFloat(avg(rs, 'bleu').toFixed(4)),
             avg_cosine: parseFloat(avg(rs, 'cosine').toFixed(4)),

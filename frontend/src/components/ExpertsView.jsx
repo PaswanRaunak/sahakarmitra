@@ -60,7 +60,7 @@ const EXPERTS_DATA = [
     location: 'Vashi, Navi Mumbai',
     rating: 4.9,
     reviewsCount: 115,
-    avatarBg: 'from-blue-700 to-indigo-900',
+    avatarBg: 'from-[#1b4342] to-[#2d6a68]',
     avatarInitials: 'VJ',
     availability: 'Available Today',
     availabilityStatus: 'online',
@@ -85,7 +85,7 @@ const EXPERTS_DATA = [
     location: 'Civil Lines, Nagpur / Nashik',
     rating: 4.7,
     reviewsCount: 86,
-    avatarBg: 'from-purple-700 to-pink-800',
+    avatarBg: 'from-stone-600 to-stone-900',
     avatarInitials: 'SP',
     availability: 'Available Friday',
     availabilityStatus: 'offline',
@@ -135,7 +135,7 @@ const EXPERTS_DATA = [
     location: 'Andheri West, Mumbai',
     rating: 4.8,
     reviewsCount: 74,
-    avatarBg: 'from-rose-700 to-amber-800',
+    avatarBg: 'from-amber-700 to-[#882c0e]',
     avatarInitials: 'MI',
     availability: 'Available Tomorrow',
     availabilityStatus: 'away',
@@ -275,8 +275,10 @@ export default function ExpertsView({ language = 'en' }) {
             />
             {searchQuery && (
               <button
+                type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-2.5 text-stone-400 hover:text-stone-700 text-xs font-bold"
+                aria-label="Clear expert search"
+                className="absolute right-3 top-2.5 text-stone-400 hover:text-stone-700 text-xs font-bold rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
               >
                 ✕
               </button>

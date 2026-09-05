@@ -182,7 +182,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
               <div className="flex items-start gap-3 text-xs text-stone-200">
                 <div className="p-1.5 rounded-lg bg-[#a03612]/20 text-[#a03612] flex-shrink-0 mt-0.5 border border-[#a03612]/30">
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
                 <span>Official MCS Act 1960, AGM & Election Rules</span>
@@ -191,7 +191,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
               <div className="flex items-start gap-3 text-xs text-stone-200">
                 <div className="p-1.5 rounded-lg bg-teal-500/20 text-teal-400 flex-shrink-0 mt-0.5 border border-teal-500/30">
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
                 <span>Verifiable Legal Section & Excerpt Citations</span>
@@ -200,7 +200,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
               <div className="flex items-start gap-3 text-xs text-stone-200">
                 <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-300 flex-shrink-0 mt-0.5 border border-amber-500/30">
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
                 <span>Multilingual Support (English, Hindi, Marathi)</span>
@@ -552,7 +552,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                 <div className="text-center py-6 space-y-4 animate-scale-in">
                   <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
                   <h4 className="text-base font-bold text-stone-900">{t('resetSent')}</h4>

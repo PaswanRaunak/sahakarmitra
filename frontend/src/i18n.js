@@ -241,7 +241,7 @@ export const STRINGS = {
     feature2Title: 'Verifiable Legal Citations',
     feature2Body: 'Every answer comes with exact section references e.g. Section 73, Section 75, Section 91.',
     feature3Title: 'Multilingual AI (EN / HI / MR)',
-    feature3Body: 'Switch seamlessly between English, Hindi, and Marathi for clear local understanding.',
+    feature3Body: 'Switch between English, Hindi, and Marathi for clear local understanding.',
     getStarted: 'Get Started with Legal Assistant',
     welcomeDisclaimer: 'SahakarMitra provides general cooperative law information, not legal representation. Always verify with official legal counsel.',
 

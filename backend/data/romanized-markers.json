@@ -1,0 +1,30 @@
+{
+  "_comment": [
+    "Romanized function-word markers per language, used ONLY for the",
+    "Latin-script secondary check (script detection cannot catch",
+    "romanized text). Adding a language here extends romanized detection:",
+    "this is data, not per-language logic. The LLM classifier remains the",
+    "fallback for anything these markers cannot resolve."
+  ],
+  "hi": ["kaise", "kya", "hai", "hain", "karne", "karna", "hota", "hote", "hoti", "chahiye", "nahi", "kitna", "kitne", "batao", "karta", "karti", "zaroori", "sakta", "sakte"],
+  "mr": ["kay", "kasa", "kashe", "kiti", "ahe", "ahet", "pahije", "madhye", "karaycha", "karayache", "asle", "asel", "sathi", "karnya", "denar", "ghyavi"],
+  "ta": ["eppadi", "enna", "ethu", "vendum", "romba", "seira", "panra", "erkanave", "irukku", "vayppu"],
+  "te": ["ela", "enti", "undi", "undhi", "kavali", "chestunaru", "cheppandi", "jarugutundi"],
+  "kn": ["hege", "enu", "ide", "beku", "maadi", "heli", "illa", "agutte"],
+  "gu": ["kem", "shu", "che", "joiye", "karo", "tamare", "thay", "joie"],
+  "bn": ["kibhabe", "kore", "chai", "janen", "hobe", "koro", "lagbe", "ache"],
+  "ml": ["engane", "entha", "venam", "cheyyan", "parayamo", "undakum", "vendi"],
+  "pa": ["kiven", "kiwe", "chahida", "dasso", "karde", "hunda", "karne"],
+  "or": ["kemiti", "kana", "achhi", "kariba", "pain", "huauchi", "darakara"],
+  "ur": ["kaise", "kya", "hai", "hain", "karna", "chahiye", "nahin", "bataiye"],
+  "ne": ["kasto", "kina", "hunchha", "garne", "paincha", "bhanda"],
+  "mai": ["kaise", "kia", "hai", "ahnai", "kareba", "chahi"],
+  "gom": ["kaso", "kite", "asa", "zai", "korop"],
+  "ks": ["kyaa", "chhu", "kuth", "kariw"],
+  "sd": ["كيان", "kyan", "ahe", "karay"],
+  "sa": ["kim", "asti", "katham", "kartavyam"],
+  "mni": ["kari", "leibra", "houre", "pheijill"],
+  "brx": ["mown", "gwnang", "haba", "kalam"],
+  "doi": ["kya", "hale", "karne", "chahi"],
+  "sat": ["beṛaṅ", "kekā", "senṛet"]
+}

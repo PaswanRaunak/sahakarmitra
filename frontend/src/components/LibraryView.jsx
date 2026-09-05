@@ -4,11 +4,15 @@ import { LEGAL_TRANSLATIONS } from '../legalTranslations.js';
 
 export default function LibraryView({
   language = 'en',
+  user = null,
   initialCategory = 'all',
   initialStateFilter = 'all',
   initialShowBookmarksOnly = false,
 }) {
   const t = makeT(language);
+  // Bookmarks are scoped to the signed-in account, never shared across accounts
+  const bookmarkStorageKey = `sahakar_bookmarks:${(user?.email || 'anonymous').toLowerCase()}`;
+  const bookmarkEmail = (user?.email || 'anonymous').toLowerCase();
 
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +23,7 @@ export default function LibraryView({
   const [copiedId, setCopiedId] = useState(null);
   const [bookmarks, setBookmarks] = useState(() => {
     try {
-      const saved = localStorage.getItem('sahakar_bookmarks');
+      const saved = localStorage.getItem(`sahakar_bookmarks:${(user?.email || 'anonymous').toLowerCase()}`);
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -37,7 +41,7 @@ export default function LibraryView({
   const saveBookmarksState = (newBookmarks) => {
     setBookmarks(newBookmarks);
     try {
-      localStorage.setItem('sahakar_bookmarks', JSON.stringify(newBookmarks));
+      localStorage.setItem(bookmarkStorageKey, JSON.stringify(newBookmarks));
     } catch {
       // Ignore
     }
@@ -50,7 +54,7 @@ export default function LibraryView({
 
     Promise.all([
       fetch('/api/library').then((res) => (res.ok ? res.json() : [])).catch(() => []),
-      fetch('/api/bookmarks').then((res) => (res.ok ? res.json() : [])).catch(() => []),
+      fetch(`/api/bookmarks?email=${encodeURIComponent(bookmarkEmail)}`).then((res) => (res.ok ? res.json() : [])).catch(() => []),
     ]).then(([libData, backendBookmarks]) => {
       if (!isMounted) return;
 
@@ -90,7 +94,7 @@ export default function LibraryView({
     fetch('/api/bookmarks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(doc),
+      body: JSON.stringify({ ...doc, email: bookmarkEmail }),
     }).catch(() => {});
   };
 
@@ -285,8 +289,10 @@ export default function LibraryView({
             />
             {searchQuery && (
               <button
+                type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-stone-400 hover:text-stone-700"
+                aria-label="Clear search"
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-stone-400 hover:text-stone-700 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -564,7 +570,7 @@ function SectionCard({
           {isCopied ? (
             <>
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
               </svg>
               <span>{t('copied') || 'Citation Copied!'}</span>
             </>

@@ -45,6 +45,28 @@ const WELCOME_SEEN_KEY = 'sahakar_welcome_seen';
 const newId = (prefix) => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 
+// ── Per-account storage ──────────────────────────────────────
+// Chat history and bookmarks are keyed by account email so that
+// creating/logging into a different account never shows another
+// account's data. (The pre-fix global 'sahakar_chats' key mixed
+// accounts and is dropped once on startup, since its contents
+// cannot be attributed to any single account.)
+const accountKey = (user) => `sahakar_chats:${(user?.email || 'anonymous').toLowerCase()}`;
+const bookmarkKey = (user) => `sahakar_bookmarks:${(user?.email || 'anonymous').toLowerCase()}`;
+
+function loadChatsForUser(user) {
+  try {
+    const raw = localStorage.getItem(accountKey(user));
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {
+    // Corrupt bucket: fall through to a fresh history
+  }
+  return null;
+}
+
 const makeChat = () => ({
   id: newId('chat'),
   title: 'New Legal Inquiry',
@@ -121,22 +143,23 @@ export default function App() {
       });
   }, [stateConfirmed]);
 
-  // Load stored User and Chat History on startup
+  // Load stored User and THIS account's chat history on startup
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem('sahakar_user');
+      // Drop the pre-fix global chat history (it mixed multiple accounts
+      // and cannot be attributed to any single one)
+      localStorage.removeItem('sahakar_chats');
+
       if (savedUser) {
         const parsed = JSON.parse(savedUser);
         setCurrentUser(parsed);
         if (parsed.state) setSelectedState(parsed.state);
-      }
 
-      const savedChats = localStorage.getItem('sahakar_chats');
-      if (savedChats) {
-        const parsed = JSON.parse(savedChats);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setChats(parsed);
-          setActiveChatId(parsed[0].id);
+        const userChats = loadChatsForUser(parsed);
+        if (userChats) {
+          setChats(userChats);
+          setActiveChatId(userChats[0].id);
           return;
         }
       }
@@ -149,16 +172,15 @@ export default function App() {
     setActiveChatId(defaultChat.id);
   }, []);
 
-  // Save chats to localStorage whenever updated
+  // Save chats to the signed-in account's bucket whenever updated
   useEffect(() => {
-    if (chats.length > 0) {
-      try {
-        localStorage.setItem('sahakar_chats', JSON.stringify(chats));
-      } catch {
-        // Ignore
-      }
+    if (!currentUser || chats.length === 0) return;
+    try {
+      localStorage.setItem(accountKey(currentUser), JSON.stringify(chats));
+    } catch {
+      // Ignore
     }
-  }, [chats]);
+  }, [currentUser, chats]);
 
   // Health check: ping the backend
   useEffect(() => {
@@ -292,7 +314,12 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    // The account's bucket stays on disk (their history returns on next
+    // login); only the in-memory data is cleared so the next sign-in,
+    // demo or otherwise, starts from its own data.
     setCurrentUser(null);
+    setChats([]);
+    setActiveChatId(null);
     try {
       localStorage.removeItem('sahakar_user');
     } catch {
@@ -300,10 +327,6 @@ export default function App() {
     }
     setActiveTab('dashboard');
     setCurrentView('landing');
-  };
-
-  const toggleLanguage = () => {
-    setLanguage(prev => prev === 'en' ? 'hi' : prev === 'hi' ? 'mr' : 'en');
   };
 
   const handleStartChatting = () => {
@@ -518,7 +541,7 @@ export default function App() {
         <LandingPage
           onOpenAuth={(mode) => setAuthModal(mode)}
           onStartChatting={handleStartChatting}
-          onToggleLanguage={toggleLanguage}
+          onSetLanguage={setLanguage}
           language={language}
         />
       )}
@@ -657,7 +680,7 @@ export default function App() {
                   onRegenerate={handleRegenerate}
                   input={input}
                   setInput={setInput}
-                  exampleQuestions={EXAMPLE_QUESTIONS[language]}
+                  exampleQuestions={EXAMPLE_QUESTIONS[language] || EXAMPLE_QUESTIONS.en}
                   showExamples={messages.length === 0}
                   language={language}
                   onConnectExpert={() => setActiveTab('experts')}

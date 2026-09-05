@@ -4,25 +4,49 @@
 //
 // Body: {
 //   message: string,
-//   language: "en"|"hi"|"mr",
+//   language: "en"|"hi"|"mr"|... (any language-config code),
+//   state?: string,
 //   history?: [{role, text}],
 //   attachments?: [{ name, type, data, size }]
 // }
-// Resp (JSON): { answer, sources: [{ section, source_file, excerpt }], parsedFiles: [] }
+// Resp (JSON): { answer, sources: [...], parsedFiles: [] }
 // Resp (SSE):  data: {type:"token"|"done"|"no_match"|"error"|"status", ...}
+//
+// The heavy lifting (style detection, retrieval, generation) lives in
+// services/chatPipeline.js so the Telegram bot and the web frontend
+// share one RAG engine.
 // ─────────────────────────────────────────────
 
 import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { retrieveRelevantChunks } from '../services/retrieval.js';
-import { generateAnswer, generateAnswerStream, translateToEnglish } from '../services/llm.js';
+import { generateAnswerStream } from '../services/llm.js';
 import { parseAllAttachments } from '../services/documentParser.js';
+import {
+  runChatPipeline,
+  resolveStyle,
+  buildRetrievalQuery,
+  filterRelevant,
+  formatSources,
+} from '../services/chatPipeline.js';
 
 const router = express.Router();
 
-const ALLOWED_LANGS = new Set(['en', 'hi', 'mr']);
-// Cosine-distance cutoff for the local MiniLM index (measured: on-topic
-// queries land ~0.7–1.4, unrelated text ~1.9). Env-overridable.
-const MAX_RELEVANCE_DISTANCE = parseFloat(process.env.RELEVANCE_MAX_DISTANCE || '1.5');
+const __routeDirname = path.dirname(fileURLToPath(import.meta.url));
+
+// All languages declared in language-config.json are accepted at the API
+// layer (validation must be able to test a language BEFORE it is enabled);
+// the frontend only offers languages where enabled: true.
+let KNOWN_LANGS = new Set(['en', 'hi', 'mr']);
+try {
+  const cfg = JSON.parse(fs.readFileSync(path.join(__routeDirname, '..', 'data', 'language-config.json'), 'utf-8'));
+  KNOWN_LANGS = new Set(Object.keys(cfg).filter((k) => !k.startsWith('_')));
+} catch (err) {
+  console.warn('[chat] language-config.json unreadable, using default languages:', err.message);
+}
+
 const MAX_MESSAGE_LENGTH = 4000;
 const MAX_HISTORY_ITEMS = 6;
 const MAX_HISTORY_TEXT = 1000;
@@ -42,8 +66,8 @@ function parseChatRequest(req) {
   if (!cleanMessage && validAttachments.length === 0) {
     return { error: 'Please provide a question or attach a file/screenshot.' };
   }
-  if (!ALLOWED_LANGS.has(language)) {
-    return { error: 'Field "language" must be one of: en, hi, mr.' };
+  if (!KNOWN_LANGS.has(language)) {
+    return { error: `Field "language" must be a supported language code (${[...KNOWN_LANGS].join(', ')}).` };
   }
 
   const cleanHistory = Array.isArray(history)
@@ -56,59 +80,6 @@ function parseChatRequest(req) {
   return { message: cleanMessage, language, state: typeof state === 'string' ? state.trim() : 'Maharashtra', history: cleanHistory, attachments: validAttachments };
 }
 
-// ── Relevance filter: drop chunks above the cosine-distance cutoff ──
-function filterRelevant(chunks) {
-  return chunks.filter(c => c.distance == null || c.distance <= MAX_RELEVANCE_DISTANCE);
-}
-
-// ── Build the retrieval query ────────────────────────────────
-// Non-English queries are translated to English first (the embedding
-// model is English-only). Short follow-up questions like "and the
-// secretary's duties?" are prefixed with the previous user message so
-// they retrieve against the full intent, not the bare fragment.
-async function buildRetrievalQuery(message, attachmentContext, language, history, state = 'Maharashtra') {
-  let query = message || attachmentContext.slice(0, 300) || `${state} cooperative societies rules`;
-
-  if (message && language !== 'en') {
-    const translated = await translateToEnglish(message);
-    if (translated && translated !== message) {
-      console.log(`[chat] Translated query: "${message.slice(0, 60)}" -> "${translated.slice(0, 60)}"`);
-    }
-    query = translated || query;
-  }
-
-  if (message) {
-    const wordCount = query.split(/\s+/).filter(Boolean).length;
-    if (wordCount <= 6 && history.length > 0) {
-      const prevUser = [...history].reverse().find(m => m.role === 'user');
-      if (prevUser && prevUser.text) {
-        query = `${prevUser.text} ${query}`;
-      }
-    }
-  }
-
-  return query.trim() || `${state} cooperative societies rules`;
-}
-
-// ── Format sources for the frontend ──────────────────────────
-function formatSources(chunks) {
-  return chunks.map((c) => ({
-    section:       c.metadata?.section_title || 'Unknown section',
-    act_name:      c.metadata?.act_name      || 'Cooperative Societies Act',
-    state:         c.metadata?.state         || 'Maharashtra',
-    source_file:   c.metadata?.source_file   || 'unknown',
-    isCrossState:  !!c.isCrossState,
-    matchedState:  c.matchedState || c.metadata?.state,
-    excerpt:       c.text.slice(0, 220) + (c.text.length > 220 ? '...' : ''),
-  }));
-}
-
-const NO_MATCH_ANSWERS = {
-  en: 'I could not find any relevant legal text for your question in the current knowledge base. Please try rephrasing your question, or consult official legal counsel.',
-  hi: 'वर्तमान ज्ञान कोश में आपके प्रश्न से संबंधित कोई कानूनी पाठ नहीं मिला। कृपया प्रश्न दूसरे शब्दों में पूछें, या आधिकारिक कानूनी सलाह लें।',
-  mr: 'सध्याच्या ज्ञानकोशात तुमच्या प्रश्नाशी संबंधित कोणताही कायदेशीर मजकूर सापडला नाही. कृपया प्रश्न दुसऱ्या शब्दांत विचारा किंवा अधिकृत कायदेशीर सल्ला घ्या.',
-};
-
 // ── Blocking endpoint ────────────────────────────────────────
 router.post('/', async (req, res) => {
   try {
@@ -118,25 +89,8 @@ router.post('/', async (req, res) => {
     }
     const { message, language, state, history, attachments } = parsed;
 
-    console.log(`[chat] q="${message.slice(0, 80)}" state=${state} attachments=${attachments.length} lang=${language}`);
-
-    // Parse attachments (OCR images, parse PDFs, decode text files)
-    const { combinedText: attachmentContext, parsedFiles } = await parseAllAttachments(attachments);
-
-    // Build retrieval query (translate + follow-up context), then filter by relevance
-    const retrievalQuery = await buildRetrievalQuery(message, attachmentContext, language, history, state);
-    const chunks = filterRelevant(await retrieveRelevantChunks(retrievalQuery, 3, { state }));
-
-    if (chunks.length === 0) {
-      console.log(`[chat] No relevant chunks (cutoff=${MAX_RELEVANCE_DISTANCE}) — returning no-match answer.`);
-      return res.json({ answer: NO_MATCH_ANSWERS[language] || NO_MATCH_ANSWERS.en, sources: [], parsedFiles });
-    }
-
-    const answer = await generateAnswer(message, chunks, language, history, attachmentContext, state);
-    const sources = formatSources(chunks);
-
-    console.log(`[chat] OK  answer_len=${answer.length}  sources=${sources.length}`);
-    return res.json({ answer, sources, parsedFiles });
+    const result = await runChatPipeline({ message, language, state, history, attachments, logTag: 'chat' });
+    return res.json({ answer: result.answer, sources: result.sources, parsedFiles: result.parsedFiles });
   } catch (err) {
     console.error('[chat] ERROR:', err);
     return res.status(500).json({
@@ -162,7 +116,8 @@ router.post('/stream', async (req, res) => {
   const send = (obj) => res.write(`data: ${JSON.stringify(obj)}\n\n`);
 
   try {
-    console.log(`[chat-stream] q="${message.slice(0, 80)}" state=${state} attachments=${attachments.length} lang=${language}`);
+    const style = await resolveStyle(message, language);
+    console.log(`[chat-stream] q="${message.slice(0, 80)}" state=${state} attachments=${attachments.length} lang=${language} style=${style.lang}/${style.form}`);
 
     if (attachments.length > 0) {
       send({ type: 'status', text: 'Processing attachments & OCR...' });
@@ -171,12 +126,12 @@ router.post('/stream', async (req, res) => {
     // Parse attachments (OCR for images, parsing for PDF)
     const { combinedText: attachmentContext } = await parseAllAttachments(attachments);
 
-    // Build retrieval query (translate + follow-up context), then filter by relevance
-    const retrievalQuery = await buildRetrievalQuery(message, attachmentContext, language, history, state);
+    // Build retrieval query (translate + follow-up context), then filter
+    const retrievalQuery = await buildRetrievalQuery(message, attachmentContext, language, history, state, style);
     const chunks = filterRelevant(await retrieveRelevantChunks(retrievalQuery, 3, { state }));
 
     if (chunks.length === 0) {
-      console.log(`[chat-stream] No relevant chunks (cutoff=${MAX_RELEVANCE_DISTANCE}) — sending no_match.`);
+      console.log(`[chat-stream] No relevant chunks — sending no_match.`);
       send({ type: 'no_match' });
       send({ type: 'done', sources: [] });
       return res.end();
@@ -186,7 +141,7 @@ router.post('/stream', async (req, res) => {
       if (token) {
         send({ type: 'token', text: token });
       }
-    }, attachmentContext, state);
+    }, attachmentContext, state, style);
 
     send({ type: 'done', sources: formatSources(chunks) });
     console.log(`[chat-stream] OK`);

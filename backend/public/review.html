@@ -112,7 +112,7 @@ function renderCard(entry) {
   const head = el('div', 'card-head');
   head.appendChild(el('span', 'id', entry.id));
   head.appendChild(el('span', 'badge cat', entry.category || ''));
-  head.appendChild(el('span', 'badge lang', entry.language));
+  head.appendChild(el('span', 'badge lang', entry.style || entry.language));
   const scoreText = (entry.bleu != null && entry.cosine != null)
     ? `BLEU ${Number(entry.bleu).toFixed(3)} · cos ${Number(entry.cosine).toFixed(3)}`
     : 'API error';

@@ -1,0 +1,268 @@
+{
+  "_comment": [
+    "State/jurisdiction rollout registry — mirrors language-config.json.",
+    "A jurisdiction is selectable in the UI only when enabled: true, which",
+    "happens ONLY via `npm run onboard-state <Name> <source-doc>` after the",
+    "real state Act text has been ingested and its seed validation passes.",
+    "",
+    "INTEGRITY RULE: each state's legal text must come from that state's",
+    "REAL Cooperative Societies Act (official source). Placeholder or",
+    "AI-generated law text is a serious integrity violation for a legal",
+    "tool and is never generated. act_name is filled only where the Act's",
+    "official name/year is known; null means 'confirm from the source",
+    "document during onboarding'."
+  ],
+  "Maharashtra": {
+    "enabled": true,
+    "validated": true,
+    "act_name": "Maharashtra Cooperative Societies Act, 1960",
+    "source_url": null,
+    "description": "Housing, urban banks, credit societies & district unions"
+  },
+  "Gujarat": {
+    "enabled": true,
+    "validated": true,
+    "act_name": "Gujarat Co-operative Societies Act, 1961",
+    "source_url": null,
+    "description": "Urban co-ops, housing federations & sugar/credit societies",
+    "onboarded_at": "2026-09-05T19:11:56.577Z"
+  },
+  "Karnataka": {
+    "enabled": true,
+    "validated": true,
+    "act_name": "Karnataka Co-operative Societies Act, 1959",
+    "source_url": null,
+    "description": "Housing co-ops, Apex banks & town credit societies"
+  },
+  "Multi-State": {
+    "enabled": true,
+    "validated": true,
+    "act_name": "Multi-State Co-operative Societies Act, 2002",
+    "source_url": null,
+    "description": "Central Act for societies operating across state borders"
+  },
+  "Andhra Pradesh": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Andhra Pradesh Co-operative Societies Act, 1964",
+    "source_url": null,
+    "description": null
+  },
+  "Arunachal Pradesh": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Arunachal Pradesh Co-operative Societies Act, 1978",
+    "source_url": null,
+    "description": null
+  },
+  "Assam": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Assam Co-operative Societies Act, 1949",
+    "source_url": null,
+    "description": null
+  },
+  "Bihar": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Bihar Co-operative Societies Act, 1935",
+    "source_url": null,
+    "description": null
+  },
+  "Chhattisgarh": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Chhattisgarh Co-operative Societies Act, 1960",
+    "source_url": null,
+    "description": null
+  },
+  "Goa": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Goa Co-operative Societies Act, 2001",
+    "source_url": null,
+    "description": null
+  },
+  "Haryana": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Haryana Co-operative Societies Act, 1984",
+    "source_url": null,
+    "description": null
+  },
+  "Himachal Pradesh": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Himachal Pradesh Co-operative Societies Act, 1968",
+    "source_url": null,
+    "description": null
+  },
+  "Jharkhand": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Jharkhand Co-operative Societies Act, 1935",
+    "source_url": null,
+    "description": null
+  },
+  "Madhya Pradesh": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Madhya Pradesh Co-operative Societies Act, 1960",
+    "source_url": null,
+    "description": null
+  },
+  "Manipur": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Manipur Co-operative Societies Act, 1976",
+    "source_url": null,
+    "description": null
+  },
+  "Meghalaya": {
+    "enabled": false,
+    "validated": false,
+    "act_name": null,
+    "source_url": null,
+    "description": null
+  },
+  "Mizoram": {
+    "enabled": false,
+    "validated": false,
+    "act_name": null,
+    "source_url": null,
+    "description": null
+  },
+  "Nagaland": {
+    "enabled": false,
+    "validated": false,
+    "act_name": null,
+    "source_url": null,
+    "description": null
+  },
+  "Odisha": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Odisha Co-operative Societies Act, 1962",
+    "source_url": null,
+    "description": null
+  },
+  "Punjab": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Punjab Co-operative Societies Act, 1961",
+    "source_url": null,
+    "description": null
+  },
+  "Rajasthan": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Rajasthan Co-operative Societies Act, 2001",
+    "source_url": null,
+    "description": null
+  },
+  "Sikkim": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Sikkim Co-operative Societies Act, 1978",
+    "source_url": null,
+    "description": null
+  },
+  "Tamil Nadu": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Tamil Nadu Cooperative Societies Act, 1983",
+    "source_url": null,
+    "description": null
+  },
+  "Telangana": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Telangana Co-operative Societies Act, 1964",
+    "source_url": null,
+    "description": null
+  },
+  "Tripura": {
+    "enabled": false,
+    "validated": false,
+    "act_name": null,
+    "source_url": null,
+    "description": null
+  },
+  "Uttar Pradesh": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Uttar Pradesh Co-operative Societies Act, 1965",
+    "source_url": null,
+    "description": null
+  },
+  "Uttarakhand": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Uttarakhand Co-operative Societies Act, 2003",
+    "source_url": null,
+    "description": null
+  },
+  "West Bengal": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "West Bengal Co-operative Societies Act, 1973",
+    "source_url": null,
+    "description": null
+  },
+  "Andaman and Nicobar Islands": {
+    "enabled": false,
+    "validated": false,
+    "act_name": null,
+    "source_url": null,
+    "description": null
+  },
+  "Chandigarh": {
+    "enabled": false,
+    "validated": false,
+    "act_name": null,
+    "source_url": null,
+    "description": null
+  },
+  "Dadra and Nagar Haveli and Daman and Diu": {
+    "enabled": false,
+    "validated": false,
+    "act_name": null,
+    "source_url": null,
+    "description": null
+  },
+  "Delhi": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Delhi Co-operative Societies Act, 1972",
+    "source_url": null,
+    "description": null
+  },
+  "Jammu and Kashmir": {
+    "enabled": false,
+    "validated": false,
+    "act_name": null,
+    "source_url": null,
+    "description": null
+  },
+  "Ladakh": {
+    "enabled": false,
+    "validated": false,
+    "act_name": null,
+    "source_url": null,
+    "description": null
+  },
+  "Lakshadweep": {
+    "enabled": false,
+    "validated": false,
+    "act_name": null,
+    "source_url": null,
+    "description": null
+  },
+  "Puducherry": {
+    "enabled": false,
+    "validated": false,
+    "act_name": "Puducherry Co-operative Societies Act, 1972",
+    "source_url": null,
+    "description": null
+  }
+}

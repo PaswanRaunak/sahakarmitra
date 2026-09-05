@@ -1,0 +1,33 @@
+{
+  "_comment": [
+    "Language rollout / validation gating. A language becomes selectable in",
+    "the UI only when enabled: true, which happens automatically via",
+    "`npm run validate-language <code>` after its golden-dataset variants",
+    "pass the BLEU/cosine gates. UI chrome may still be English for",
+    "languages whose i18n dictionary has not been translated yet; chat",
+    "answers work in any enabled language regardless."
+  ],
+  "en": { "enabled": true, "validated": true },
+  "as": { "enabled": false, "validated": false },
+  "bn": { "enabled": false, "validated": false },
+  "brx": { "enabled": false, "validated": false },
+  "doi": { "enabled": false, "validated": false },
+  "gu": { "enabled": false, "validated": false },
+  "hi": { "enabled": true, "validated": true },
+  "kn": { "enabled": false, "validated": false },
+  "gom": { "enabled": false, "validated": false },
+  "ks": { "enabled": false, "validated": false },
+  "mai": { "enabled": false, "validated": false },
+  "ml": { "enabled": false, "validated": false },
+  "mni": { "enabled": false, "validated": false },
+  "mr": { "enabled": true, "validated": true },
+  "ne": { "enabled": false, "validated": false },
+  "or": { "enabled": false, "validated": false },
+  "pa": { "enabled": false, "validated": false },
+  "sa": { "enabled": false, "validated": false },
+  "sat": { "enabled": false, "validated": false },
+  "sd": { "enabled": false, "validated": false },
+  "ta": { "enabled": false, "validated": false },
+  "te": { "enabled": false, "validated": false },
+  "ur": { "enabled": false, "validated": false }
+}

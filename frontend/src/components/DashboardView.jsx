@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeT } from '../i18n.js';
 
 // Live knowledge-base figures for the currently ingested corpus
@@ -15,7 +15,26 @@ export default function DashboardView({
   language = 'en'
 }) {
   const [showTip, setShowTip] = useState(true);
+  const [live, setLive] = useState(FALLBACK_STATS);
   const t = makeT(language);
+
+  useEffect(() => {
+    fetch('/api/library').then((r) => (r.ok ? r.json() : null)).then((docs) => {
+      if (Array.isArray(docs) && docs.length) {
+        setLive((s) => ({ ...s, sections: docs.length }));
+      }
+    }).catch(() => {});
+    fetch('/api/languages').then((r) => (r.ok ? r.json() : null)).then((langs) => {
+      if (Array.isArray(langs)) {
+        setLive((s) => ({ ...s, languages: langs.filter((l) => l.enabled).length }));
+      }
+    }).catch(() => {});
+    fetch('/api/states').then((r) => (r.ok ? r.json() : null)).then((d) => {
+      if (d && d.coverage) {
+        setLive((s) => ({ ...s, coverage: d.coverage }));
+      }
+    }).catch(() => {});
+  }, []);
 
   // Time of day greeting
   const hour = new Date().getHours();
@@ -92,7 +111,7 @@ export default function DashboardView({
             className="flex-1 md:flex-none px-6 py-3 bg-[#a03612] hover:bg-[#882c0e] text-white rounded-full text-xs font-bold transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612] focus-visible:ring-offset-2 focus-visible:ring-offset-stone-900"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
             </svg>
             <span>{t('newQuery')}</span>
           </button>

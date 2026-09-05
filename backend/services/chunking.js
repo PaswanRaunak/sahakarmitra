@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 // ─────────────────────────────────────────────
 // Parent-Child chunking for legal text.
 //
@@ -78,31 +81,50 @@ export function splitSentences(text) {
 }
 
 /**
- * Infer state and statutory Act name from file name and document header.
+ * Infer state and statutory Act name from file name and document header,
+ * driven by data/state-config.json — adding a state to onboarding never
+ * requires touching this logic.
+ *
+ * Matching: a jurisdiction matches when its official act_name or the
+ * state's own name appears in the document's first line (the statutory
+ * header every ingested Act carries) or in the file name. The default
+ * is Maharashtra, the primary corpus.
  */
+let stateConfigCache = null;
+function loadStateConfig() {
+  if (!stateConfigCache) {
+    try {
+      const raw = JSON.parse(fs.readFileSync(
+        path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'data', 'state-config.json'),
+        'utf-8'
+      ));
+      stateConfigCache = raw;
+    } catch (err) {
+      console.warn('[chunking] state-config.json unreadable, defaulting to Maharashtra:', err.message);
+      stateConfigCache = {};
+    }
+  }
+  return stateConfigCache;
+}
+
 export function inferDocumentMetadata(text = '', sourceFile = '') {
-  const fileLower = String(sourceFile).toLowerCase();
+  const fileLower = String(sourceFile).toLowerCase().replace(/[-\s]+/g, '');
   const firstLine = (text.split('\n')[0] || '').toLowerCase();
 
-  if (fileLower.includes('gujarat') || firstLine.includes('gujarat')) {
-    return {
-      state: 'Gujarat',
-      act_name: 'Gujarat Co-operative Societies Act, 1961',
-    };
+  for (const [state, meta] of Object.entries(loadStateConfig())) {
+    if (!meta.act_name) continue; // Act not yet confirmed — cannot match
+    const actLower = meta.act_name.toLowerCase();
+    const stateLower = state.toLowerCase().replace(/[-\s]+/g, '');
+    if (
+      firstLine.includes(actLower) ||
+      (firstLine.length > 0 && firstLine.includes(stateLower) && firstLine.includes('cooperative societies')) ||
+      fileLower.includes(stateLower)
+    ) {
+      return { state, act_name: meta.act_name };
+    }
   }
-  if (fileLower.includes('karnataka') || firstLine.includes('karnataka')) {
-    return {
-      state: 'Karnataka',
-      act_name: 'Karnataka Co-operative Societies Act, 1959',
-    };
-  }
-  if (fileLower.includes('multistate') || fileLower.includes('multi-state') || firstLine.includes('multi-state')) {
-    return {
-      state: 'Multi-State',
-      act_name: 'Multi-State Co-operative Societies Act, 2002',
-    };
-  }
-  // Default is Maharashtra
+
+  // Default is Maharashtra, the primary corpus
   return {
     state: 'Maharashtra',
     act_name: 'Maharashtra Cooperative Societies Act, 1960',

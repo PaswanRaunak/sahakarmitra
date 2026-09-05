@@ -2,241 +2,561 @@
   {
     "id": "elections-73-conduct",
     "category": "Elections",
-    "question_en": "How are elections to the committee of a society conducted?",
-    "question_hi": "सोसाइटी की समिति के चुनाव कैसे संपन्न कराए जाते हैं?",
-    "question_mr": "संस्थेच्या समितीच्या निवडणुका कशा पार पाडल्या जातात?",
     "expected_section": "Section 73",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 73 of the Maharashtra Cooperative Societies Act, 1960, the election of the members of the committee shall be conducted in the manner prescribed by the Registrar and, save as otherwise provided in the rules of the society, shall be by secret ballot.",
-    "reference_answer_hi": "महाराष्ट्र सहकारी समिति अधिनियम, 1960 की धारा 73 के अनुसार, समिति के सदस्यों का चुनाव रजिस्ट्रार द्वारा निर्धारित तरीके से संपन्न होगा और, समिति के नियमों में अन्यथा प्रावधान न होने पर, गुप्त मतदान द्वारा होगा।",
-    "reference_answer_mr": "महाराष्ट्र सहकारी संस्था अधिनियम, 1960 च्या कलम 73 नुसार, समितीच्या सदस्यांची निवडणूक रजिस्ट्रार यांनी निर्धारित केलेल्या पद्धतीने पार पाडली जाईल आणि संस्थेच्या नियमांमध्ये अन्यथा तरतूद नसल्यास, गुप्त मतदानाद्वारे होईल."
+    "variants": {
+      "en": {
+        "question": "How are elections to the committee of a society conducted?",
+        "reference_answer": "Under Section 73 of the Maharashtra Cooperative Societies Act, 1960, the election of the members of the committee shall be conducted in the manner prescribed by the Registrar and, save as otherwise provided in the rules of the society, shall be by secret ballot."
+      },
+      "hi": {
+        "question": "सोसाइटी की समिति के चुनाव कैसे संपन्न कराए जाते हैं?",
+        "reference_answer": "महाराष्ट्र सहकारी समिति अधिनियम, 1960 की धारा 73 के अनुसार, समिति के सदस्यों का चुनाव रजिस्ट्रार द्वारा निर्धारित तरीके से संपन्न होगा और, समिति के नियमों में अन्यथा प्रावधान न होने पर, गुप्त मतदान द्वारा होगा।"
+      },
+      "hi_romanized": {
+        "question": "Society ki committee ke elections kaise conduct hote hain?",
+        "reference_answer": "MCS Act 1960 ke Section 73 ke hisaab se, committee members ka election Registrar ke prescribed tarike se conduct hota hai aur, society rules mein kuch aur na likha ho, secret ballot se hota hai."
+      },
+      "mr": {
+        "question": "संस्थेच्या समितीच्या निवडणुका कशा पार पाडल्या जातात?",
+        "reference_answer": "महाराष्ट्र सहकारी संस्था अधिनियम, 1960 च्या कलम 73 नुसार, समितीच्या सदस्यांची निवडणूक रजिस्ट्रार यांनी निर्धारित केलेल्या पद्धतीने पार पाडली जाईल आणि संस्थेच्या नियमांमध्ये अन्यथा तरतूद नसल्यास, गुप्त मतदानाद्वारे होईल."
+      },
+      "mr_english": {
+        "question": "सोसायटीच्या committee साठी elections कसे conduct करावे?",
+        "reference_answer": "MCS Act 1960 च्या कलम 73 नुसार, committee सदस्यांची निवडणूक Registrar ने prescribed केलेल्या पद्धतीने होते आणि society च्या rules मध्ये अन्यथा तरतूद नसल्यास, secret ballot द्वारे होते."
+      }
+    }
   },
   {
     "id": "elections-73b-contest",
     "category": "Elections",
-    "question_en": "Who is eligible to contest the election of the committee?",
-    "question_hi": "समिति के चुनाव लड़ने के योग्य कौन है?",
-    "question_mr": "समितीच्या निवडणुकीत उभे राहण्यास कोण पात्र आहे?",
     "expected_section": "Section 73B",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 73B, a member is eligible to contest the election of the committee if, on the date of filing nomination, the member is not in arrears of any dues payable to the society, has not been held responsible for any loss caused to the society by an order under section 101, and has not been subjected to any disqualification under the rules.",
-    "reference_answer_hi": "धारा 73B के अनुसार, नामांकन दाखिल करने की तिथि को सदस्य तभी चुनाव लड़ने का पात्र होता है जब वह सोसाइटी के किसी बकाया में चूक न करता हो, धारा 101 के अंतर्गत सोसाइटी को हुए किसी नुकसान का उत्तरदायी न ठहराया गया हो, और नियमों के तहत किसी अपात्रता का शिकार न हुआ हो।",
-    "reference_answer_mr": "कलम 73B नुसार, नामांकन दाखल करण्याच्या दिवशी सदस्य तेव्हाच निवडणूक लढवण्यास पात्र असतो जेव्हा तो संस्थेच्या कोणत्याही थकित रकमेत मागे नसतो, कलम 101 अंतर्गत संस्थेला झालेल्या तोट्याबाबत जबाबदार धरला गेलेला नसतो आणि नियमांनुसार त्याला अपात्रता प्राप्त झालेली नसते."
+    "variants": {
+      "en": {
+        "question": "Who is eligible to contest the election of the committee?",
+        "reference_answer": "Under Section 73B, a member is eligible to contest the election of the committee if, on the date of filing nomination, the member is not in arrears of any dues payable to the society, has not been held responsible for any loss caused to the society by an order under section 101, and has not been subjected to any disqualification under the rules."
+      },
+      "hi": {
+        "question": "समिति के चुनाव लड़ने के योग्य कौन है?",
+        "reference_answer": "धारा 73B के अनुसार, नामांकन दाखिल करने की तिथि को सदस्य तभी चुनाव लड़ने का पात्र होता है जब वह सोसाइटी के किसी बकाया में चूक न करता हो, धारा 101 के अंतर्गत सोसाइटी को हुए किसी नुकसान का उत्तरदायी न ठहराया गया हो, और नियमों के तहत किसी अपात्रता का शिकार न हुआ हो।"
+      },
+      "hi_romanized": {
+        "question": "Committee election ke liye kaun contest kar sakta hai?",
+        "reference_answer": "Section 73B ke anusar, nomination file karne ki date ko member tabhi contest karne ka eligible hai jab woh society ke kisi dues mein arrears mein na ho, Section 101 ke under kisi loss ka responsible na thahraaya gaya ho, aur rules ke under koi disqualification na ho."
+      },
+      "mr": {
+        "question": "समितीच्या निवडणुकीत उभे राहण्यास कोण पात्र आहे?",
+        "reference_answer": "कलम 73B नुसार, नामांकन दाखल करण्याच्या दिवशी सदस्य तेव्हाच निवडणूक लढवण्यास पात्र असतो जेव्हा तो संस्थेच्या कोणत्याही थकित रकमेत मागे नसतो, कलम 101 अंतर्गत संस्थेला झालेल्या तोट्याबाबत जबाबदार धरला गेलेला नसतो आणि नियमांनुसार त्याला अपात्रता प्राप्त झालेली नसते."
+      },
+      "mr_english": {
+        "question": "सोसायटीच्या committee निवडणुकीत contest करण्यास कोण पात्र आहे?",
+        "reference_answer": "कलम 73B नुसार, nomination दाखल करण्याच्या दिवशी सदस्य society च्या dues मध्ये arrears मध्ये नसावा, कलम 101 अंतर्गत loss साठी जबाबदार धरला गेलेला नसावा आणि rules नुसार disqualification प्राप्त झालेली नसावी."
+      }
+    }
   },
   {
     "id": "elections-73c-petition",
     "category": "Elections",
-    "question_en": "Within how many days can an election petition be filed after the declaration of results?",
-    "question_hi": "परिणामों की घोषणा के बाद चुनाव याचिका कितने दिनों के भीतर दायर की जा सकती है?",
-    "question_mr": "निकाल जाहीर झाल्यानंतर निवडणूक याचिका किती दिवसांत दाखल करता येते?",
     "expected_section": "Section 73C",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 73C, an election petition challenging the election of any member of the committee may be presented to the Registrar within thirty days from the date of declaration of the result. The Registrar may, after notice to the parties and inquiry, declare the election to be void or valid and, where void, direct a fresh election to be held.",
-    "reference_answer_hi": "धारा 73C के अनुसार, परिणाम की घोषणा की तिथि से तीस दिनों के भीतर समिति के किसी सदस्य के चुनाव को चुनौती देते हुए रजिस्ट्रार के समक्ष चुनाव याचिका प्रस्तुत की जा सकती है। पक्षकारों को सूचना देने और जांच के बाद रजिस्ट्रार चुनाव को रद्द या वैध घोषित कर सकता है और रद्द होने पर नए चुनाव कराने का आदेश दे सकता है।",
-    "reference_answer_mr": "कलम 73C नुसार, निकाल जाहीर झाल्याच्या तारखेपासून तीस दिवसांत समितीच्या कोणत्याही सदस्याच्या निवडणुकीस आव्हान देणारी निवडणूक याचिका रजिस्ट्रार यांच्यासमोर सादर करता येते. पक्षकारांना नोटीस देऊन चौकशीनंतर रजिस्ट्रार निवडणूक रद्द वा वैध ठरवू शकतात आणि रद्द झाल्यास नवी निवडणूक घडवण्याचे आदेश देऊ शकतात."
+    "variants": {
+      "en": {
+        "question": "Within how many days can an election petition be filed after the declaration of results?",
+        "reference_answer": "Under Section 73C, an election petition challenging the election of any member of the committee may be presented to the Registrar within thirty days from the date of declaration of the result. The Registrar may, after notice to the parties and inquiry, declare the election to be void or valid and, where void, direct a fresh election to be held."
+      },
+      "hi": {
+        "question": "परिणामों की घोषणा के बाद चुनाव याचिका कितने दिनों के भीतर दायर की जा सकती है?",
+        "reference_answer": "धारा 73C के अनुसार, परिणाम की घोषणा की तिथि से तीस दिनों के भीतर समिति के किसी सदस्य के चुनाव को चुनौती देते हुए रजिस्ट्रार के समक्ष चुनाव याचिका प्रस्तुत की जा सकती है। पक्षकारों को सूचना देने और जांच के बाद रजिस्ट्रार चुनाव को रद्द या वैध घोषित कर सकता है और रद्द होने पर नए चुनाव कराने का आदेश दे सकता है।"
+      },
+      "hi_romanized": {
+        "question": "Election result aane ke kitne din ke andar election petition file kar sakte hain?",
+        "reference_answer": "Section 73C ke anusar, result declare hone ki date se tees din ke andar Registrar ke samne election petition present ki ja sakti hai. Inquiry ke baad Registrar election ko void ya valid ghoshit kar sakta hai aur void hone par fresh election ka aadesh de sakta hai."
+      },
+      "mr": {
+        "question": "निकाल जाहीर झाल्यानंतर निवडणूक याचिका किती दिवसांत दाखल करता येते?",
+        "reference_answer": "कलम 73C नुसार, निकाल जाहीर झाल्याच्या तारखेपासून तीस दिवसांत समितीच्या कोणत्याही सदस्याच्या निवडणुकीस आव्हान देणारी निवडणूक याचिका रजिस्ट्रार यांच्यासमोर सादर करता येते. पक्षकारांना नोटीस देऊन चौकशीनंतर रजिस्ट्रार निवडणूक रद्द वा वैध ठरवू शकतात आणि रद्द झाल्यास नवी निवडणूक घडवण्याचे आदेश देऊ शकतात."
+      },
+      "mr_english": {
+        "question": "निकाल जाहीर झाल्यानंतर election petition किती दिवसांत file करता येते?",
+        "reference_answer": "कलम 73C नुसार, निकाल जाहीर झाल्याच्या तारखेपासून तीस दिवसांत Registrar समोर election petition सादर करता येते. चौकशीनंतर Registrar निवडणूक void किंवा valid ठरवू शकतात आणि void झाल्यास fresh election चे आदेश देऊ शकतात."
+      }
+    }
   },
   {
     "id": "agm-81a-appointment",
     "category": "AGM",
-    "question_en": "Who appoints the auditor of a society and when?",
-    "question_hi": "सोसाइटी का लेखापरीक्षक कौन और कब नियुक्त करता है?",
-    "question_mr": "संस्थेचा लेखापरीक्षक कोण आणि कधी नियुक्त करते?",
     "expected_section": "Section 81A",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 81A, at every annual general meeting the society shall appoint an auditor qualified under section 81B to audit the accounts of the society for the next year. The auditor shall hold office until the conclusion of the next annual general meeting and shall be eligible for reappointment.",
-    "reference_answer_hi": "धारा 81A के अनुसार, प्रत्येक वार्षिक आम सभा में सोसाइटी धारा 81B के अंतर्गत योग्य लेखापरीक्षक की अगले वर्ष के खातों के अंकेक्षण के लिए नियुक्ति करेगी। लेखापरीक्षक अगली वार्षिक आम सभा के समापन तक पद पर रहता है और पुनर्नियुक्ति का पात्र होता है।",
-    "reference_answer_mr": "कलम 81A नुसार, प्रत्येक वार्षिक सर्वसाधारण सभेत संस्था कलम 81B अंतर्गत पात्र असलेल्या लेखापरीक्षकाची पुढील वर्षाच्या लेख्यांच्या लेखापरीक्षणासाठी नियुक्ती करते. लेखापरीक्षक पुढील वार्षिक सर्वसाधारण सभेच्या समारोपापर्यंत पदावर राहतो आणि पुनर्नियुक्तीस पात्र असतो."
+    "variants": {
+      "en": {
+        "question": "Who appoints the auditor of a society and when?",
+        "reference_answer": "Under Section 81A, at every annual general meeting the society shall appoint an auditor qualified under section 81B to audit the accounts of the society for the next year. The auditor shall hold office until the conclusion of the next annual general meeting and shall be eligible for reappointment."
+      },
+      "hi": {
+        "question": "सोसाइटी का लेखापरीक्षक कौन और कब नियुक्त करता है?",
+        "reference_answer": "धारा 81A के अनुसार, प्रत्येक वार्षिक आम सभा में सोसाइटी धारा 81B के अंतर्गत योग्य लेखापरीक्षक की अगले वर्ष के खातों के अंकेक्षण के लिए नियुक्ति करेगी। लेखापरीक्षक अगली वार्षिक आम सभा के समापन तक पद पर रहता है और पुनर्नियुक्ति का पात्र होता है।"
+      },
+      "hi_romanized": {
+        "question": "Society ka auditor kaun aur kab appoint karta hai?",
+        "reference_answer": "Section 81A ke anusar, har annual general meeting mein society Section 81B ke under qualified auditor ko agli saal ke accounts ke audit ke liye appoint karti hai. Auditor agli annual general meeting ke conclusion tak pad par rehta hai aur reappointment ka eligible hota hai."
+      },
+      "mr": {
+        "question": "संस्थेचा लेखापरीक्षक कोण आणि कधी नियुक्त करते?",
+        "reference_answer": "कलम 81A नुसार, प्रत्येक वार्षिक सर्वसाधारण सभेत संस्था कलम 81B अंतर्गत पात्र असलेल्या लेखापरीक्षकाची पुढील वर्षाच्या लेख्यांच्या लेखापरीक्षणासाठी नियुक्ती करते. लेखापरीक्षक पुढील वार्षिक सर्वसाधारण सभेच्या समारोपापर्यंत पदावर राहतो आणि पुनर्नियुक्तीस पात्र असतो."
+      },
+      "mr_english": {
+        "question": "Society च्या auditor ची नियुक्ती कोण आणि कधी करते?",
+        "reference_answer": "कलम 81A नुसार, प्रत्येक annual general meeting मध्ये संस्था कलम 81B अंतर्गत पात्र auditor ची पुढील वर्षाच्या accounts च्या audit साठी नियुक्ती करते. Auditor पुढील AGM च्या समारोपापर्यंत पदावर राहतो आणि reappointment साठी पात्र असतो."
+      }
+    }
   },
   {
     "id": "agm-81a-term",
     "category": "AGM",
-    "question_en": "Until when does the auditor appointed at the annual general meeting hold office?",
-    "question_hi": "वार्षिक आम सभा में नियुक्त लेखापरीक्षक कब तक पद पर रहता है?",
-    "question_mr": "वार्षिक सर्वसाधारण सभेत नियुक्त लेखापरीक्षक कधीपर्यंत पदावर राहतो?",
     "expected_section": "Section 81A",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 81A, the auditor appointed at the annual general meeting shall hold office until the conclusion of the next annual general meeting and shall be eligible for reappointment.",
-    "reference_answer_hi": "धारा 81A के अनुसार, वार्षिक आम सभा में नियुक्त लेखापरीक्षक अगली वार्षिक आम सभा के समापन तक अपने पद पर बना रहता है और पुनर्नियुक्ति का पात्र होता है।",
-    "reference_answer_mr": "कलम 81A नुसार, वार्षिक सर्वसाधारण सभेत नियुक्त लेखापरीक्षक पुढील वार्षिक सर्वसाधारण सभेच्या समारोपापर्यंत पदावर राहतो आणि पुनर्नियुक्तीस पात्र असतो."
+    "variants": {
+      "en": {
+        "question": "Until when does the auditor appointed at the annual general meeting hold office?",
+        "reference_answer": "Under Section 81A, the auditor appointed at the annual general meeting shall hold office until the conclusion of the next annual general meeting and shall be eligible for reappointment."
+      },
+      "hi": {
+        "question": "वार्षिक आम सभा में नियुक्त लेखापरीक्षक कब तक पद पर रहता है?",
+        "reference_answer": "धारा 81A के अनुसार, वार्षिक आम सभा में नियुक्त लेखापरीक्षक अगली वार्षिक आम सभा के समापन तक अपने पद पर बना रहता है और पुनर्नियुक्ति का पात्र होता है।"
+      },
+      "hi_romanized": {
+        "question": "AGM mein appoint kiya gaya auditor kitne time tak pad par rehta hai?",
+        "reference_answer": "Section 81A ke anusar, annual general meeting mein appoint kiya gaya auditor agli annual general meeting ke conclusion tak pad par rehta hai aur reappointment ka eligible hota hai."
+      },
+      "mr": {
+        "question": "वार्षिक सर्वसाधारण सभेत नियुक्त लेखापरीक्षक कधीपर्यंत पदावर राहतो?",
+        "reference_answer": "कलम 81A नुसार, वार्षिक सर्वसाधारण सभेत नियुक्त लेखापरीक्षक पुढील वार्षिक सर्वसाधारण सभेच्या समारोपापर्यंत पदावर राहतो आणि पुनर्नियुक्तीस पात्र असतो."
+      },
+      "mr_english": {
+        "question": "AGM मध्ये appoint केलेला auditor कधीपर्यंत पदावर राहतो?",
+        "reference_answer": "कलम 81A नुसार, AGM मध्ये नियुक्त केलेला auditor पुढील annual general meeting च्या समारोपापर्यंत पदावर राहतो आणि reappointment साठी पात्र असतो."
+      }
+    }
   },
   {
     "id": "agm-81-annual-audit",
     "category": "AGM",
-    "question_en": "Is it compulsory for a society to get its accounts audited every year?",
-    "question_hi": "क्या सोसाइटी के लिए हर साल अपने खातों का अंकेक्षण कराना अनिवार्य है?",
-    "question_mr": "संस्थेसाठी दर वर्षी आपल्या लेख्यांचे लेखापरीक्षण करणे बंधनकारक आहे का?",
     "expected_section": "Section 81",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Yes. Under Section 81, every society shall maintain such books and accounts as may be prescribed by the rules and shall have them audited annually by the auditor appointed under section 81A. The books of accounts shall be balanced and closed on the 30th day of June of each year or on such other date as may be specified in the by-laws.",
-    "reference_answer_hi": "हाँ। धारा 81 के अनुसार, प्रत्येक सोसाइटी नियमों द्वारा निर्धारित पुस्तकें और खाते रखेगी और उनका वार्षिक अंकेक्षण धारा 81A के तहत नियुक्त लेखापरीक्षक से कराएगी। लेखा पुस्तकें प्रत्येक वर्ष 30 जून को या उप-नियमों में निर्दिष्ट किसी अन्य तिथि को बंद और संतुलित की जाएंगी।",
-    "reference_answer_mr": "होय. कलम 81 नुसार, प्रत्येक संस्था नियमांनुसार निर्धारित खाती व वह्या ठेवील आणि कलम 81A अंतर्गत नियुक्त लेखापरीक्षकाकडून दरवर्षी त्यांचे लेखापरीक्षण करून घेईल. लेख्यांची बही दर वर्षी 30 जून रोजी किंवा उपनियमांमध्ये निर्दिष्ट केलेल्या अन्य तारखेला बंद व संतुलित केली जाईल."
+    "variants": {
+      "en": {
+        "question": "Is it compulsory for a society to get its accounts audited every year?",
+        "reference_answer": "Yes. Under Section 81, every society shall maintain such books and accounts as may be prescribed by the rules and shall have them audited annually by the auditor appointed under section 81A. The books of accounts shall be balanced and closed on the 30th day of June of each year or on such other date as may be specified in the by-laws."
+      },
+      "hi": {
+        "question": "क्या सोसाइटी के लिए हर साल अपने खातों का अंकेक्षण कराना अनिवार्य है?",
+        "reference_answer": "हाँ। धारा 81 के अनुसार, प्रत्येक सोसाइटी नियमों द्वारा निर्धारित पुस्तकें और खाते रखेगी और उनका वार्षिक अंकेक्षण धारा 81A के तहत नियुक्त लेखापरीक्षक से कराएगी। लेखा पुस्तकें प्रत्येक वर्ष 30 जून को या उप-नियमों में निर्दिष्ट किसी अन्य तिथि को बंद और संतुलित की जाएंगी।"
+      },
+      "hi_romanized": {
+        "question": "Kya society ke liye har saal accounts ka audit karana zaroori hai?",
+        "reference_answer": "Haan. Section 81 ke anusar, har society rules mein prescribed books aur accounts rakhegi aur Section 81A ke under appointed auditor se unka annual audit karayegi. Books of account har saal 30 June ko ya by-laws mein specified kisi anya date par band aur balanced ki jaati hain."
+      },
+      "mr": {
+        "question": "संस्थेसाठी दर वर्षी आपल्या लेख्यांचे लेखापरीक्षण करणे बंधनकारक आहे का?",
+        "reference_answer": "होय. कलम 81 नुसार, प्रत्येक संस्था नियमांनुसार निर्धारित खाती व वह्या ठेवील आणि कलम 81A अंतर्गत नियुक्त लेखापरीक्षकाकडून दरवर्षी त्यांचे लेखापरीक्षण करून घेईल. लेख्यांची बही दर वर्षी 30 जून रोजी किंवा उपनियमांमध्ये निर्दिष्ट केलेल्या अन्य तारखेला बंद व संतुलित केली जाईल."
+      },
+      "mr_english": {
+        "question": "Society ला दरवर्षी accounts चे audit करणे बंधनकारक आहे का?",
+        "reference_answer": "होय. कलम 81 नुसार, प्रत्येक संस्था rules नुसार निर्धारित books व accounts ठेवील आणि कलम 81A अंतर्गत नियुक्त auditor कडून दरवर्षी audit करून घेईल. लेखे दर वर्षी 30 June रोजी किंवा by-laws मध्ये निर्दिष्ट तारखेला बंद व संतुलित केले जातात."
+      }
+    }
   },
   {
     "id": "registration-5-conditions",
     "category": "Registration",
-    "question_en": "What are the conditions for registering a new society?",
-    "question_hi": "नई सोसाइटी के पंजीकरण की शर्तें क्या हैं?",
-    "question_mr": "नवीन संस्थेच्या नोंदणीच्या अटी काय आहेत?",
     "expected_section": "Section 5",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 5, a society shall be registered under the Act only if it is organized for the promotion of the economic interests of its members in accordance with co-operative principles. The State Government may prescribe the minimum number of members required for different classes of societies; in the case of credit societies the minimum shall ordinarily be ten.",
-    "reference_answer_hi": "धारा 5 के अनुसार, कोई सोसाइटी तभी इस अधिनियम के तहत पंजीकृत होगी जब वह सहकारी सिद्धांतों के अनुसार अपने सदस्यों के आर्थिक हितों की उन्नति हेतु गठित हो। राज्य सरकार विभिन्न वर्गों की सोसाइटियों के लिए न्यूनतम सदस्य संख्या अधिसूचित कर सकती है; साख सोसाइटियों के लिए न्यूनतम संख्या सामान्यतः दस होगी।",
-    "reference_answer_mr": "कलम 5 नुसार, सहकारी तत्त्वांनुसार सदस्यांच्या आर्थिक हितसंवर्धनासाठी संस्था उभी केली असतील तेव्हाच तिची या अधिनियमाअंतर्गत नोंदणी होईल. राज्य सरकार विविध प्रकारच्या संस्थांसाठी किमान सदस्य संख्या निर्धारित करू शकते; पतसंस्थांच्या बाबतीत ही संख्या साधारणपणे दहा असेल."
+    "variants": {
+      "en": {
+        "question": "What are the conditions for registering a new society?",
+        "reference_answer": "Under Section 5, a society shall be registered under the Act only if it is organized for the promotion of the economic interests of its members in accordance with co-operative principles. The State Government may prescribe the minimum number of members required for different classes of societies; in the case of credit societies the minimum shall ordinarily be ten."
+      },
+      "hi": {
+        "question": "नई सोसाइटी के पंजीकरण की शर्तें क्या हैं?",
+        "reference_answer": "धारा 5 के अनुसार, कोई सोसाइटी तभी इस अधिनियम के तहत पंजीकृत होगी जब वह सहकारी सिद्धांतों के अनुसार अपने सदस्यों के आर्थिक हितों की उन्नति हेतु गठित हो। राज्य सरकार विभिन्न वर्गों की सोसाइटियों के लिए न्यूनतम सदस्य संख्या अधिसूचित कर सकती है; साख सोसाइटियों के लिए न्यूनतम संख्या सामान्यतः दस होगी।"
+      },
+      "hi_romanized": {
+        "question": "Nayi society ke registration ke liye kya conditions hain?",
+        "reference_answer": "Section 5 ke anusar, society tabhi register hogi jab woh cooperative principles ke according members ke economic interests ke liye organized ho. State Government alag-alag classes ki societies ke liye minimum member sankhya prescribe kar sakti hai; credit societies ke liye ye aamtaur par das hoti hai."
+      },
+      "mr": {
+        "question": "नवीन संस्थेच्या नोंदणीच्या अटी काय आहेत?",
+        "reference_answer": "कलम 5 नुसार, सहकारी तत्त्वांनुसार सदस्यांच्या आर्थिक हितसंवर्धनासाठी संस्था उभी केली असतील तेव्हाच तिची या अधिनियमाअंतर्गत नोंदणी होईल. राज्य सरकार विविध प्रकारच्या संस्थांसाठी किमान सदस्य संख्या निर्धारित करू शकते; पतसंस्थांच्या बाबतीत ही संख्या साधारणपणे दहा असेल."
+      },
+      "mr_english": {
+        "question": "नवीन society च्या नोंदणीसाठी कोणत्या conditions लागतात?",
+        "reference_answer": "कलम 5 नुसार, cooperative principles नुसार सदस्यांच्या economic interests साठी संस्था उभी केली असतील तेव्हाच नोंदणी होते. राज्य सरकार विविध प्रकारच्या societies साठी किमान सदस्य संख्या निर्धारित करू शकते; credit societies साठी ही संख्या साधारणपणे दहा असते."
+      }
+    }
   },
   {
     "id": "registration-6-documents",
     "category": "Registration",
-    "question_en": "What documents must accompany an application for registration of a society?",
-    "question_hi": "सोसाइटी के पंजीकरण के आवेदन के साथ कौन से दस्तावेज़ जमा करने होते हैं?",
-    "question_mr": "संस्थेच्या नोंदणीसाठीच्या अर्जासोबत कोणती कागदपत्रे जमा करावी लागतात?",
     "expected_section": "Section 6",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 6, the application for registration shall be made to the Registrar and accompanied by four copies of the proposed by-laws, a list of persons who have promoted the society and agreed to take membership, a statement showing the share capital or other funds proposed to be raised, and such other particulars as may be prescribed. For individual membership it shall be signed by at least ten persons.",
-    "reference_answer_hi": "धारा 6 के अनुसार, पंजीकरण का आवेदन रजिस्ट्रार को दिया जाता है और उसके साथ प्रस्तावित उप-नियमों की चार प्रतियां, सोसाइटी को बढ़ावा देने वाले और सदस्यता लेने को सहमत व्यक्तियों की सूची, प्रस्तावित शेयर पूंजी या अन्य निधियों का विवरण तथा निर्धारित अन्य जानकारी जमा की जाती है। व्यक्तिगत सदस्यता की स्थिति में आवेदन पर कम से कम दस व्यक्तियों के हस्ताक्षर होने चाहिए।",
-    "reference_answer_mr": "कलम 6 नुसार, नोंदणीचा अर्ज रजिस्ट्रार यांना करावा आणि त्यासोबत प्रस्तावित उपनियमांच्या चार प्रती, संस्थेला चालना देणाऱ्या व सदस्यता घेण्यास संमत व्यक्तींची यादी, उभारण्यात येणाऱ्या भागभांडवल वा इतर निधीचे विवरण तसेच निर्धारित इतर माहिती जमा करावी लागते. वैयक्तिक सदस्यतेच्या बाबतीत अर्जावर किमान दहा व्यक्तींचे स्वाक्षऱ्या असावीत."
+    "variants": {
+      "en": {
+        "question": "What documents must accompany an application for registration of a society?",
+        "reference_answer": "Under Section 6, the application for registration shall be made to the Registrar and accompanied by four copies of the proposed by-laws, a list of persons who have promoted the society and agreed to take membership, a statement showing the share capital or other funds proposed to be raised, and such other particulars as may be prescribed. For individual membership it shall be signed by at least ten persons."
+      },
+      "hi": {
+        "question": "सोसाइटी के पंजीकरण के आवेदन के साथ कौन से दस्तावेज़ जमा करने होते हैं?",
+        "reference_answer": "धारा 6 के अनुसार, पंजीकरण का आवेदन रजिस्ट्रार को दिया जाता है और उसके साथ प्रस्तावित उप-नियमों की चार प्रतियां, सोसाइटी को बढ़ावा देने वाले और सदस्यता लेने को सहमत व्यक्तियों की सूची, प्रस्तावित शेयर पूंजी या अन्य निधियों का विवरण तथा निर्धारित अन्य जानकारी जमा की जाती है। व्यक्तिगत सदस्यता की स्थिति में आवेदन पर कम से कम दस व्यक्तियों के हस्ताक्षर होने चाहिए।"
+      },
+      "hi_romanized": {
+        "question": "Society registration ke application ke saath kaun se documents jama karne hote hain?",
+        "reference_answer": "Section 6 ke anusar, application Registrar ko di jaati hai jisme proposed by-laws ki chaar copies, promoters ki list, share capital ya funds ka statement aur prescribed anya jaankari hoti hai. Individual membership ke liye kam se kam das vyaktiyon ke signatures zaroori hain."
+      },
+      "mr": {
+        "question": "संस्थेच्या नोंदणीसाठीच्या अर्जासोबत कोणती कागदपत्रे जमा करावी लागतात?",
+        "reference_answer": "कलम 6 नुसार, नोंदणीचा अर्ज रजिस्ट्रार यांना करावा आणि त्यासोबत प्रस्तावित उपनियमांच्या चार प्रती, संस्थेला चालना देणाऱ्या व सदस्यता घेण्यास संमत व्यक्तींची यादी, उभारण्यात येणाऱ्या भागभांडवल वा इतर निधीचे विवरण तसेच निर्धारित इतर माहिती जमा करावी लागते. वैयक्तिक सदस्यतेच्या बाबतीत अर्जावर किमान दहा व्यक्तींचे स्वाक्षऱ्या असावीत."
+      },
+      "mr_english": {
+        "question": "Society च्या registration साठीच्या अर्जासोबत कोणती documents जमा करावी लागतात?",
+        "reference_answer": "कलम 6 नुसार, registration चा अर्ज Registrar यांना द्यावा आणि त्यासोबत proposed by-laws च्या चार प्रती, promoters ची यादी, share capital चे विवरण व निर्धारित इतर माहिती जमा करावी लागते. Individual membership साठी किमान दहा व्यक्तींच्या स्वाक्षऱ्या आवश्यक आहेत."
+      }
+    }
   },
   {
     "id": "registration-10-effects",
     "category": "Registration",
-    "question_en": "What are the effects of registration of a society?",
-    "question_hi": "सोसाइटी के पंजीकरण के क्या प्रभाव होते हैं?",
-    "question_mr": "संस्थेच्या नोंदणीचे परिणाम काय असतात?",
     "expected_section": "Section 10",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 10, a society registered under the Act becomes a body corporate by the name under which it is registered, having perpetual succession and a common seal, with power to hold property, to enter into contracts, and to institute or defend suits and other legal proceedings.",
-    "reference_answer_hi": "धारा 10 के अनुसार, इस अधिनियम के तहत पंजीकृत सोसाइटी उसी नाम से निकाय-निगम बन जाती है जिस नाम से वह पंजीकृत होती है। उसमें शाश्वत उत्तराधिकार और सामान्य मुहर होती है, और उसे संपत्ति धारण करने, अनुबंध करने तथा वाद व अन्य कानूनी कार्यवाहियां करने या उनका बचाव करने की शक्ति प्राप्त होती है।",
-    "reference_answer_mr": "कलम 10 नुसार, या अधिनियमाअंतर्गत नोंदणी झालेली संस्था ज्या नावाने नोंदणी झाली त्याच नावाने निगमित संस्था होते. तिला सतत उत्तराधिकार व सामाईक मुद्रा असते, आणि तिला मालमत्ता धारण करण्याच्या, करार करण्याच्या तसेच दावे व इतर कायदेशीर कार्यवाह्या करण्याच्या किंवा त्यांचा प्रतिकार करण्याच्या शक्ती प्राप्त होतात."
+    "variants": {
+      "en": {
+        "question": "What are the effects of registration of a society?",
+        "reference_answer": "Under Section 10, a society registered under the Act becomes a body corporate by the name under which it is registered, having perpetual succession and a common seal, with power to hold property, to enter into contracts, and to institute or defend suits and other legal proceedings."
+      },
+      "hi": {
+        "question": "सोसाइटी के पंजीकरण के क्या प्रभाव होते हैं?",
+        "reference_answer": "धारा 10 के अनुसार, इस अधिनियम के तहत पंजीकृत सोसाइटी उसी नाम से निकाय-निगम बन जाती है जिस नाम से वह पंजीकृत होती है। उसमें शाश्वत उत्तराधिकार और सामान्य मुहर होती है, और उसे संपत्ति धारण करने, अनुबंध करने तथा वाद व अन्य कानूनी कार्यवाहियां करने या उनका बचाव करने की शक्ति प्राप्त होती है।"
+      },
+      "hi_romanized": {
+        "question": "Society ke registration ke kya effects hote hain?",
+        "reference_answer": "Section 10 ke anusar, registered society usi naam se body corporate ban jaati hai, jisme perpetual succession aur common seal hota hai, aur use property hold karne, contracts karne aur suits ya legal proceedings karne ya defend karne ka adhikar milta hai."
+      },
+      "mr": {
+        "question": "संस्थेच्या नोंदणीचे परिणाम काय असतात?",
+        "reference_answer": "कलम 10 नुसार, या अधिनियमाअंतर्गत नोंदणी झालेली संस्था ज्या नावाने नोंदणी झाली त्याच नावाने निगमित संस्था होते. तिला सतत उत्तराधिकार व सामाईक मुद्रा असते, आणि तिला मालमत्ता धारण करण्याच्या, करार करण्याच्या तसेच दावे व इतर कायदेशीर कार्यवाह्या करण्याच्या किंवा त्यांचा प्रतिकार करण्याच्या शक्ती प्राप्त होतात."
+      },
+      "mr_english": {
+        "question": "Society च्या registration चे काय परिणाम असतात?",
+        "reference_answer": "कलम 10 नुसार, registered society तिच्या नावाने body corporate होते, तिला perpetual succession व common seal असते, आणि मालमत्ता धारण करण्याच्या, contracts करण्याच्या व दावे करण्याच्या किंवा त्यांचा प्रतिकार करण्याच्या शक्ती प्राप्त होतात."
+      }
+    }
   },
   {
     "id": "members-24-rights",
     "category": "Member Rights",
-    "question_en": "What rights and privileges do members of a society have?",
-    "question_hi": "सोसाइटी के सदस्यों को कौन से अधिकार और विशेषाधिकार प्राप्त हैं?",
-    "question_mr": "संस्थेच्या सदस्यांना कोणते अधिकार व सुविधा मिळतात?",
     "expected_section": "Section 24",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 24, every member has the right to attend and take part in general body meetings and vote on resolutions, to inspect the registers, books and accounts of the society during office hours on any working day, to receive a copy of the annual report, the audit memorandum and the audited balance sheet, and to receive such dividend or bonus on share capital as may be declared by the society.",
-    "reference_answer_hi": "धारा 24 के अनुसार, प्रत्येक सदस्य को सामान्य सभाओं में भाग लेने और प्रस्तावों पर मतदान करने, किसी भी कार्य दिवस पर कार्यालय समय में सोसाइटी के रजिस्टर, पुस्तकें और खातों का निरीक्षण करने, वार्षिक प्रतिवेदन, अंकेक्षण ज्ञापन और अंकेक्षित तुलन-पत्र की प्रति प्राप्त करने, तथा शेयर पूंजी पर घोषित लाभांश या बोनस प्राप्त करने का अधिकार है।",
-    "reference_answer_mr": "कलम 24 नुसार, प्रत्येक सदस्याला सर्वसाधारण सभांत भाग घेऊन ठरावांवर मतदान करण्याचा, कोणत्याही कामाच्या दिवशी कार्यालयीन वेळेत संस्थेच्या नोंदी, वह्या व खाती तपासण्याचा, वार्षिक अहवाल, लेखापरीक्षण टिपणी व पडताळलेले उतारा-पत्रक यांच्या प्रती घेण्याचा तसेच भागभांडवलावर जाहीर झालेला लाभांश किंवा बोनस मिळवण्याचा अधिकार आहे."
+    "variants": {
+      "en": {
+        "question": "What rights and privileges do members of a society have?",
+        "reference_answer": "Under Section 24, every member has the right to attend and take part in general body meetings and vote on resolutions, to inspect the registers, books and accounts of the society during office hours on any working day, to receive a copy of the annual report, the audit memorandum and the audited balance sheet, and to receive such dividend or bonus on share capital as may be declared by the society."
+      },
+      "hi": {
+        "question": "सोसाइटी के सदस्यों को कौन से अधिकार और विशेषाधिकार प्राप्त हैं?",
+        "reference_answer": "धारा 24 के अनुसार, प्रत्येक सदस्य को सामान्य सभाओं में भाग लेने और प्रस्तावों पर मतदान करने, किसी भी कार्य दिवस पर कार्यालय समय में सोसाइटी के रजिस्टर, पुस्तकें और खातों का निरीक्षण करने, वार्षिक प्रतिवेदन, अंकेक्षण ज्ञापन और अंकेक्षित तुलन-पत्र की प्रति प्राप्त करने, तथा शेयर पूंजी पर घोषित लाभांश या बोनस प्राप्त करने का अधिकार है।"
+      },
+      "hi_romanized": {
+        "question": "Society ke members ko kaun se rights aur privileges milte hain?",
+        "reference_answer": "Section 24 ke anusar, har member ko general body meetings mein bhaag lene aur resolutions par vote karne, office hours mein registers, books aur accounts inspect karne, annual report, audit memorandum aur audited balance sheet ki copy lene, aur share capital par declared dividend ya bonus lene ka adhikar hai."
+      },
+      "mr": {
+        "question": "संस्थेच्या सदस्यांना कोणते अधिकार व सुविधा मिळतात?",
+        "reference_answer": "कलम 24 नुसार, प्रत्येक सदस्याला सर्वसाधारण सभांत भाग घेऊन ठरावांवर मतदान करण्याचा, कोणत्याही कामाच्या दिवशी कार्यालयीन वेळेत संस्थेच्या नोंदी, वह्या व खाती तपासण्याचा, वार्षिक अहवाल, लेखापरीक्षण टिपणी व पडताळलेले उतारा-पत्रक यांच्या प्रती घेण्याचा तसेच भागभांडवलावर जाहीर झालेला लाभांश किंवा बोनस मिळवण्याचा अधिकार आहे."
+      },
+      "mr_english": {
+        "question": "Society च्या सदस्यांना कोणते rights व सुविधा मिळतात?",
+        "reference_answer": "कलम 24 नुसार, प्रत्येक सदस्याला general body meetings मध्ये भाग घेऊन मतदान करण्याचा, registers व accounts तपासण्याचा, annual report व audited balance sheet च्या प्रती घेण्याचा आणि share capital वर declared dividend किंवा bonus मिळवण्याचा अधिकार आहे."
+      }
+    }
   },
   {
     "id": "members-35-withdrawal",
     "category": "Member Rights",
-    "question_en": "How can a member withdraw from the society and when are the dues paid?",
-    "question_hi": "कोई सदस्य सोसाइटी से कैसे अपनी सदस्यता वापस ले सकता है और बकाया कब मिलता है?",
-    "question_mr": "सदस्य संस्थेतून कसा माघार घेऊ शकतो आणि देयके कधी मिळतात?",
     "expected_section": "Section 35",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 35, a member may withdraw from the society by giving at least one month's notice in writing to the Secretary, provided the member has no liability to the society as borrower, guarantor or otherwise. The society shall pay the amount of share capital and other dues, after deducting any amount outstanding against the member, within a period not exceeding six months from the date of withdrawal.",
-    "reference_answer_hi": "धारा 35 के अनुसार, कोई सदस्य सचिव को कम से कम एक माह का लिखित नोटिस देकर सदस्यता वापस ले सकता है, बशर्ते उस पर उधारकर्ता, जमानतदार या अन्य रूप में सोसाइटी के प्रति कोई दायित्व न हो। सोसाइटी बकाया राशि काटने के बाद शेयर पूंजी और अन्य देय राशियां वापसी की तिथि से छह महीने से अधिक अवधि में नहीं चुकाएगी।",
-    "reference_answer_mr": "कलम 35 नुसार, सदस्य सचिव यांना किमान एक महिन्याची लेखी सूचना देऊन संस्थेतून माघार घेऊ शकतो, अशी अट की त्याच्यावर कर्जदार, जामीनदार वा अन्य प्रकारे संस्थेच्या अनुषंगाने कोणतेही दायित्व नसावे. संस्था थकित रकम वजा जाऊन भागभांडवल व इतर देयके माघारीच्या तारखेपासून सहा महिन्यांहून अधिक काळात न ठेवता अदा करेल."
+    "variants": {
+      "en": {
+        "question": "How can a member withdraw from the society and when are the dues paid?",
+        "reference_answer": "Under Section 35, a member may withdraw from the society by giving at least one month's notice in writing to the Secretary, provided the member has no liability to the society as borrower, guarantor or otherwise. The society shall pay the amount of share capital and other dues, after deducting any amount outstanding against the member, within a period not exceeding six months from the date of withdrawal."
+      },
+      "hi": {
+        "question": "कोई सदस्य सोसाइटी से कैसे अपनी सदस्यता वापस ले सकता है और बकाया कब मिलता है?",
+        "reference_answer": "धारा 35 के अनुसार, कोई सदस्य सचिव को कम से कम एक माह का लिखित नोटिस देकर सदस्यता वापस ले सकता है, बशर्ते उस पर उधारकर्ता, जमानतदार या अन्य रूप में सोसाइटी के प्रति कोई दायित्व न हो। सोसाइटी बकाया राशि काटने के बाद शेयर पूंजी और अन्य देय राशियां वापसी की तिथि से छह महीने से अधिक अवधि में नहीं चुकाएगी।"
+      },
+      "hi_romanized": {
+        "question": "Member society se membership kaise withdraw kar sakta hai aur dues kab milte hain?",
+        "reference_answer": "Section 35 ke anusar, member Secretary ko kam se kam ek mahine ka likhit notice dekar withdrawal kar sakta hai, bas ye ki us par borrower ya guarantor roop mein koi liability na ho. Society outstanding kaatne ke baad share capital aur dues withdrawal ki date se chhah mahine ke andar dene hogi."
+      },
+      "mr": {
+        "question": "सदस्य संस्थेतून कसा माघार घेऊ शकतो आणि देयके कधी मिळतात?",
+        "reference_answer": "कलम 35 नुसार, सदस्य सचिव यांना किमान एक महिन्याची लेखी सूचना देऊन संस्थेतून माघार घेऊ शकतो, अशी अट की त्याच्यावर कर्जदार, जामीनदार वा अन्य प्रकारे संस्थेच्या अनुषंगाने कोणतेही दायित्व नसावे. संस्था थकित रकम वजा जाऊन भागभांडवल व इतर देयके माघारीच्या तारखेपासून सहा महिन्यांहून अधिक काळात न ठेवता अदा करेल."
+      },
+      "mr_english": {
+        "question": "Member सोसायटीतून कसा withdraw करू शकतो आणि dues कधी मिळतात?",
+        "reference_answer": "कलम 35 नुसार, सदस्य Secretary यांना किमान एक महिन्याची लेखी notice देऊन माघार घेऊ शकतो, अशी अट की त्याच्यावर borrower किंवा guarantor म्हणून दायित्व नसावे. संस्था outstanding वजा जाऊन share capital व dues माघारीच्या तारखेपासून सहा महिन्यांत अदा करेल."
+      }
+    }
   },
   {
     "id": "members-36-expulsion",
     "category": "Member Rights",
-    "question_en": "Can a member be expelled from the society?",
-    "question_hi": "क्या किसी सदस्य को सोसाइटी से निष्कासित किया जा सकता है?",
-    "question_mr": "सदस्याला संस्थेतून काढून टाकता येईल का?",
     "expected_section": "Section 36",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 36, no member shall be expelled except by a resolution passed by a majority of not less than three-fourths of the members present and voting at a general body meeting convened for that purpose. The member concerned must be given a reasonable opportunity of being heard before the resolution is passed, and a member expelled under this section may appeal to the Registrar within sixty days of the communication of the order.",
-    "reference_answer_hi": "धारा 36 के अनुसार, इस उद्देश्य के लिए आहूत सामान्य सभा में उपस्थित और मतदान करने वाले सदस्यों के कम से कम तीन-चौथाई बहुमत से पारित प्रस्ताव के अलावा किसी सदस्य को निष्कासित नहीं किया जा सकता। प्रस्ताव पारित होने से पहले संबंधित सदस्य को सुनवाई का उचित अवसर दिया जाना चाहिए, और निष्कासित सदस्य आदेश की सूचना के 60 दिनों के भीतर रजिस्ट्रार के पास अपील कर सकता है।",
-    "reference_answer_mr": "कलम 36 नुसार, त्याच प्रयोजनासाठी बोलावलेल्या सर्वसाधारण सभेत उपस्थित व मतदान करणाऱ्या सदस्यांच्या किमान तीन चतुर्थांश बहुमताने संमत केलेल्या ठरावाशिवाय सदस्याला वगळता येऊ शकत नाही. ठराव संमत होण्यापूर्वी संबंधित सदस्याला ऐकण्याची वाजवी संधी देणे आवश्यक आहे, आणि वगळलेला सदस्य आदेशाच्या संदेशनापासून साठ दिवसांत रजिस्ट्रार यांचकडे अपील करू शकतो."
+    "variants": {
+      "en": {
+        "question": "Can a member be expelled from the society?",
+        "reference_answer": "Under Section 36, no member shall be expelled except by a resolution passed by a majority of not less than three-fourths of the members present and voting at a general body meeting convened for that purpose. The member concerned must be given a reasonable opportunity of being heard before the resolution is passed, and a member expelled under this section may appeal to the Registrar within sixty days of the communication of the order."
+      },
+      "hi": {
+        "question": "क्या किसी सदस्य को सोसाइटी से निष्कासित किया जा सकता है?",
+        "reference_answer": "धारा 36 के अनुसार, इस उद्देश्य के लिए आहूत सामान्य सभा में उपस्थित और मतदान करने वाले सदस्यों के कम से कम तीन-चौथाई बहुमत से पारित प्रस्ताव के अलावा किसी सदस्य को निष्कासित नहीं किया जा सकता। प्रस्ताव पारित होने से पहले संबंधित सदस्य को सुनवाई का उचित अवसर दिया जाना चाहिए, और निष्कासित सदस्य आदेश की सूचना के 60 दिनों के भीतर रजिस्ट्रार के पास अपील कर सकता है।"
+      },
+      "hi_romanized": {
+        "question": "Kya kisi member ko society se expel kar sakte hain?",
+        "reference_answer": "Section 36 ke anusar, us uddeshya ke liye bulayi gayi general body meeting mein upasthit aur voting karne wale members ke kam se kam teen-chothaai bahumat se pass prastav ke alawa member ko expel nahi kiya ja sakta. Member ko sunwai ka mauka dena zaroori hai, aur expelled member aadesh ki communication ke 60 dinon ke andar Registrar ke paas appeal kar sakta hai."
+      },
+      "mr": {
+        "question": "सदस्याला संस्थेतून काढून टाकता येईल का?",
+        "reference_answer": "कलम 36 नुसार, त्याच प्रयोजनासाठी बोलावलेल्या सर्वसाधारण सभेत उपस्थित व मतदान करणाऱ्या सदस्यांच्या किमान तीन चतुर्थांश बहुमताने संमत केलेल्या ठरावाशिवाय सदस्याला वगळता येऊ शकत नाही. ठराव संमत होण्यापूर्वी संबंधित सदस्याला ऐकण्याची वाजवी संधी देणे आवश्यक आहे, आणि वगळलेला सदस्य आदेशाच्या संदेशनापासून साठ दिवसांत रजिस्ट्रार यांचकडे अपील करू शकतो."
+      },
+      "mr_english": {
+        "question": "Member ला सोसायटीतून expel करता येईल का?",
+        "reference_answer": "कलम 36 नुसार, त्या प्रयोजनासाठी बोलावलेल्या सभेत उपस्थित व मतदान करणाऱ्या सदस्यांच्या किमान तीन चतुर्थांश बहुमताने संमत केलेल्या resolution शिवाय सदस्याला expel करता येत नाही. सदस्याला hearing ची संधी देणे आवश्यक आहे आणि expulsion आदेशानंतर साठ दिवसांत Registrar कडे appeal करता येते."
+      }
+    }
   },
   {
     "id": "members-28-loans",
     "category": "Member Rights",
-    "question_en": "Can a society lend money to a non-member?",
-    "question_hi": "क्या सोसाइटी किसी गैर-सदस्य को पैसा उधार दे सकती है?",
-    "question_mr": "संस्था गैर-सदस्याला पैसे कर्ज देऊ शकते का?",
     "expected_section": "Section 28",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 28, no society shall lend money to any person other than a member of the society, save as otherwise permitted by the Registrar. No society shall lend money to a member on the security of the member's own share in the society.",
-    "reference_answer_hi": "धारा 28 के अनुसार, रजिस्ट्रार द्वारा अन्यथा अनुमति नहीं दी गई हो, तो कोई सोसाइटी सदस्य के अतिरिक्त किसी अन्य व्यक्ति को पैसा उधार नहीं देगी। सोसाइटी किसी सदस्य को उसके स्वयं के शेयर की सुरक्षा पर भी पैसा उधार नहीं देगी।",
-    "reference_answer_mr": "कलम 28 नुसार, रजिस्ट्रार यांनी अन्यथा परवानगी दिली नसल्यास संस्था सदस्याव्यतिरिक्त अन्य कोणत्याही व्यक्तीला पैसे कर्ज देणार नाही. संस्था सदस्याला त्याच्या स्वतःच्या भागाच्या तारणावर कर्ज देणार देखील नाही."
+    "variants": {
+      "en": {
+        "question": "Can a society lend money to a non-member?",
+        "reference_answer": "Under Section 28, no society shall lend money to any person other than a member of the society, save as otherwise permitted by the Registrar. No society shall lend money to a member on the security of the member's own share in the society."
+      },
+      "hi": {
+        "question": "क्या सोसाइटी किसी गैर-सदस्य को पैसा उधार दे सकती है?",
+        "reference_answer": "धारा 28 के अनुसार, रजिस्ट्रार द्वारा अन्यथा अनुमति नहीं दी गई हो, तो कोई सोसाइटी सदस्य के अतिरिक्त किसी अन्य व्यक्ति को पैसा उधार नहीं देगी। सोसाइटी किसी सदस्य को उसके स्वयं के शेयर की सुरक्षा पर भी पैसा उधार नहीं देगी।"
+      },
+      "hi_romanized": {
+        "question": "Kya society kisi non-member ko paise udhaar de sakti hai?",
+        "reference_answer": "Section 28 ke anusar, Registrar dvara anyatha anumati na ho to koi society member ke alawa kisi anya vyakti ko paise udhaar nahi degi. Society kisi member ko uske apne share ki security par bhi paise udhaar nahi degi."
+      },
+      "mr": {
+        "question": "संस्था गैर-सदस्याला पैसे कर्ज देऊ शकते का?",
+        "reference_answer": "कलम 28 नुसार, रजिस्ट्रार यांनी अन्यथा परवानगी दिली नसल्यास संस्था सदस्याव्यतिरिक्त अन्य कोणत्याही व्यक्तीला पैसे कर्ज देणार नाही. संस्था सदस्याला त्याच्या स्वतःच्या भागाच्या तारणावर कर्ज देणार देखील नाही."
+      },
+      "mr_english": {
+        "question": "Society गैर-सदस्याला पैसे loan देऊ शकते का?",
+        "reference_answer": "कलम 28 नुसार, Registrar यांची परवानगी नसल्यास संस्था सदस्याव्यतिरिक्त अन्य व्यक्तीला पैसे loan देणार नाही. संस्था सदस्याला त्याच्या स्वतःच्या share च्या security वर loan देणार नाही."
+      }
+    }
   },
   {
     "id": "disputes-91-reference",
     "category": "Disputes",
-    "question_en": "How is a dispute between a member and the society resolved?",
-    "question_hi": "सदस्य और सोसाइटी के बीच विवाद कैसे सुलझाया जाता है?",
-    "question_mr": "सदस्य व संस्थे यांच्यातील वाद कसा मिटवला जातो?",
     "expected_section": "Section 91",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 91, any dispute concerning the business of a society arising among members, or between a member and the society or its committee, shall be referred to the Registrar for decision. Such disputes may relate to recovery of sums due by a member, recovery of possession of society property, removal of office-bearers or committee members, and matters arising out of the interpretation of by-laws.",
-    "reference_answer_hi": "धारा 91 के अनुसार, सोसाइटी के कारोबार से संबंधित कोई भी विवाद — चाहे सदस्यों के बीच हो या सदस्य और सोसाइटी या उसकी समिति के बीच — निर्णय के लिए रजिस्ट्रार को संदर्भित किया जाएगा। ऐसे विवादों में सदस्य द्वारा देय राशि की वसूली, सोसाइटी की संपत्ति के कब्जे की वसूली, पदाधिकारी या समिति सदस्य को हटाना और उप-नियमों की व्याख्या से उठने वाले मामले शामिल हैं।",
-    "reference_answer_mr": "कलम 91 नुसार, संस्थेच्या व्यवसायाशी संबंधित कोणताही वाद — सदस्यांमध्ये असो वा सदस्य व संस्था किंवा तिच्या समितीमध्ये — निर्णयासाठी रजिस्ट्रार यांचकडे सोपवला जाईल. अशा वादांमध्ये सदस्याकडून देय रकमेची वसुली, संस्थेच्या मालमत्तेच्या ताब्याची वसुली, पदाधिकारी वा समिती सदस्यांना काढून टाकणे आणि उपनियमांच्या अर्थार्पणातून उद्भवणाऱ्या बाबींचा समावेश होतो."
+    "variants": {
+      "en": {
+        "question": "How is a dispute between a member and the society resolved?",
+        "reference_answer": "Under Section 91, any dispute concerning the business of a society arising among members, or between a member and the society or its committee, shall be referred to the Registrar for decision. Such disputes may relate to recovery of sums due by a member, recovery of possession of society property, removal of office-bearers or committee members, and matters arising out of the interpretation of by-laws."
+      },
+      "hi": {
+        "question": "सदस्य और सोसाइटी के बीच विवाद कैसे सुलझाया जाता है?",
+        "reference_answer": "धारा 91 के अनुसार, सोसाइटी के कारोबार से संबंधित कोई भी विवाद — चाहे सदस्यों के बीच हो या सदस्य और सोसाइटी या उसकी समिति के बीच — निर्णय के लिए रजिस्ट्रार को संदर्भित किया जाएगा। ऐसे विवादों में सदस्य द्वारा देय राशि की वसूली, सोसाइटी की संपत्ति के कब्जे की वसूली, पदाधिकारी या समिति सदस्य को हटाना और उप-नियमों की व्याख्या से उठने वाले मामले शामिल हैं।"
+      },
+      "hi_romanized": {
+        "question": "Member aur society ke beech dispute kaise resolve hota hai?",
+        "reference_answer": "Section 91 ke anusar, society ke business se sambandhit koi bhi dispute, chahe members ke beech ho ya member aur society ya uski committee ke beech, decision ke liye Registrar ko refer kiya jaata hai. Isme member par due recovery, society property ke kabze ki recovery, office-bearers ko hatana aur by-laws ki interpretation jaise matters aate hain."
+      },
+      "mr": {
+        "question": "सदस्य व संस्थे यांच्यातील वाद कसा मिटवला जातो?",
+        "reference_answer": "कलम 91 नुसार, संस्थेच्या व्यवसायाशी संबंधित कोणताही वाद — सदस्यांमध्ये असो वा सदस्य व संस्था किंवा तिच्या समितीमध्ये — निर्णयासाठी रजिस्ट्रार यांचकडे सोपवला जाईल. अशा वादांमध्ये सदस्याकडून देय रकमेची वसुली, संस्थेच्या मालमत्तेच्या ताब्याची वसुली, पदाधिकारी वा समिती सदस्यांना काढून टाकणे आणि उपनियमांच्या अर्थार्पणातून उद्भवणाऱ्या बाबींचा समावेश होतो."
+      },
+      "mr_english": {
+        "question": "सदस्य आणि society यांच्यातील dispute कसा resolve होतो?",
+        "reference_answer": "कलम 91 नुसार, society च्या व्यवसायाशी संबंधित कोणताही वाद — सदस्यांमध्ये असो वा सदस्य व society किंवा समितीमध्ये — निर्णयासाठी Registrar कडे सोपवला जातो. यामध्ये dues ची वसुली, मालमत्तेचा ताबा, office-bearers ना काढून टाकणे आणि by-laws च्या interpretation चा समावेश होतो."
+      }
+    }
   },
   {
     "id": "disputes-92-finality",
     "category": "Disputes",
-    "question_en": "Is the decision of the Registrar in a dispute final?",
-    "question_hi": "क्या विवाद में रजिस्ट्रार का निर्णय अंतिम होता है?",
-    "question_mr": "वादातील रजिस्ट्रार यांचा निर्णय अंतिम असतो का?",
     "expected_section": "Section 92",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 92, the Registrar shall, after giving the parties a reasonable opportunity of being heard, decide the dispute. The decision shall be enforceable as if it were a decree of a civil court and shall be final, subject to an appeal to the Co-operative Appellate Court constituted under section 96.",
-    "reference_answer_hi": "धारा 92 के अनुसार, रजिस्ट्रार पक्षकारों को सुनवाई का उचित अवसर देने के बाद विवाद का निर्णय करेगा। यह निर्णय सिविल न्यायालय के डिक्री की तरह प्रवर्तनीय होता है और अंतिम होता है, जिसके विरुद्ध धारा 96 के अंतर्गत गठित सहकारी अपीलीय न्यायालय में अपील की जा सकती है।",
-    "reference_answer_mr": "कलम 92 नुसार, रजिस्ट्रार पक्षकारांना ऐकण्याची वाजवी संधी देऊन वादाचा निकाल देतील. हा निर्णय दिवाणी न्यायालयाच्या हुकूमाप्रमाणे अंमलात आणता येतो व तो अंतिम असतो, ज्याविरुद्ध कलम 96 अंतर्गत स्थापन झालेल्या सहकारी अपील न्यायालयात अपील करता येते."
+    "variants": {
+      "en": {
+        "question": "Is the decision of the Registrar in a dispute final?",
+        "reference_answer": "Under Section 92, the Registrar shall, after giving the parties a reasonable opportunity of being heard, decide the dispute. The decision shall be enforceable as if it were a decree of a civil court and shall be final, subject to an appeal to the Co-operative Appellate Court constituted under section 96."
+      },
+      "hi": {
+        "question": "क्या विवाद में रजिस्ट्रार का निर्णय अंतिम होता है?",
+        "reference_answer": "धारा 92 के अनुसार, रजिस्ट्रार पक्षकारों को सुनवाई का उचित अवसर देने के बाद विवाद का निर्णय करेगा। यह निर्णय सिविल न्यायालय के डिक्री की तरह प्रवर्तनीय होता है और अंतिम होता है, जिसके विरुद्ध धारा 96 के अंतर्गत गठित सहकारी अपीलीय न्यायालय में अपील की जा सकती है।"
+      },
+      "hi_romanized": {
+        "question": "Kya dispute mein Registrar ka decision final hota hai?",
+        "reference_answer": "Section 92 ke anusar, Registrar parties ko sunwai ka mauka dekar dispute ka decision karta hai. Ye decision civil court ke decree ki tarah enforceable aur final hota hai; iske viruddh Section 96 ke under bane Co-operative Appellate Court mein appeal ki ja sakti hai."
+      },
+      "mr": {
+        "question": "वादातील रजिस्ट्रार यांचा निर्णय अंतिम असतो का?",
+        "reference_answer": "कलम 92 नुसार, रजिस्ट्रार पक्षकारांना ऐकण्याची वाजवी संधी देऊन वादाचा निकाल देतील. हा निर्णय दिवाणी न्यायालयाच्या हुकूमाप्रमाणे अंमलात आणता येतो व तो अंतिम असतो, ज्याविरुद्ध कलम 96 अंतर्गत स्थापन झालेल्या सहकारी अपील न्यायालयात अपील करता येते."
+      },
+      "mr_english": {
+        "question": "वादात Registrar यांचा निर्णय final असतो का?",
+        "reference_answer": "कलम 92 नुसार, Registrar पक्षकारांना ऐकण्याची संधी देऊन वादाचा निकाल देतील. हा निर्णय civil court च्या decree प्रमाणे enforceable आणि अंतिम आहे; त्याविरुद्ध कलम 96 अंतर्गत स्थापन झालेल्या Appellate Court मध्ये appeal करता येते."
+      }
+    }
   },
   {
     "id": "disputes-96-appeal",
     "category": "Disputes",
-    "question_en": "Within what period can I appeal against the Registrar's decision?",
-    "question_hi": "रजिस्ट्रार के निर्णय के खिलाफ मैं कितने समय में अपील कर सकता हूं?",
-    "question_mr": "रजिस्ट्रार यांच्या निर्णयाविरुद्ध मी किती काळात अपील करू शकतो?",
     "expected_section": "Section 96",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 96, any party aggrieved by the decision of the Registrar under section 92 may, within sixty days from the date of the communication of the decision, prefer an appeal to the Co-operative Appellate Court. The Court may, after notice to the parties, confirm, set aside, or modify the decision of the Registrar.",
-    "reference_answer_hi": "धारा 96 के अनुसार, धारा 92 के तहत रजिस्ट्रार के निर्णय से आहत कोई भी पक्ष, निर्णय की सूचना की तिथि से 60 दिनों के भीतर, सहकारी अपीलीय न्यायालय में अपील कर सकता है। पक्षकारों को सूचना देने के बाद न्यायालय रजिस्ट्रार के निर्णय को बरकरार रख सकता है, रद्द कर सकता है या उसमें संशोधन कर सकता है।",
-    "reference_answer_mr": "कलम 96 नुसार, कलम 92 अंतर्गत रजिस्ट्रार यांच्या निर्णयाने दुखावला गेलेला कोणताही पक्ष, निर्णयाच्या संदेशनाच्या तारखेपासून साठ दिवसांत, सहकारी अपील न्यायालयात अपील करू शकतो. पक्षकारांना नोटीस दिल्यानंतर न्यायालय रजिस्ट्रार यांचा निर्णय पुष्ट करू शकतो, रद्द करू शकतो किंवा दुरुस्त करू शकतो."
+    "variants": {
+      "en": {
+        "question": "Within what period can I appeal against the Registrar's decision?",
+        "reference_answer": "Under Section 96, any party aggrieved by the decision of the Registrar under section 92 may, within sixty days from the date of the communication of the decision, prefer an appeal to the Co-operative Appellate Court. The Court may, after notice to the parties, confirm, set aside, or modify the decision of the Registrar."
+      },
+      "hi": {
+        "question": "रजिस्ट्रार के निर्णय के खिलाफ मैं कितने समय में अपील कर सकता हूं?",
+        "reference_answer": "धारा 96 के अनुसार, धारा 92 के तहत रजिस्ट्रार के निर्णय से आहत कोई भी पक्ष, निर्णय की सूचना की तिथि से 60 दिनों के भीतर, सहकारी अपीलीय न्यायालय में अपील कर सकता है। पक्षकारों को सूचना देने के बाद न्यायालय रजिस्ट्रार के निर्णय को बरकरार रख सकता है, रद्द कर सकता है या उसमें संशोधन कर सकता है।"
+      },
+      "hi_romanized": {
+        "question": "Registrar ke decision ke khilaaf main kitne din mein appeal kar sakta hoon?",
+        "reference_answer": "Section 96 ke anusar, Section 92 ke under Registrar ke decision se aggrieved koi bhi party, decision ki communication ki date se 60 dinon ke andar Co-operative Appellate Court mein appeal kar sakta hai. Court parties ko notice dekar decision ko confirm, set aside ya modify kar sakta hai."
+      },
+      "mr": {
+        "question": "रजिस्ट्रार यांच्या निर्णयाविरुद्ध मी किती काळात अपील करू शकतो?",
+        "reference_answer": "कलम 96 नुसार, कलम 92 अंतर्गत रजिस्ट्रार यांच्या निर्णयाने दुखावला गेलेला कोणताही पक्ष, निर्णयाच्या संदेशनाच्या तारखेपासून साठ दिवसांत, सहकारी अपील न्यायालयात अपील करू शकतो. पक्षकारांना नोटीस दिल्यानंतर न्यायालय रजिस्ट्रार यांचा निर्णय पुष्ट करू शकतो, रद्द करू शकतो किंवा दुरुस्त करू शकतो."
+      },
+      "mr_english": {
+        "question": "Registrar यांच्या निर्णयाविरुद्ध मी किती दिवसांत appeal करू शकतो?",
+        "reference_answer": "कलम 96 नुसार, कलम 92 अंतर्गत निर्णयाने दुखावलेला पक्ष, निर्णयाच्या संदेशनापासून साठ दिवसांत Co-operative Appellate Court मध्ये appeal करू शकतो. न्यायालय निर्णय confirm, set aside किंवा modify करू शकतो."
+      }
+    }
   },
   {
     "id": "disputes-101-loss",
     "category": "Disputes",
-    "question_en": "What happens if an office-bearer causes loss to the society?",
-    "question_hi": "यदि कोई पदाधिकारी सोसाइटी को नुकसान पहुंचाए तो क्या होता है?",
-    "question_mr": "पदाधिकाऱ्याने संस्थेचे नुकसान केल्यास काय होते?",
     "expected_section": "Section 101",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 101, where in the course of an audit, inquiry or inspection it is found that any loss has been caused to the society by an office-bearer, committee member or employee thereof, the Registrar may, after giving such person a reasonable opportunity of being heard, assess the loss and direct the person to make good the loss within such time as may be specified.",
-    "reference_answer_hi": "धारा 101 के अनुसार, यदि अंकेक्षण, जांच या निरीक्षण के दौरान यह पाया जाता है कि किसी पदाधिकारी, समिति सदस्य या कर्मचारी द्वारा सोसाइटी को नुकसान पहुंचाया गया है, तो रजिस्ट्रार उस व्यक्ति को सुनवाई का उचित अवसर देने के बाद नुकसान का आकलन कर सकता है और निर्धारित समय में नुकसान की भरपाई करने का निर्देश दे सकता है।",
-    "reference_answer_mr": "कलम 101 नुसार, लेखापरीक्षण, चौकशी किंवा तपासणीत असे आढळून आल्यास की पदाधिकाऱ्याने, समिती सदस्याने किंवा कर्मचाऱ्याने संस्थेचे नुकसान केले आहे, तर रजिस्ट्रार त्या व्यक्तीला ऐकण्याची वाजवी संधी देऊन तोटा आकारून निर्धारित केलेल्या काळात तोटा भरून काढण्याचे आदेश देऊ शकतात."
+    "variants": {
+      "en": {
+        "question": "What happens if an office-bearer causes loss to the society?",
+        "reference_answer": "Under Section 101, where in the course of an audit, inquiry or inspection it is found that any loss has been caused to the society by an office-bearer, committee member or employee thereof, the Registrar may, after giving such person a reasonable opportunity of being heard, assess the loss and direct the person to make good the loss within such time as may be specified."
+      },
+      "hi": {
+        "question": "यदि कोई पदाधिकारी सोसाइटी को नुकसान पहुंचाए तो क्या होता है?",
+        "reference_answer": "धारा 101 के अनुसार, यदि अंकेक्षण, जांच या निरीक्षण के दौरान यह पाया जाता है कि किसी पदाधिकारी, समिति सदस्य या कर्मचारी द्वारा सोसाइटी को नुकसान पहुंचाया गया है, तो रजिस्ट्रार उस व्यक्ति को सुनवाई का उचित अवसर देने के बाद नुकसान का आकलन कर सकता है और निर्धारित समय में नुकसान की भरपाई करने का निर्देश दे सकता है।"
+      },
+      "hi_romanized": {
+        "question": "Agar koi office-bearer society ko nuksaan pahunchaye to kya hota hai?",
+        "reference_answer": "Section 101 ke anusar, audit, inquiry ya inspection ke dauraan agar pata chalta hai ki kisi office-bearer, committee member ya employee ne society ko loss pahunchaaya hai, to Registrar sunwai ka mauka dekar loss assess kar sakta hai aur nirdhaarit samay mein loss bharpai ka nirdesh de sakta hai."
+      },
+      "mr": {
+        "question": "पदाधिकाऱ्याने संस्थेचे नुकसान केल्यास काय होते?",
+        "reference_answer": "कलम 101 नुसार, लेखापरीक्षण, चौकशी किंवा तपासणीत असे आढळून आल्यास की पदाधिकाऱ्याने, समिती सदस्याने किंवा कर्मचाऱ्याने संस्थेचे नुकसान केले आहे, तर रजिस्ट्रार त्या व्यक्तीला ऐकण्याची वाजवी संधी देऊन तोटा आकारून निर्धारित केलेल्या काळात तोटा भरून काढण्याचे आदेश देऊ शकतात."
+      },
+      "mr_english": {
+        "question": "पदाधिकाऱ्याने society चे नुकसान केल्यास काय होते?",
+        "reference_answer": "कलम 101 नुसार, audit किंवा inquiry मध्ये office-bearer, committee member किंवा employee कडून society चे नुकसान झाले आढळून आल्यास, Registrar वाजवी संधी देऊन तोटा आकारून निर्धारित काळात भरून काढण्याचे आदेश देऊ शकतात."
+      }
+    }
   },
   {
     "id": "audit-81-books",
     "category": "Auditing",
-    "question_en": "What books and accounts must a society maintain?",
-    "question_hi": "सोसाइटी को कौन सी पुस्तकें और खाते रखने होते हैं?",
-    "question_mr": "संस्थेने कोणत्या वह्या व खाती ठेवावीत?",
     "expected_section": "Section 81",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 81, every society shall maintain such books and accounts as may be prescribed by the rules and shall have them audited annually by the auditor appointed under section 81A. The books of accounts shall be balanced and closed on the 30th day of June of each year or on such other date as may be specified in the by-laws.",
-    "reference_answer_hi": "धारा 81 के अनुसार, प्रत्येक सोसाइटी नियमों द्वारा निर्धारित पुस्तकें और खाते रखेगी तथा धारा 81A के तहत नियुक्त लेखापरीक्षक से उनका वार्षिक अंकेक्षण कराएगी। लेखा-पुस्तकें प्रत्येक वर्ष 30 जून को या उप-नियमों में निर्दिष्ट अन्य तिथि को संतुलित और बंद की जाएंगी।",
-    "reference_answer_mr": "कलम 81 नुसार, प्रत्येक संस्था नियमांमध्ये निर्धारित केलेल्या वह्या व खाती ठेवील आणि कलम 81A अंतर्गत नियुक्त लेखापरीक्षकाकडून दरवर्षी त्यांचे लेखापरीक्षण करून घेईल. लेखा-वह्या दर वर्षी 30 जून रोजी किंवा उपनियमांत निर्दिष्ट अन्य तारखेला संतुलित व बंद केल्या जातील."
+    "variants": {
+      "en": {
+        "question": "What books and accounts must a society maintain?",
+        "reference_answer": "Under Section 81, every society shall maintain such books and accounts as may be prescribed by the rules and shall have them audited annually by the auditor appointed under section 81A. The books of accounts shall be balanced and closed on the 30th day of June of each year or on such other date as may be specified in the by-laws."
+      },
+      "hi": {
+        "question": "सोसाइटी को कौन सी पुस्तकें और खाते रखने होते हैं?",
+        "reference_answer": "धारा 81 के अनुसार, प्रत्येक सोसाइटी नियमों द्वारा निर्धारित पुस्तकें और खाते रखेगी तथा धारा 81A के तहत नियुक्त लेखापरीक्षक से उनका वार्षिक अंकेक्षण कराएगी। लेखा-पुस्तकें प्रत्येक वर्ष 30 जून को या उप-नियमों में निर्दिष्ट अन्य तिथि को संतुलित और बंद की जाएंगी।"
+      },
+      "hi_romanized": {
+        "question": "Society ko kaun si books aur accounts rakhne hote hain?",
+        "reference_answer": "Section 81 ke anusar, har society rules mein prescribed books aur accounts rakhegi aur Section 81A ke under appointed auditor se unka annual audit karayegi. Books har saal 30 June ko ya by-laws mein specified kisi anya date par balanced aur band ki jaati hain."
+      },
+      "mr": {
+        "question": "संस्थेने कोणत्या वह्या व खाती ठेवावीत?",
+        "reference_answer": "कलम 81 नुसार, प्रत्येक संस्था नियमांमध्ये निर्धारित केलेल्या वह्या व खाती ठेवील आणि कलम 81A अंतर्गत नियुक्त लेखापरीक्षकाकडून दरवर्षी त्यांचे लेखापरीक्षण करून घेईल. लेखा-वह्या दर वर्षी 30 जून रोजी किंवा उपनियमांत निर्दिष्ट अन्य तारखेला संतुलित व बंद केल्या जातील."
+      },
+      "mr_english": {
+        "question": "Society ने कोणती books आणि accounts ठेवावीत?",
+        "reference_answer": "कलम 81 नुसार, प्रत्येक संस्था rules मध्ये निर्धारित books व accounts ठेवील आणि कलम 81A अंतर्गत नियुक्त auditor कडून दरवर्षी लेखापरीक्षण करून घेईल. लेखा-वह्या दर वर्षी 30 June रोजी किंवा by-laws मध्ये निर्दिष्ट तारखेला संतुलित व बंद केल्या जातात."
+      }
+    }
   },
   {
     "id": "audit-81b-ineligible",
     "category": "Auditing",
-    "question_en": "Who cannot be appointed as an auditor of a society?",
-    "question_hi": "सोसाइटी का लेखापरीक्षक किसे नियुक्त नहीं किया जा सकता?",
-    "question_mr": "संस्थेचा लेखापरीक्षक कोणाला नियुक्त करता येणार नाही?",
     "expected_section": "Section 81B",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 81B, a person is qualified to be appointed as an auditor if the person is a chartered accountant within the meaning of the Chartered Accountants Act, 1949, or has served as an auditor of a co-operative society for not less than five years. No person who is a member of the committee or is in the employment of the society shall be appointed as an auditor of the society.",
-    "reference_answer_hi": "धारा 81B के अनुसार, कोई व्यक्ति तभी लेखापरीक्षक नियुक्त होने की योग्य है जब वह चार्टर्ड अकाउंटेंट्स अधिनियम, 1949 के अर्थ में चार्टर्ड अकाउंटेंट हो या कम से कम पांच वर्षों तक सहकारी सोसाइटी का लेखापरीक्षक रहा हो। समिति का सदस्य या सोसाइटी में नौकरी करने वाला व्यक्ति लेखापरीक्षक नियुक्त नहीं किया जाएगा।",
-    "reference_answer_mr": "कलम 81B नुसार, व्यक्ती तेव्हाच लेखापरीक्षक म्हणून नियुक्त होण्यास पात्र असते जेव्हा ती लेखापाल अधिनियम, 1949 च्या अर्थाने सनदी लेखापाल असते किंवा किमान पाच वर्षे सहकारी संस्थेचा लेखापरीक्षक म्हणून काम केलेले असते. समितीचा सदस्य किंवा संस्थेत नोकरी करणारी व्यक्ती यांना लेखापरीक्षक म्हणून नियुक्त केले जाणार नाही."
+    "variants": {
+      "en": {
+        "question": "Who cannot be appointed as an auditor of a society?",
+        "reference_answer": "Under Section 81B, a person is qualified to be appointed as an auditor if the person is a chartered accountant within the meaning of the Chartered Accountants Act, 1949, or has served as an auditor of a co-operative society for not less than five years. No person who is a member of the committee or is in the employment of the society shall be appointed as an auditor of the society."
+      },
+      "hi": {
+        "question": "सोसाइटी का लेखापरीक्षक किसे नियुक्त नहीं किया जा सकता?",
+        "reference_answer": "धारा 81B के अनुसार, कोई व्यक्ति तभी लेखापरीक्षक नियुक्त होने की योग्य है जब वह चार्टर्ड अकाउंटेंट्स अधिनियम, 1949 के अर्थ में चार्टर्ड अकाउंटेंट हो या कम से कम पांच वर्षों तक सहकारी सोसाइटी का लेखापरीक्षक रहा हो। समिति का सदस्य या सोसाइटी में नौकरी करने वाला व्यक्ति लेखापरीक्षक नियुक्त नहीं किया जाएगा।"
+      },
+      "hi_romanized": {
+        "question": "Society ka auditor kise appoint nahi kar sakte?",
+        "reference_answer": "Section 81B ke anusar, wahi vyakti auditor appoint hone ke liye qualified hai jo Chartered Accountants Act 1949 ke arth mein chartered accountant ho ya kam se kam paanch saal tak kisi cooperative society ka auditor raha ho. Committee ka member ya society ka employee auditor appoint nahi kiya ja sakta."
+      },
+      "mr": {
+        "question": "संस्थेचा लेखापरीक्षक कोणाला नियुक्त करता येणार नाही?",
+        "reference_answer": "कलम 81B नुसार, व्यक्ती तेव्हाच लेखापरीक्षक म्हणून नियुक्त होण्यास पात्र असते जेव्हा ती लेखापाल अधिनियम, 1949 च्या अर्थाने सनदी लेखापाल असते किंवा किमान पाच वर्षे सहकारी संस्थेचा लेखापरीक्षक म्हणून काम केलेले असते. समितीचा सदस्य किंवा संस्थेत नोकरी करणारी व्यक्ती यांना लेखापरीक्षक म्हणून नियुक्त केले जाणार नाही."
+      },
+      "mr_english": {
+        "question": "Society चा auditor कोणाला appoint करता येणार नाही?",
+        "reference_answer": "कलम 81B नुसार, Chartered Accountants Act 1949 च्या अर्थाने chartered accountant असलेली व्यक्ती किंवा किमान पाच वर्षे cooperative society चा auditor राहिलेली व्यक्तीच पात्र असते. समितीचा सदस्य किंवा society चा employee यांना auditor म्हणून नियुक्त केले जाणार नाही."
+      }
+    }
   },
   {
     "id": "audit-83-report",
     "category": "Auditing",
-    "question_en": "What must the auditor's report to the society state?",
-    "question_hi": "लेखापरीक्षक की रिपोर्ट में क्या बताना होता है?",
-    "question_mr": "लेखापरीक्षकाच्या अहवालात काय नमूद करावयाचे असते?",
     "expected_section": "Section 83",
     "expected_act": "Maharashtra Cooperative Societies Act, 1960",
-    "reference_answer_en": "Under Section 83, the auditor shall make a report to the society on the accounts examined by him and on every balance sheet and profit and loss statement laid before the society in general meeting during his tenure. The report shall state whether, in the auditor's opinion, the balance sheet and profit and loss statement show a true and fair view of the state of affairs of the society and whether the society has complied with the provisions of the Act and the rules made thereunder.",
-    "reference_answer_hi": "धारा 83 के अनुसार, लेखापरीक्षक अपने कार्यकाल के दौरान सामान्य सभा के समक्ष रखे गए प्रत्येक तुलन-पत्र और लाभ-हानि विवरण सहित जांचे गए खातों पर सोसाइटी को प्रतिवेदन देगा। प्रतिवेदन में यह बताया जाएगा कि लेखापरीक्षक की राय में तुलन-पत्र और लाभ-हानि विवरण सोसाइटी की स्थिति का सही और न्यायसंगत चित्र प्रस्तुत करते हैं या नहीं, तथा सोसाइटी ने अधिनियम और उसके अंतर्गत बने नियमों का पालन किया है या नहीं।",
-    "reference_answer_mr": "कलम 83 नुसार, लेखापरीक्षक आपल्या कार्यकाळात सर्वसाधारण सभेसमोर मांडलेल्या प्रत्येक उतारा-पत्रकाचा व नफा-तोटा पत्रकाचा समावेश करून तपासलेल्या लेख्यांबाबत संस्थेला अहवाल देईल. अहवालात असे नमूद केले जाईल की लेखापरीक्षकाच्या मते उतारा-पत्रक व नफा-तोटा पत्रक संस्थेच्या परिस्थितीचे खरे व न्याय्य चित्र मांडतात का, तसेच संस्थेने अधिनियम व त्याअंतर्गत केलेल्या नियमांचे पालन केले आहे का."
+    "variants": {
+      "en": {
+        "question": "What must the auditor's report to the society state?",
+        "reference_answer": "Under Section 83, the auditor shall make a report to the society on the accounts examined by him and on every balance sheet and profit and loss statement laid before the society in general meeting during his tenure. The report shall state whether, in the auditor's opinion, the balance sheet and profit and loss statement show a true and fair view of the state of affairs of the society and whether the society has complied with the provisions of the Act and the rules made thereunder."
+      },
+      "hi": {
+        "question": "लेखापरीक्षक की रिपोर्ट में क्या बताना होता है?",
+        "reference_answer": "धारा 83 के अनुसार, लेखापरीक्षक अपने कार्यकाल के दौरान सामान्य सभा के समक्ष रखे गए प्रत्येक तुलन-पत्र और लाभ-हानि विवरण सहित जांचे गए खातों पर सोसाइटी को प्रतिवेदन देगा। प्रतिवेदन में यह बताया जाएगा कि लेखापरीक्षक की राय में तुलन-पत्र और लाभ-हानि विवरण सोसाइटी की स्थिति का सही और न्यायसंगत चित्र प्रस्तुत करते हैं या नहीं, तथा सोसाइटी ने अधिनियम और उसके अंतर्गत बने नियमों का पालन किया है या नहीं।"
+      },
+      "hi_romanized": {
+        "question": "Auditor ki report mein kya hona chahiye?",
+        "reference_answer": "Section 83 ke anusar, auditor apne kaaryakaal mein general meeting ke samaksh rakhe gaye har balance sheet aur profit-loss statement ke saath examined accounts par society ko report dega. Report mein yah bataya jaayega ki auditor ki raay mein balance sheet aur profit-loss statement true aur fair view dete hain ya nahi, aur society ne Act aur rules ka paalan kiya hai ya nahi."
+      },
+      "mr": {
+        "question": "लेखापरीक्षकाच्या अहवालात काय नमूद करावयाचे असते?",
+        "reference_answer": "कलम 83 नुसार, लेखापरीक्षक आपल्या कार्यकाळात सर्वसाधारण सभेसमोर मांडलेल्या प्रत्येक उतारा-पत्रकाचा व नफा-तोटा पत्रकाचा समावेश करून तपासलेल्या लेख्यांबाबत संस्थेला अहवाल देईल. अहवालात असे नमूद केले जाईल की लेखापरीक्षकाच्या मते उतारा-पत्रक व नफा-तोटा पत्रक संस्थेच्या परिस्थितीचे खरे व न्याय्य चित्र मांडतात का, तसेच संस्थेने अधिनियम व त्याअंतर्गत केलेल्या नियमांचे पालन केले आहे का."
+      },
+      "mr_english": {
+        "question": "Auditor च्या report मध्ये काय असणे आवश्यक आहे?",
+        "reference_answer": "कलम 83 नुसार, auditor आपल्या कार्यकाळात सभेसमोर मांडलेल्या प्रत्येक balance sheet व profit-loss statement सह तपासलेल्या लेख्यांबाबत अहवाल देईल. अहवालात असे नमूद केले जाईल की auditor च्या मते balance sheet व profit-loss statement खरे व न्याय्य चित्र मांडतात का आणि संस्थेने Act व rules चे पालन केले आहे का."
+      }
+    }
   }
 ]

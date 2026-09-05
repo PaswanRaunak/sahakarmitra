@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { makeT } from '../i18n.js';
 
 export default function SettingsView({ user, onUpdateUser, language = 'en', initialSubTab = 'profile' }) {
+  const [sessionsNotice, setSessionsNotice] = useState(false);
   const t = makeT(language);
 
   // Profile Form State initialized from user props or defaults
@@ -404,7 +405,7 @@ export default function SettingsView({ user, onUpdateUser, language = 'en', init
                   className="px-6 py-3 bg-[#a03612] hover:bg-[#882c0e] text-white font-bold text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                   <span>{t('saveChanges')}</span>
                 </button>
@@ -517,7 +518,7 @@ export default function SettingsView({ user, onUpdateUser, language = 'en', init
                   className="px-6 py-3 bg-[#a03612] hover:bg-[#882c0e] text-white font-bold text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                   <span>{t('saveChanges')}</span>
                 </button>
@@ -703,11 +704,14 @@ export default function SettingsView({ user, onUpdateUser, language = 'en', init
 
                   <button
                     type="button"
-                    onClick={() => alert('Logged out from all other active sessions.')}
+                    onClick={() => { setSessionsNotice(true); setTimeout(() => setSessionsNotice(false), 4000); }}
                     className="w-full sm:w-auto px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition"
                   >
                     {t('logoutAllDevices')}
                   </button>
+                  {sessionsNotice && (
+                    <p role="status" className="text-[11px] text-emerald-700 font-semibold">All other active sessions were signed out.</p>
+                  )}
                 </div>
               </div>
 

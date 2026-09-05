@@ -1,8 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeT } from '../i18n.js';
+import LanguageMenu from './LanguageMenu.jsx';
 
-export default function LandingPage({ onOpenAuth, onStartChatting, onToggleLanguage, language = 'en' }) {
+export default function LandingPage({ onOpenAuth, onStartChatting, onSetLanguage, language = 'en' }) {
   const t = makeT(language);
+
+  // Live rollout coverage (mirrors the state/language configs via the API)
+  const [states, setStates] = useState(null);     // null = loading
+  const [liveLanguages, setLiveLanguages] = useState(null);
+  useEffect(() => {
+    fetch('/api/states').then((r) => (r.ok ? r.json() : null)).then((d) => {
+      if (d && Array.isArray(d.states)) setStates(d);
+    }).catch(() => {});
+    fetch('/api/languages').then((r) => (r.ok ? r.json() : null)).then((d) => {
+      if (Array.isArray(d)) setLiveLanguages(d.filter((l) => l.enabled).length);
+    }).catch(() => {});
+  }, []);
 
   const SAMPLE_TOPICS = [
     { title: 'AGM quorum & notice rules', query: 'What is the quorum required for an AGM under Section 72 of the MCS Act 1960?' },
@@ -62,7 +75,7 @@ export default function LandingPage({ onOpenAuth, onStartChatting, onToggleLangu
   ];
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] text-[#1c1917] font-sans selection:bg-[#a03612] selection:text-white">
+    <div className="min-h-[100dvh] bg-[#faf8f5] text-[#1c1917] font-sans selection:bg-[#a03612] selection:text-white">
 
       {/* ── Top Navigation ───────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-[#faf8f5]/90 backdrop-blur-xl border-b border-stone-200/70 px-4 sm:px-8 py-3.5">
@@ -87,17 +100,15 @@ export default function LandingPage({ onOpenAuth, onStartChatting, onToggleLangu
           <nav aria-label="Primary" className="hidden md:flex items-center gap-8 text-sm font-semibold text-stone-600">
             <a href="#home" className="text-[#a03612] hover:text-[#882c0e] transition-colors">{t('navHome')}</a>
             <a href="#features" className="hover:text-[#a03612] transition-colors">{t('navFeatures')}</a>
-            <a href="#experts" className="hover:text-[#a03612] transition-colors">{t('navAbout')}</a>
+            <a href="#about" className="hover:text-[#a03612] transition-colors">{t('navAbout')}</a>
           </nav>
 
           <div className="flex items-center gap-2.5">
-            <button
-              onClick={onToggleLanguage}
-              aria-label={`Switch language (current: ${language})`}
-              className="px-3 py-2 text-xs font-bold text-stone-700 bg-white border border-stone-200 rounded-xl hover:bg-stone-50 transition-colors shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
-            >
-              {language.toUpperCase()}
-            </button>
+            <LanguageMenu
+              current={language}
+              onChange={onSetLanguage}
+              buttonClassName="px-3 py-2 text-xs font-bold text-stone-700 bg-white border border-stone-200 rounded-xl hover:bg-stone-50 transition-colors shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
+            />
             <button
               onClick={() => onOpenAuth('login')}
               className="px-4 sm:px-5 py-2.5 text-xs font-extrabold text-white bg-[#a03612] hover:bg-[#882c0e] rounded-xl shadow-xs hover:shadow-md transition-[transform,box-shadow,background-color] transform hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612] focus-visible:ring-offset-2"
@@ -109,7 +120,7 @@ export default function LandingPage({ onOpenAuth, onStartChatting, onToggleLangu
         </div>
       </header>
 
-      <main>
+      <main id="main-content">
         {/* ── Hero: editorial offset, one answer artifact ──────── */}
         <section id="home" className="pt-12 sm:pt-20 pb-14 sm:pb-20 px-4 sm:px-8 max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
@@ -125,24 +136,34 @@ export default function LandingPage({ onOpenAuth, onStartChatting, onToggleLangu
               </h1>
 
               <p className="text-base sm:text-lg text-stone-600 max-w-xl leading-relaxed">
-                SahakarMitra gives cooperative housing societies and urban banks across Maharashtra, Gujarat, Karnataka, and Multi-State jurisdictions verified answers straight from statute, in English, हिंदी, and मराठी.
+                SahakarMitra gives cooperative housing societies and urban banks verified answers straight from statute, in English, हिंदी, and मराठी, with more states and Indian languages rolling out as their Acts are validated.
               </p>
 
-              {/* Supported Jurisdictions Pills */}
+              {/* Supported Jurisdictions (live from the rollout config) */}
               <div className="flex flex-wrap gap-2 pt-1">
-                <span className="px-2.5 py-1 bg-white border border-stone-200 rounded-lg text-[11px] font-bold text-stone-700 shadow-xs flex items-center gap-1.5">
-                  <span>🏛️</span> Maharashtra (MCS Act)
-                </span>
-                <span className="px-2.5 py-1 bg-white border border-stone-200 rounded-lg text-[11px] font-bold text-stone-700 shadow-xs flex items-center gap-1.5">
-                  <span>🏢</span> Gujarat (GCS Act)
-                </span>
-                <span className="px-2.5 py-1 bg-white border border-stone-200 rounded-lg text-[11px] font-bold text-stone-700 shadow-xs flex items-center gap-1.5">
-                  <span>🏛️</span> Karnataka (KCS Act)
-                </span>
-                <span className="px-2.5 py-1 bg-white border border-stone-200 rounded-lg text-[11px] font-bold text-stone-700 shadow-xs flex items-center gap-1.5">
-                  <span>🇮🇳</span> Central Multi-State
-                </span>
+                {(states
+                  ? states.states.filter((st) => st.enabled)
+                  : [
+                      { id: 'Maharashtra', act_name: 'MCS Act' },
+                      { id: 'Gujarat', act_name: 'GCS Act' },
+                      { id: 'Karnataka', act_name: 'KCS Act' },
+                      { id: 'Multi-State', act_name: 'Central Multi-State' },
+                    ]
+                ).map((st) => (
+                  <span key={st.id} className="px-2.5 py-1 bg-white border border-stone-200 rounded-lg text-[11px] font-bold text-stone-700 shadow-xs flex items-center gap-1.5">
+                    <svg className="w-3 h-3 text-[#a03612]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l9-4 9 4v6c0 5.55-3.84 10.74-9 12-5.16-1.26-9-5.45-9-12V6z" />
+                    </svg>
+                    {st.id}
+                  </span>
+                ))}
               </div>
+
+              {states && states.coverage && (
+                <p className="text-[11px] font-semibold text-stone-400 tabular-nums">
+                  Coverage: {states.coverage.enabled}/{states.coverage.total} jurisdictions live · new states onboarded as their Acts are verified
+                </p>
+              )}
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
                 <button
@@ -151,7 +172,7 @@ export default function LandingPage({ onOpenAuth, onStartChatting, onToggleLangu
                 >
                   <span>Launch Legal Assistant</span>
                   <svg className="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9-7-9-7-9 7 9 7z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9-7-9-7-9 7 9 7z" />
                   </svg>
                 </button>
 
@@ -170,11 +191,11 @@ export default function LandingPage({ onOpenAuth, onStartChatting, onToggleLangu
                 </div>
                 <div>
                   <dt className="text-[11px] text-stone-500 font-semibold">States & Acts</dt>
-                  <dd className="text-2xl sm:text-3xl font-black text-stone-900 tabular-nums">4</dd>
+                  <dd className="text-2xl sm:text-3xl font-black text-stone-900 tabular-nums">{states ? states.coverage.enabled : 4}</dd>
                 </div>
                 <div>
                   <dt className="text-[11px] text-stone-500 font-semibold">Languages</dt>
-                  <dd className="text-2xl sm:text-3xl font-black text-stone-900 tabular-nums">3</dd>
+                  <dd className="text-2xl sm:text-3xl font-black text-stone-900 tabular-nums">{liveLanguages ?? 3}</dd>
                 </div>
                 <div>
                   <dt className="text-[11px] text-stone-500 font-semibold">Instant support</dt>
@@ -209,7 +230,7 @@ export default function LandingPage({ onOpenAuth, onStartChatting, onToggleLangu
 
                 <figcaption className="px-6 sm:px-8 py-4 bg-[#faf8f5] border-t border-stone-100 flex items-center gap-2 text-[11px] font-semibold text-[#1b4342]">
                   <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
                   Verified · Section 29, Model Bye-laws · MCS Act 1960
                 </figcaption>

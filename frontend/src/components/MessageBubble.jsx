@@ -42,8 +42,8 @@ function renderFormattedContent(text, isUser = false) {
     }
 
     // 2. Headings (# Heading, ## Heading, ### Heading, #### Heading)
-    if (/^#{1,6}\s+/.test(firstLine)) {
-      const match = firstLine.match(/^(#{1,6})\s+(.*)/);
+    if (/^#{1,6}\s*(?=\S)/.test(firstLine)) {
+      const match = firstLine.match(/^(#{1,6})\s*(.*)/);
       const level = match[1].length;
       const title = match[2];
 
@@ -146,9 +146,9 @@ function renderFormattedContent(text, isUser = false) {
       }
 
       // Heading embedded in line
-      if (/^#{1,6}\s+/.test(trimmed)) {
+      if (/^#{1,6}\s*(?=\S)/.test(trimmed)) {
         currentList = null;
-        const match = trimmed.match(/^(#{1,6})\s+(.*)/);
+        const match = trimmed.match(/^(#{1,6})\s*(.*)/);
         processedElements.push({ type: 'heading', level: match[1].length, title: match[2] });
         return;
       }
@@ -298,6 +298,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
   const [feedback, setFeedback] = useState(null); // 'up' | 'down' | null
   const [previewImage, setPreviewImage] = useState(null);
   const [isPlayingSpeech, setIsPlayingSpeech] = useState(false);
+  const [speechNotice, setSpeechNotice] = useState(false);
 
   const handleCopy = async () => {
     try {
@@ -311,7 +312,8 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
 
   const handleToggleSpeech = () => {
     if (!('speechSynthesis' in window)) {
-      alert(t('speechNotSupported'));
+      setSpeechNotice(true);
+      setTimeout(() => setSpeechNotice(false), 4000);
       return;
     }
 
@@ -452,7 +454,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
             <div className="mt-4 pt-3 border-t border-stone-200/80 space-y-2">
               <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#a03612]">
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
                 <span>{t('sourcesHeading')}</span>
               </div>
@@ -540,6 +542,12 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
                   </button>
                 )}
               </div>
+
+              {speechNotice && (
+                <span role="status" className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1">
+                  {t('speechNotSupported')}
+                </span>
+              )}
 
               {/* Thumbs Up / Down Feedback */}
               <div className="flex items-center gap-1.5">

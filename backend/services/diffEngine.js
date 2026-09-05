@@ -124,10 +124,17 @@ export async function detectChanges(sourceUrls = new Map()) {
           // amendments never overwrite each other
           const pendingName = `${path.parse(file).name}__${timestampSlug()}${path.extname(file)}`;
           const pendingPath = path.join(PENDING_DIR, pendingName);
+          // On failure the manifest is left untouched: the file stays in
+          // raw/ and the change is re-flagged on the next run.
           if (fs.existsSync(pendingPath)) {
-            result.errors.push(`pending file already exists: ${pendingName}`);
-          } else {
+            result.errors.push(`pending file already exists, retry next run: ${pendingName}`);
+            continue;
+          }
+          try {
             fs.renameSync(filePath, pendingPath);
+          } catch (err) {
+            result.errors.push(`${key}: rename to pending failed (${err.message}) — will retry`);
+            continue;
           }
           entry.md5_hash = md5;
           entry.last_changed = now;

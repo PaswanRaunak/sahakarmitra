@@ -69,9 +69,9 @@ export default function WelcomeModal({ onClose, onStartChat, language = 'en' }) 
               </svg>
             </div>
             <div>
-              <h4 className="text-xs font-bold text-stone-900 group-hover:text-[#a03612] transition">
+              <span className="text-xs font-bold text-stone-900 group-hover:text-[#a03612] transition block">
                 {t('feature1Title')}
-              </h4>
+              </span>
               <p className="text-[11px] text-stone-500 leading-snug">
                 {t('feature1Body')}
               </p>
@@ -90,9 +90,9 @@ export default function WelcomeModal({ onClose, onStartChat, language = 'en' }) 
               </svg>
             </div>
             <div>
-              <h4 className="text-xs font-bold text-stone-900 group-hover:text-[#2d6a68] transition">
+              <span className="text-xs font-bold text-stone-900 group-hover:text-[#2d6a68] transition block">
                 {t('feature2Title')}
-              </h4>
+              </span>
               <p className="text-[11px] text-stone-500 leading-snug">
                 {t('feature2Body')}
               </p>
@@ -111,9 +111,9 @@ export default function WelcomeModal({ onClose, onStartChat, language = 'en' }) 
               </svg>
             </div>
             <div>
-              <h4 className="text-xs font-bold text-stone-900 group-hover:text-cyan-800 transition">
+              <span className="text-xs font-bold text-stone-900 group-hover:text-cyan-800 transition block">
                 {t('feature3Title')}
-              </h4>
+              </span>
               <p className="text-[11px] text-stone-500 leading-snug">
                 {t('feature3Body')}
               </p>
@@ -128,7 +128,7 @@ export default function WelcomeModal({ onClose, onStartChat, language = 'en' }) 
           className="w-full py-3.5 bg-[#a03612] hover:bg-[#882c0e] text-white font-bold text-xs rounded-2xl shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
           </svg>
           <span>{t('getStarted')}</span>
         </button>

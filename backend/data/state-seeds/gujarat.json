@@ -1,0 +1,43 @@
+{
+  "state": "Gujarat",
+  "generated_at": "2026-09-05T19:11:50.882Z",
+  "needs_real_verification": true,
+  "note": "Questions auto-derived from ingested section titles. Answers come from the real source text via retrieval. Human review recommended.",
+  "seeds": [
+    {
+      "question": "What does \"Section 4: Societies which may be registered\" say?",
+      "expected_section": "4",
+      "derived_from": "Section 4: Societies which may be registered",
+      "needs_real_verification": true,
+      "derived_automatically": true
+    },
+    {
+      "question": "What does \"Section 9: Registration and certificate of registration\" say?",
+      "expected_section": "9",
+      "derived_from": "Section 9: Registration and certificate of registration",
+      "needs_real_verification": true,
+      "derived_automatically": true
+    },
+    {
+      "question": "What does \"Section 22: Rights and duties of members\" say?",
+      "expected_section": "22",
+      "derived_from": "Section 22: Rights and duties of members",
+      "needs_real_verification": true,
+      "derived_automatically": true
+    },
+    {
+      "question": "What does \"Section 28: Voting powers of members\" say?",
+      "expected_section": "28",
+      "derived_from": "Section 28: Voting powers of members",
+      "needs_real_verification": true,
+      "derived_automatically": true
+    },
+    {
+      "question": "What does \"Section 36: Expulsion of members\" say?",
+      "expected_section": "36",
+      "derived_from": "Section 36: Expulsion of members",
+      "needs_real_verification": true,
+      "derived_automatically": true
+    }
+  ]
+}

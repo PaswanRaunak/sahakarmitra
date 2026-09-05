@@ -29,6 +29,8 @@ review-scores.json
 **/data/pending-ingestion/
 **/data/updates/
 **/data/updates-applied/
+data/state-docs-applied/
+data/state-seeds/
 *.embeddings_cache.json
 *.traineddata
 *.sqlite3

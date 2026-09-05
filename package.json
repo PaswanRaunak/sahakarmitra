@@ -1,0 +1,16 @@
+{
+  "name": "sahakarmitra",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SahakarMitra root convenience scripts",
+  "scripts": {
+    "telegram-bot": "npm --prefix backend run telegram-bot",
+    "dev": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "ingest": "npm --prefix backend run ingest",
+    "test": "npm --prefix backend run test",
+    "validate:citations": "npm --prefix backend run validate:citations",
+    "validate:translations": "npm --prefix backend run validate:translations"
+  }
+}

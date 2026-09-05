@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { makeT } from '../i18n.js';
+import LanguageMenu from './LanguageMenu.jsx';
 
 export default function DashboardHeader({
   language,
@@ -17,7 +18,25 @@ export default function DashboardHeader({
 }) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const profileMenuRef = useRef(null);
   const t = makeT(language);
+
+  // Close the profile menu on outside click or Escape
+  useEffect(() => {
+    if (!showProfileMenu) return;
+    const onPointer = (e) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) {
+        setShowProfileMenu(false);
+      }
+    };
+    const onKey = (e) => { if (e.key === 'Escape') setShowProfileMenu(false); };
+    document.addEventListener('mousedown', onPointer);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onPointer);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [showProfileMenu]);
 
   const getDerivedName = (u) => {
     if (u?.name && u.name.trim().length > 1) return u.name.trim();
@@ -115,7 +134,10 @@ export default function DashboardHeader({
             className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-stone-200 rounded-full text-xs font-semibold text-stone-700 hover:bg-stone-50 hover:border-[#a03612]/40 transition shadow-xs active:scale-95"
             title={`${t('stateSelectorLabel') || 'State'}: ${selectedState}`}
           >
-            <span className="text-[#a03612] text-xs">📍</span>
+            <svg className="w-3.5 h-3.5 text-[#a03612]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
             <span className="font-bold text-stone-800">{selectedState}</span>
             <svg className="w-3.5 h-3.5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -136,10 +158,11 @@ export default function DashboardHeader({
           </button>
 
           {/* User Profile Avatar with Clean Dropdown Menu */}
-          <div className="relative">
+          <div className="relative" ref={profileMenuRef}>
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               aria-label={t('accountSettings')}
+              aria-expanded={showProfileMenu}
               className="w-9 h-9 rounded-full bg-[#2d6a68] text-white font-bold text-xs flex items-center justify-center border-2 border-white shadow-sm hover:scale-105 transition transform active:scale-95"
               title={t('accountSettings')}
             >

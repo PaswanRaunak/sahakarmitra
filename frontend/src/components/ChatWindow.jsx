@@ -39,6 +39,7 @@ export default function ChatWindow({
   const [fileError, setFileError] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [isListening, setIsListening] = useState(false);
+  const [speechNotice, setSpeechNotice] = useState(null);
 
   const recognitionRef = useRef(null);
   // Text inserted by the current dictation session. Replaced on every
@@ -53,7 +54,8 @@ export default function ChatWindow({
   const toggleListening = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert(t('speechNotSupported'));
+      setSpeechNotice(t('speechNotSupported'));
+      setTimeout(() => setSpeechNotice(null), 4000);
       return;
     }
 
@@ -396,7 +398,7 @@ export default function ChatWindow({
                 {t('followUpsHeading')}
               </p>
               <div className="flex flex-wrap gap-2">
-                {FOLLOW_UPS[language]?.map((q) => (
+                {(FOLLOW_UPS[language] || FOLLOW_UPS.en).map((q) => (
                   <button
                     key={q}
                     type="button"
@@ -436,7 +438,7 @@ export default function ChatWindow({
           className="absolute bottom-24 right-6 sm:right-8 z-20 px-4 py-2.5 bg-white text-[#a03612] border border-amber-200/90 shadow-lg rounded-full text-xs font-extrabold hover:bg-amber-50 active:scale-95 transition-[background-color,transform] duration-200 flex items-center gap-1.5 cursor-pointer animate-slide-up"
         >
           <svg className="w-3.5 h-3.5 text-[#a03612] animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
           <span>{t('scrollToBottom')}</span>
         </button>
@@ -451,6 +453,13 @@ export default function ChatWindow({
             <div role="alert" className="flex items-center justify-between px-4 py-2 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs animate-fade-in">
               <span>{fileError}</span>
               <button type="button" onClick={() => setFileError(null)} aria-label="Dismiss error" className="font-bold ml-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">×</button>
+            </div>
+          )}
+
+          {/* Speech support notice */}
+          {speechNotice && (
+            <div role="status" className="px-4 py-2 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl text-xs animate-fade-in">
+              {speechNotice}
             </div>
           )}
 
@@ -510,12 +519,12 @@ export default function ChatWindow({
             <div className="flex items-center justify-between px-4 py-2.5 bg-amber-500/10 border border-amber-500/30 text-[#a03612] rounded-2xl text-xs font-bold shadow-soft animate-slide-up backdrop-blur-xs">
               <div className="flex items-center gap-3">
                 {/* Animated Sound Wave Equalizer Bars */}
-                <div className="flex items-center gap-1 h-5 px-1">
-                  <span className="w-1 bg-[#a03612] rounded-full animate-audio-bar-1"></span>
-                  <span className="w-1 bg-[#a03612] rounded-full animate-audio-bar-2"></span>
-                  <span className="w-1 bg-[#a03612] rounded-full animate-audio-bar-3"></span>
-                  <span className="w-1 bg-[#a03612] rounded-full animate-audio-bar-4"></span>
-                  <span className="w-1 bg-[#a03612] rounded-full animate-audio-bar-5"></span>
+                <div className="flex items-end gap-1 h-5 px-1">
+                  <span className="w-1 h-5 bg-[#a03612] rounded-full origin-bottom animate-audio-bar-1"></span>
+                  <span className="w-1 h-5 bg-[#a03612] rounded-full origin-bottom animate-audio-bar-2"></span>
+                  <span className="w-1 h-5 bg-[#a03612] rounded-full origin-bottom animate-audio-bar-3"></span>
+                  <span className="w-1 h-5 bg-[#a03612] rounded-full origin-bottom animate-audio-bar-4"></span>
+                  <span className="w-1 h-5 bg-[#a03612] rounded-full origin-bottom animate-audio-bar-5"></span>
                 </div>
                 <span className="font-bold text-stone-900 tracking-tight">{t('listening')}</span>
               </div>
@@ -612,7 +621,7 @@ export default function ChatWindow({
                   <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />
                 ) : (
                   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M12 4.5l7.5 7.5-7.5 7.5-7.5-7.5z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.5l7.5 7.5-7.5 7.5-7.5-7.5z" />
                   </svg>
                 )}
               </button>

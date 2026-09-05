@@ -154,10 +154,25 @@ async function validateCollection(collectionName) {
   const client = new ChromaClient({ path: CHROMA_URL });
   const col = await client.getCollection({ name: collectionName });
 
+  // The dataset is language-indexed (variants structure). The retrieval
+  // gate validates the ENGLISH variants only: production retrieval always
+  // embeds English (non-English queries are translated first in chat.js),
+  // so Devanagari/Tamil questions here would NOT reflect real behavior.
+  // Per-language response quality is gated separately by
+  // validate:translations and validate-language (full chat pipeline).
+  const tests = [];
+  for (const entry of entries) {
+    const variants = entry.variants || {};
+    const en = variants.en || Object.values(variants)[0];
+    if (en?.question && en?.reference_answer) {
+      tests.push({ id: entry.id, question: en.question, expected_section: entry.expected_section });
+    }
+  }
+
   let pass = 0;
   const failures = [];
-  for (const entry of entries) {
-    const qEmb = await generateEmbedding(entry.question_en);
+  for (const test of tests) {
+    const qEmb = await generateEmbedding(test.question);
     const res = await col.query({ queryEmbeddings: [qEmb], nResults: 9 });
 
     // first 3 DISTINCT parent sections (mirrors retrieval's parent dedup)
@@ -168,14 +183,14 @@ async function validateCollection(collectionName) {
       if (sections.length >= 3) break;
     }
 
-    const want = sectionNumberOf(entry.expected_section);
+    const want = sectionNumberOf(test.expected_section);
     const ok = want && sections.some((s) => sectionNumberOf(s) === want);
     if (ok) pass += 1;
-    else failures.push(`${entry.id}: expected ${entry.expected_section}, got [${sections.join(' | ')}]`);
+    else failures.push(`${test.id}: expected ${test.expected_section}, got [${sections.join(' | ')}]`);
   }
 
-  const accuracy = pass / entries.length;
-  return { total: entries.length, pass, accuracy, failures };
+  const accuracy = tests.length ? pass / tests.length : 0;
+  return { total: tests.length, pass, accuracy, failures };
 }
 
 // ── Step F: prune old collections ───────────────────────────────

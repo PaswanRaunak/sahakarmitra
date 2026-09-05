@@ -99,32 +99,94 @@ app.get('/api/library', async (req, res) => {
   }
 });
 
-// ── Bookmarks Endpoints ─────────────────────────────────────────
+// ── State rollout config ────────────────────────────────────────
+// Drives the state selector: enabled jurisdictions selectable,
+// disabled greyed as "coming soon". Coverage counts come straight
+// from state-config.json — honest, live progress.
+const stateConfigPath = path.join(__dirname, 'data', 'state-config.json');
+
+app.get('/api/states', (req, res) => {
+  try {
+    const config = JSON.parse(fs.readFileSync(stateConfigPath, 'utf-8'));
+    const states = Object.entries(config)
+      .filter(([name]) => !name.startsWith('_'))
+      .map(([name, flags]) => ({
+        id: name,
+        name,
+        enabled: !!flags.enabled,
+        validated: !!flags.validated,
+        act_name: flags.act_name || null,
+        description: flags.description || null,
+      }))
+      .sort((a, b) => (a.enabled === b.enabled ? a.name.localeCompare(b.name) : a.enabled ? -1 : 1));
+    const enabledCount = states.filter((s) => s.enabled).length;
+    res.json({ states, coverage: { enabled: enabledCount, total: states.length } });
+  } catch (err) {
+    console.error('[states] Failed to read state config:', err.message);
+    res.status(500).json({ error: 'Could not load state configuration.' });
+  }
+});
+
+// ── Language rollout config ─────────────────────────────────────
+// Drives the language selector: enabled languages are selectable,
+// disabled ones are shown greyed as "coming soon". Names come from
+// Intl.DisplayNames (no hardcoded per-language maps).
+const languageConfigPath = path.join(__dirname, 'data', 'language-config.json');
+
+app.get('/api/languages', (req, res) => {
+  try {
+    const config = JSON.parse(fs.readFileSync(languageConfigPath, 'utf-8'));
+    const displayNames = new Intl.DisplayNames(['en'], { type: 'language' });
+    const languages = Object.entries(config)
+      .filter(([code]) => !code.startsWith('_'))
+      .map(([code, flags]) => ({
+        code,
+        name: displayNames.of(code) || code,
+        enabled: !!flags.enabled,
+        validated: !!flags.validated,
+      }))
+      .sort((a, b) => (a.enabled === b.enabled ? a.name.localeCompare(b.name) : a.enabled ? -1 : 1));
+    res.json(languages);
+  } catch (err) {
+    console.error('[languages] Failed to read language config:', err.message);
+    res.status(500).json({ error: 'Could not load language configuration.' });
+  }
+});
+
+// ── Bookmarks Endpoints (per-account) ───────────────────────────
+// Bookmarks are scoped to the signed-in account (email). The store is
+// { [email]: [items] }; a legacy flat-array bookmarks.json (which mixed
+// accounts) is discarded rather than attributed.
 const bookmarksPath = path.join(__dirname, 'data', 'bookmarks.json');
 
-function readBookmarks() {
+function readBookmarkStore() {
   try {
     if (fs.existsSync(bookmarksPath)) {
-      const raw = fs.readFileSync(bookmarksPath, 'utf-8');
-      return JSON.parse(raw);
+      const raw = JSON.parse(fs.readFileSync(bookmarksPath, 'utf-8'));
+      if (raw && typeof raw === 'object' && !Array.isArray(raw)) return raw;
+      // Legacy flat array (pre-account-scoping): unattributable, drop it
     }
   } catch (err) {
     console.warn('[bookmarks] Failed to read bookmarks:', err.message);
   }
-  return [];
+  return {};
 }
 
-function writeBookmarks(bookmarks) {
+function writeBookmarkStore(store) {
   try {
-    fs.writeFileSync(bookmarksPath, JSON.stringify(bookmarks, null, 2), 'utf-8');
+    fs.writeFileSync(bookmarksPath, JSON.stringify(store, null, 2), 'utf-8');
   } catch (err) {
     console.warn('[bookmarks] Failed to write bookmarks:', err.message);
   }
 }
 
+function emailOf(req, body = {}) {
+  return String(req.query.email || body.email || 'anonymous').toLowerCase().slice(0, 200);
+}
+
 app.get('/api/bookmarks', (req, res) => {
-  const bookmarks = readBookmarks();
-  res.json(bookmarks);
+  const store = readBookmarkStore();
+  res.json(store[emailOf(req)] || []);
 });
 
 app.post('/api/bookmarks', (req, res) => {
@@ -132,26 +194,35 @@ app.post('/api/bookmarks', (req, res) => {
   if (!item || (!item.id && !item.section_title)) {
     return res.status(400).json({ error: 'Invalid bookmark item' });
   }
-  let bookmarks = readBookmarks();
-  const existingIndex = bookmarks.findIndex(b => b.id === item.id || b.section_title === item.section_title);
+  const email = emailOf(req, item);
+  const store = readBookmarkStore();
+  const list = store[email] || [];
+  const existingIndex = list.findIndex(b => b.id === item.id || b.section_title === item.section_title);
   if (existingIndex >= 0) {
-    bookmarks.splice(existingIndex, 1);
+    list.splice(existingIndex, 1);
   } else {
-    bookmarks.unshift({
-      ...item,
+    list.unshift({
+      id: item.id,
+      section_title: item.section_title,
+      act_name: item.act_name,
+      category: item.category,
+      source_file: item.source_file,
+      excerpt: item.excerpt,
       bookmarkedAt: new Date().toISOString(),
     });
   }
-  writeBookmarks(bookmarks);
-  res.json(bookmarks);
+  store[email] = list;
+  writeBookmarkStore(store);
+  res.json(list);
 });
 
 app.delete('/api/bookmarks/:id', (req, res) => {
-  const { id } = req.params;
-  let bookmarks = readBookmarks();
-  bookmarks = bookmarks.filter(b => b.id !== id && b.section_title !== id);
-  writeBookmarks(bookmarks);
-  res.json(bookmarks);
+  const email = emailOf(req);
+  const store = readBookmarkStore();
+  const list = store[email] || [];
+  store[email] = list.filter(b => b.id !== req.params.id && b.section_title !== req.params.id);
+  writeBookmarkStore(store);
+  res.json(store[email]);
 });
 
 // ── Feedback endpoint, persists thumbs up/down for later analysis ──

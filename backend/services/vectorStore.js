@@ -44,21 +44,27 @@ export function getActiveCollectionName() {
     }
     return activeCache.value;
   } catch {
-    if (activeCache.value === null) {
-      console.warn(`[vectorStore] No valid active-collection pointer (${path.basename(ACTIVE_COLLECTION_FILE)}), using legacy default "${DEFAULT_COLLECTION}".`);
+    // Transient read failure (mid-write, AV scan, etc.): keep serving the
+    // last-known-good pointer rather than reverting to the legacy default,
+    // which may already have been pruned after a swap.
+    if (activeCache.value !== null) {
+      return activeCache.value;
     }
+    console.warn(`[vectorStore] No valid active-collection pointer (${path.basename(ACTIVE_COLLECTION_FILE)}), using legacy default "${DEFAULT_COLLECTION}".`);
     return DEFAULT_COLLECTION;
   }
 }
 
-/** The swap itself: atomically repoint the live collection (one JSON write). */
+/** The swap itself: atomically repoint the live collection (write + rename). */
 export function setActiveCollectionName(name) {
   if (typeof name !== 'string' || !name.trim()) {
     throw new Error('setActiveCollectionName: name must be a non-empty string');
   }
   const value = name.trim();
   fs.mkdirSync(path.dirname(ACTIVE_COLLECTION_FILE), { recursive: true });
-  fs.writeFileSync(ACTIVE_COLLECTION_FILE, JSON.stringify({ active: value, updated_at: new Date().toISOString() }, null, 2), 'utf-8');
+  const tmp = `${ACTIVE_COLLECTION_FILE}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify({ active: value, updated_at: new Date().toISOString() }, null, 2), 'utf-8');
+  fs.renameSync(tmp, ACTIVE_COLLECTION_FILE);
   activeCache = { mtimeMs: fs.statSync(ACTIVE_COLLECTION_FILE).mtimeMs, value };
   console.log(`[vectorStore] Active collection swapped → "${value}".`);
 }
