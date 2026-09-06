@@ -16,6 +16,7 @@ import SettingsView    from './components/SettingsView.jsx';
 import ExpertsView     from './components/ExpertsView.jsx';
 import LibraryView     from './components/LibraryView.jsx';
 import StateModal      from './components/StateModal.jsx';
+import ErrorBoundary   from './components/ErrorBoundary.jsx';
 import { makeT }       from './i18n.js';
 
 const EXAMPLE_QUESTIONS = {
@@ -526,6 +527,7 @@ export default function App() {
   const isDevanagari = language !== 'en';
 
   return (
+    <ErrorBoundary>
     <div className={`min-h-screen bg-[#faf8f5] text-[#1c1917] flex flex-col font-sans ${isDevanagari ? 'lang-dev' : ''}`}>
 
       {/* Skip link, first focusable element on the page */}
@@ -538,12 +540,14 @@ export default function App() {
 
       {/* VIEW 1: LANDING PAGE */}
       {currentView === 'landing' && (
-        <LandingPage
-          onOpenAuth={(mode) => setAuthModal(mode)}
-          onStartChatting={handleStartChatting}
-          onSetLanguage={setLanguage}
-          language={language}
-        />
+        <ErrorBoundary compact name="Landing page">
+          <LandingPage
+            onOpenAuth={(mode) => setAuthModal(mode)}
+            onStartChatting={handleStartChatting}
+            onSetLanguage={setLanguage}
+            language={language}
+          />
+        </ErrorBoundary>
       )}
 
       {/* VIEW 2: AI COOPERATIVE DASHBOARD WORKSPACE */}
@@ -636,14 +640,16 @@ export default function App() {
             <div id="main-content" className="flex-1 flex flex-col min-w-0 bg-[#faf8f5]">
 
               {activeTab === 'dashboard' ? (
-                <DashboardView
-                  user={currentUser}
-                  chats={chats}
-                  onSelectChat={(id) => { setActiveChatId(id); setActiveTab('chat'); }}
-                  onNewChat={handleNewChat}
-                  onOpenWelcome={() => setShowWelcome(true)}
-                  language={language}
-                />
+                <ErrorBoundary compact name="Dashboard Overview" onOpenHome={() => setActiveTab('chat')}>
+                  <DashboardView
+                    user={currentUser}
+                    chats={chats}
+                    onSelectChat={(id) => { setActiveChatId(id); setActiveTab('chat'); }}
+                    onNewChat={handleNewChat}
+                    onOpenWelcome={() => setShowWelcome(true)}
+                    language={language}
+                  />
+                </ErrorBoundary>
               ) : activeTab === 'settings' ? (
                 <SettingsView
                   user={currentUser}
@@ -723,5 +729,6 @@ export default function App() {
       )}
 
     </div>
+    </ErrorBoundary>
   );
 }

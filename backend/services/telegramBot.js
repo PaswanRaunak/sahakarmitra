@@ -97,6 +97,38 @@ export function markdownToTelegramHtml(text) {
   return s;
 }
 
+// Telegram hard-limits one message at 4096 characters. Split on
+// paragraph boundaries first, falling back to hard slices.
+function splitTelegramMessage(html, limit = 4000) {
+  if (html.length <= limit) return [html];
+  const parts = [];
+  let rest = html;
+  while (rest.length > limit) {
+    let cut = rest.lastIndexOf('\n\n', limit);
+    if (cut < limit * 0.4) cut = rest.lastIndexOf('\n', limit);
+    if (cut < limit * 0.4) cut = limit;
+    parts.push(rest.slice(0, cut));
+    rest = rest.slice(cut).replace(/^\n+/, '');
+  }
+  if (rest) parts.push(rest);
+  return parts;
+}
+
+// Send with graceful degradation: if Telegram rejects the HTML entities,
+// retry as unformatted plain text so the user never loses the answer.
+async function sendRichMessage(bot, chatId, html, extra = {}) {
+  const parts = splitTelegramMessage(html);
+  for (const part of parts) {
+    try {
+      await bot.sendMessage(chatId, part, { parse_mode: 'HTML', disable_web_page_preview: true, ...extra });
+    } catch (err) {
+      console.warn('[telegram] HTML send failed, retrying as plain text:', err.message);
+      const plain = part.replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+      await bot.sendMessage(chatId, plain, { disable_web_page_preview: true, ...extra });
+    }
+  }
+}
+
 function formatCitations(sources) {
   if (!Array.isArray(sources) || sources.length === 0) return '';
   const lines = sources.map((s, i) => {
@@ -210,7 +242,7 @@ export function startTelegramBot(token) {
 
       const html = markdownToTelegramHtml(answer) + formatCitations(sources);
       if (status) await bot.deleteMessage(chatId, status.message_id).catch(() => {});
-      await bot.sendMessage(chatId, html, { parse_mode: 'HTML', disable_web_page_preview: true });
+      await sendRichMessage(bot, chatId, html);
       console.log(`[telegram] OK  answer_len=${answer.length}`);
     } catch (err) {
       console.error('[telegram] pipeline error:', err.message);

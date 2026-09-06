@@ -15,7 +15,9 @@ export default function DashboardView({
   language = 'en'
 }) {
   const [showTip, setShowTip] = useState(true);
-  const [live, setLive] = useState(FALLBACK_STATS);
+  // Live figures fetched from the APIs on mount; CORPUS is the fallback
+  // so the strip still renders if the backend is briefly unreachable.
+  const [live, setLive] = useState(CORPUS);
   const t = makeT(language);
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export default function DashboardView({
     }).catch(() => {});
   }, []);
 
-  // Time of day greeting
+    // Time of day greeting
   const hour = new Date().getHours();
   const getDerivedName = (u) => {
     if (u?.name && u.name.trim().length > 1) return u.name.trim();
@@ -55,9 +57,9 @@ export default function DashboardView({
 
   const stats = [
     { label: t('statChats'), value: chats.length },
-    { label: t('statSections') || 'Statute sections', value: CORPUS.sections },
-    { label: t('statClauses') || 'Indexed clauses', value: CORPUS.clauses },
-    { label: 'Jurisdictions', value: CORPUS.states },
+    { label: t('statSections') || 'Statute sections', value: live.sections ?? CORPUS.sections },
+    { label: live.coverage ? 'Jurisdictions live' : (t('statClauses') || 'Indexed clauses'), value: live.coverage ? `${live.coverage.enabled}/${live.coverage.total}` : CORPUS.clauses },
+    { label: t('statLanguages') || 'Languages', value: live.languages ?? CORPUS.languages },
   ];
 
   const GUIDES = [

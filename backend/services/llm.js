@@ -96,7 +96,14 @@ export function detectLanguageStyle(text, uiLanguage = 'en') {
   // Non-Latin-dominant text — franc identifies the language (any script:
   // Devanagari, Tamil, Telugu, Urdu/Arabic, Bengali, ...)
   if (latin / total < 0.5) {
-    const iso3 = franc(t);
+    // franc is n-gram based and unreliable on short input (a short Hindi
+    // query can come back as Nepali/Maithili with high confidence, which
+    // would bypass the fallback entirely). Short queries route to the
+    // LLM classifier instead.
+    if (t.length < 25) {
+      return { lang: fallbackLang, form: 'native', mixed: latin / total > 0.08, ambiguous: true };
+    }
+    const iso3 = franc(t, { only: Object.keys(ISO3_TO_CONFIG) });
     const lang = ISO3_TO_CONFIG[iso3];
     const mixed = latin / total > 0.08;
     // Mixed-script text (Indic script + English words) often confuses franc

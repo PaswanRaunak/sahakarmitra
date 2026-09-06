@@ -103,13 +103,15 @@ async function prepareStateDocs(state, meta, docPaths, { force }) {
     }
 
     // INTEGRITY CHECK: the document must actually be this state's Act.
-    // Its header must carry the state name or the configured act_name.
-    const firstLine = (text.split('\n')[0] || '').toLowerCase();
+    // Real gazette PDFs rarely carry the Act title on line 1 (blank lines,
+    // page numbers, gazette registration codes come first), so scan a
+    // generous window instead of trusting lines[0].
+    const head = text.slice(0, 2000).toLowerCase();
     const stateLower = state.toLowerCase();
     const actLower = (meta.act_name || '').toLowerCase();
-    if (!firstLine.includes(stateLower) && !(actLower && firstLine.includes(actLower))) {
+    if (!head.includes(stateLower) && !(actLower && head.includes(actLower))) {
       throw new Error(
-        `Integrity check failed for "${path.basename(abs)}": the document header does not mention ${state}` +
+        `Integrity check failed for "${path.basename(abs)}": the first 2,000 characters do not mention ${state}` +
         (meta.act_name ? ` or "${meta.act_name}"` : '') +
         `. Onboarding requires the state's REAL Act text — refusing to continue.`
       );

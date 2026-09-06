@@ -43,6 +43,7 @@ dist/
 build/
 out/
 .vite/
+audit_pdf/
 
 # Logs & Diagnostics
 *.log

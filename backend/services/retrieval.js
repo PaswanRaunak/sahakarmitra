@@ -44,6 +44,12 @@ const client = new ChromaClient({ path: CHROMA_URL });
 const CHROMA_RETRY_TTL_MS = 30_000;
 let chromaDownUntil = 0;
 
+// Local-fallback relevance cutoff. The local cosineDistance is
+// 1 - cosine similarity, where the Chroma cutoff of 1.5 would mean
+// cosine > -0.5 (an open door). Unrelated text sits at ~0.9-1.0 here,
+// on-topic matches at ~0.3-0.6, so 0.85 separates them cleanly.
+const MAX_RELEVANCE_DISTANCE_LOCAL = parseFloat(process.env.RELEVANCE_MAX_DISTANCE_LOCAL || '0.85');
+
 // In-memory local vector store fallback
 let localStore = null;
 let localParentMap = null; // parent_id → parent record (local mode)
@@ -307,6 +313,7 @@ async function queryVectorStore(queryEmbedding, nChildren, stateFilter = null) {
         metadata: item.metadata,
         distance: cosineDistance(queryEmbedding, item.embedding),
       }))
+      .filter(m => m.distance <= MAX_RELEVANCE_DISTANCE_LOCAL)
       .sort((a, b) => a.distance - b.distance)
       .slice(0, nChildren);
   }

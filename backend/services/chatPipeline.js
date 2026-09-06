@@ -17,20 +17,27 @@ import {
 } from './llm.js';
 import { parseAllAttachments } from './documentParser.js';
 
-// Cosine-distance cutoff for the local MiniLM index (measured: on-topic
-// queries land ~0.7-1.4, unrelated text ~1.9). Env-overridable.
+// Relevance cutoffs. The two backends use DIFFERENT distance semantics,
+// so each gets its own threshold:
+//   - ChromaDB collection default = squared L2 on normalized vectors
+//     (distance 0..2; 1.5 ~= cosine similarity 0.25) - calibrated live:
+//     on-topic queries land ~0.7-1.4, unrelated ~1.9.
+//   - Local fallback cosineDistance = 1 - cosine similarity, where 1.5
+//     would mean cosine > -0.5 (an open door). Unrelated text sits at
+//     ~0.9-1.0, so 0.85 rejects noise while keeping on-topic matches
+//     (typically 0.3-0.6). Applied inside retrieval.js (it knows which
+//     backend served the chunks); this outer filter guards Chroma results.
 const MAX_RELEVANCE_DISTANCE = parseFloat(process.env.RELEVANCE_MAX_DISTANCE || '1.5');
+
+export function filterRelevant(chunks, maxDistance = MAX_RELEVANCE_DISTANCE) {
+  return chunks.filter(c => c.distance == null || c.distance <= maxDistance);
+}
 
 export const NO_MATCH_ANSWERS = {
   en: 'I could not find any relevant legal text for your question in the current knowledge base. Please try rephrasing your question, or consult official legal counsel.',
   hi: 'वर्तमान ज्ञान कोश में आपके प्रश्न से संबंधित कोई कानूनी पाठ नहीं मिला। कृपया प्रश्न दूसरे शब्दों में पूछें, या आधिकारिक कानूनी सलाह लें।',
   mr: 'सध्याच्या ज्ञानकोशात तुमच्या प्रश्नाशी संबंधित कोणताही कायदेशीर मजकूर सापडला नाही. कृपया प्रश्न दुसऱ्या शब्दांत विचारा किंवा अधिकृत कायदेशीर सल्ला घ्या.',
 };
-
-// ── Relevance filter: drop chunks above the cosine-distance cutoff ──
-export function filterRelevant(chunks) {
-  return chunks.filter(c => c.distance == null || c.distance <= MAX_RELEVANCE_DISTANCE);
-}
 
 // ── Language style resolution ────────────────────────────────
 // Heuristic detection of the user's input style; LLM classification
