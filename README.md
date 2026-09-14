@@ -47,22 +47,49 @@
 ## System Architecture
 
 ```mermaid
-graph TD
-    A["User / React 18 Web App"] -->|"POST /api/chat + /api/chat/stream (SSE)"| B["Express Backend :5000"]
-    T["Telegram User"] -->|"Long Polling (telegramBot.js)"| B
-    B --> P["runChatPipeline (services/chatPipeline.js)<br/>SHARED ENGINE: web + telegram"]
-    P -->|"1. Language + style detection"| D1["franc + romanized markers + LLM fallback"]
-    P -->|"2. Attachment parsing (OCR/PDF)"| C["pdf-parse & Tesseract"]
-    P -->|"3. Build retrieval query (translate if needed)"| D["@xenova/transformers all-MiniLM-L6-v2"]
-    D -->|"4. Vector search (child chunks)"| E[("ChromaDB :8000<br/>ACTIVE collection via pointer swap")]
-    E -->|"5. Resolve parent_id → full sections"| F["parents-{collection}.json"]
-    F -->|"6. Full parent sections + citation metadata"| P
-    P -->|"7. System prompt + retrieved text"| G{"LLM Engine"}
-    G -->|"Priority 1"| H["Groq API / openai/gpt-oss-120b"]
-    G -->|"Priority 2"| I["OpenRouter API / openrouter/free"]
-    H -->|"8. Grounded answer + citations"| A
-    I -->|"8. Grounded answer + citations"| T
-    M["Monitor: scraper.js + diffEngine.js<br/>MD5 change detection"] -->|"amendment flagged"| R["reindex.js: blue-green build<br/>+ golden gate + pointer swap"]
+flowchart TB
+    subgraph CLIENTS["Clients"]
+        direction LR
+        A["Web App<br/>(React 18 + Vite)"]
+        T["Telegram<br/>(long polling)"]
+    end
+
+    subgraph BACKEND["Express Backend :5000"]
+        P["runChatPipeline<br/>shared RAG engine"]
+        L["Language & style detection<br/>(franc + markers + LLM fallback)"]
+        X["pdf-parse + Tesseract OCR<br/>(attachments)"]
+        G{"LLM Engine<br/>(failover)"}
+        H["Groq<br/>gpt-oss-120b"]
+        I["OpenRouter<br/>free tier"]
+    end
+
+    subgraph STORE["Storage"]
+        E[("ChromaDB :8000<br/>active collection<br/>(pointer swap)")]
+        F["parents-*.json<br/>(full sections)"]
+        D["MiniLM-L6-v2<br/>local embeddings"]
+    end
+
+    subgraph OPS["Data governance"]
+        M["Monitor<br/>scraper + MD5 diff"]
+        R["reindex.js<br/>blue-green build"]
+    end
+
+    A -->|"1. question"| P
+    T -->|"1. question"| P
+    P --> L
+    P --> X
+    L -->|"2. English query"| D
+    X --> D
+    D -->|"3. search child chunks"| E
+    E -->|"4. parent_id"| F
+    F -->|"5. full parent sections"| P
+    P --> G
+    G --> H
+    G --> I
+    H -->|"6. cited answer"| A
+    I -->|"6. cited answer"| T
+    M -->|"amendment flagged"| R
+    R -->|"validated swap"| E
 ```
 
 ---
