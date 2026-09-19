@@ -307,6 +307,17 @@ if (process.env.ENABLE_CRON === 'true') {
     .catch((err) => console.warn('[server] Could not start update-check scheduler:', err.message));
 }
 
+// ── Telegram Bot ───────────────────────────────────────────────
+// Auto-starts when TELEGRAM_BOT_TOKEN is configured in environment
+if (process.env.TELEGRAM_BOT_TOKEN) {
+  import('./services/telegramBot.js')
+    .then(({ startTelegramBot }) => {
+      startTelegramBot(process.env.TELEGRAM_BOT_TOKEN);
+      console.log('  Telegram bot : polling started');
+    })
+    .catch((err) => console.warn('[server] Could not start Telegram bot:', err.message));
+}
+
 app.listen(PORT, () => {
   console.log(`SahakarMitra backend running on http://localhost:${PORT}`);
   console.log(`  Health check : http://localhost:${PORT}/api/health`);
