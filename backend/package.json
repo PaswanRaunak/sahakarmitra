@@ -1,7 +1,7 @@
 {
   "name": "sahakarmitra-backend",
   "version": "1.0.0",
-  "description": "SahakarMitra backend — RAG-powered multilingual legal assistant for Indian cooperative societies (SIH26088).",
+  "description": "SahakarMitra backend - RAG-powered multilingual legal assistant for Indian cooperative societies (SIH26088).",
   "main": "server.js",
   "type": "module",
   "scripts": {
