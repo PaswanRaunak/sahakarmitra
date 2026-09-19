@@ -9,6 +9,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import chatRoutes from './routes/chat.js';
 import reviewRoutes from './routes/review.js';
 import geoRoutes from './routes/geo.js';
@@ -18,6 +19,17 @@ import { getAllDocumentChunks } from './services/retrieval.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Trust first proxy (Render, Vercel, Railway, Cloudflare, Nginx) so client IP detection is accurate
+app.set('trust proxy', 1);
+
+// Security Headers (Helmet)
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // Prevents interfering with frontend streaming and dynamic preview
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
 // ── Simple in-memory rate limiter (per IP, fixed window) ─────
 // RATE_LIMIT_MAX is env-overridable so bulk validation runs
@@ -54,10 +66,43 @@ function rateLimit(req, res, next) {
   next();
 }
 
-// Middleware
-app.use(cors());                                  // allow the Vite dev server (5173) to call us
-app.use(express.json({ limit: '25mb' }));         // parse JSON bodies (chat messages & attachments)
-app.use(express.urlencoded({ extended: true, limit: '25mb' }));
+// Configurable CORS: allow specific origins in production, or all during local development
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
+  : null;
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // allow requests with no origin (like mobile apps, curl, server-to-server)
+      if (!origin || !allowedOrigins || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+        return callback(null, true);
+      }
+      return callback(new Error('Blocked by CORS policy'));
+    },
+    credentials: true,
+  })
+);
+
+app.use(express.json({ limit: '10mb' }));         // parse JSON bodies (chat messages & attachments)
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// ── Admin Auth Middleware ──────────────────────────────────────
+function requireAdminAuth(req, res, next) {
+  const secret = process.env.ADMIN_SECRET;
+  if (!secret) return next(); // If no ADMIN_SECRET configured, permit in local dev
+
+  const authHeader = req.headers['authorization'] || req.headers['x-admin-key'] || req.query.admin_key;
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
+
+  if (token !== secret) {
+    if (req.accepts('html')) {
+      return res.status(401).send('<h1>401 Unauthorized</h1><p>Admin authentication key required.</p>');
+    }
+    return res.status(401).json({ error: 'Unauthorized: Valid admin key required.' });
+  }
+  next();
+}
 
 // Health-check endpoint, reports real readiness, not just liveness:
 //   llm: whether at least one AI provider key is configured
@@ -80,9 +125,9 @@ app.get('/api/health', (req, res) => {
 app.use('/api/chat', rateLimit, chatRoutes);
 app.use('/api/geo', geoRoutes);
 
-// ── HITL Translation Review (admin) ────────────────────────────
-app.use('/api/review', reviewRoutes);
-app.get('/admin/review', (req, res) => {
+// ── HITL Translation Review (admin protected) ───────────────────
+app.use('/api/review', requireAdminAuth, reviewRoutes);
+app.get('/admin/review', requireAdminAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'review.html'));
 });
 

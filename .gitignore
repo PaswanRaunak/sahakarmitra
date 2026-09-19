@@ -54,6 +54,7 @@ yarn-error.log*
 pnpm-debug.log*
 
 # IDE, Tools & Editor files
+graphify-out/
 .rocketride/
 .claude/
 .gemini/
