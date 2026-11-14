@@ -1,0 +1,27 @@
+# SahakarMitra
+
+> AI-powered multilingual legal assistant for Indian cooperative housing societies.
+> Answers are grounded in the actual statutory text of the applicable Cooperative
+> Societies Act (Maharashtra 1960, Gujarat 1961, Karnataka 1959, Multi-State 2002)
+> via retrieval-augmented generation, and always cite the exact section and Act name.
+
+## What it does
+
+- Answers questions on cooperative society law: elections, AGMs, registration,
+  member rights, disputes, audits, winding up.
+- Supports English, Hindi, and Marathi, mirroring the user's language and style
+  (including romanized Hinglish input).
+- Lets users upload society notices (PDF or screenshot) for statutory review.
+- Connects members to verified human legal experts for matters beyond information.
+
+## Key facts
+
+- Live at: https://sahakarmitra.vercel.app
+- Grounding: retrieval over verified statute text; every answer cites its section.
+- Jurisdictions live: 4 of 36 planned (validated rollout gate).
+- Languages live: English, Hindi, Marathi of 22 planned Indian languages.
+
+## For legal safety
+
+Answers are informational, not legal representation. The system cites the exact
+statutory provision behind each claim so it can be verified against the official Act.

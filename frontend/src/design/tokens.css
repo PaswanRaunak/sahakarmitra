@@ -1,0 +1,87 @@
+/* ═══════════════════════════════════════════════════════════════
+   SahakarMitra Design Tokens - Forest family
+   (brandkit source of truth: one accent, two modes, shape-scale lock)
+
+   Palette family: "Forest" - deep forest green + bone + amber accent.
+   Rotates away from the warm-cream + rust default per design-taste v2
+   §4.2. Stored as RGB triplets so Tailwind alpha modifiers work
+   (bg-surface/80 etc).
+
+   Modes: `:root` = light (bone), `.dark` = dark (deep forest).
+   Tailwind darkMode: 'class'. App root toggles the class; initial
+   value = localStorage -> prefers-color-scheme.
+
+   Shape scale lock: containers rounded-3xl (24px), cards rounded-2xl
+   (16px), controls rounded-xl (12px), pills rounded-full.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Surfaces */
+  --c-surface: 247 245 239;      /* bone page background      #F7F5EF */
+  --c-elevated: 255 255 255;     /* cards                     #FFFFFF */
+  --c-sunken: 237 234 226;       /* wells, trays              #EDEAE2 */
+
+  /* Ink */
+  --c-ink: 26 36 28;             /* primary text   forest-ink #1A241C */
+  --c-ink-soft: 76 89 81;        /* secondary text            #4C5951 */
+  --c-muted: 122 135 127;        /* tertiary/meta             #7A877F */
+
+  /* Structure */
+  --c-line: 214 211 200;         /* hairlines/borders         #D6D3C8 */
+  --c-forest: 30 70 54;          /* deep forest structural    #1E4636 */
+  --c-forest-soft: 45 106 79;    /* lighter forest            #2D6A4F */
+
+  /* Accent (single, locked): deep amber */
+  --c-accent: 154 98 16;         /* #9A6210 - white-on-accent AA */
+  --c-accent-strong: 122 77 10;  /* hover/active              #7A4D0A */
+  --c-accent-soft: 240 230 210;  /* tinted chips/backgrounds  #F0E6D2 */
+
+  /* Status */
+  --c-success: 64 147 92;
+  --c-warning: 164 133 71;
+  --c-error: 156 69 61;
+
+  /* Header material */
+  --c-header: 247 245 239;       /* header glass base */
+
+  /* Banner: the "darkest surface" for hero banners / footers / auth panels.
+     Light mode = deep forest; dark mode = deeper than the page itself. */
+  --c-banner: 30 70 54;          /* #1E4636 */
+  --c-banner-ink-muted: 178 200 186; /* muted text on banner #B2C8BA */
+
+  /* Shadows tinted to the surface hue (never pure black) */
+  --shadow-soft: 0 4px 20px -2px rgba(30, 70, 54, 0.07), 0 2px 6px -1px rgba(30, 70, 54, 0.04);
+  --shadow-card: 0 12px 32px -4px rgba(30, 70, 54, 0.10), 0 4px 12px -2px rgba(30, 70, 54, 0.05);
+  --shadow-diffuse: 0 20px 40px -15px rgba(30, 70, 54, 0.08);
+}
+
+.dark {
+  --c-surface: 15 23 18;         /* deep forest page          #0F1712 */
+  --c-elevated: 22 33 26;        /* cards                     #16211A */
+  --c-sunken: 10 16 12;          /* wells                     #0A100C */
+
+  --c-ink: 232 236 231;          /* primary text              #E8ECE7 */
+  --c-ink-soft: 147 162 151;     /* secondary                 #93A297 */
+  --c-muted: 110 125 114;        /* tertiary                  #6E7D72 */
+
+  --c-line: 46 60 50;            /* hairlines                 #2E3C32 */
+  --c-forest: 69 130 100;        /* structural on dark        #458264 */
+  --c-forest-soft: 87 152 121;   /* lighter                   #579879 */
+
+  --c-accent: 224 166 60;        /* bright amber              #E0A63C */
+  --c-accent-strong: 240 186 92; /* hover                     #F0BA5C */
+  --c-accent-soft: 42 53 38;     /* tinted chips              #2A3526 */
+
+  --c-success: 102 187 133;
+  --c-warning: 206 174 106;
+  --c-error: 217 106 96;
+
+  --c-header: 15 23 18;
+
+  --c-banner: 10 16 12;          /* #0A100C */
+  --c-banner-ink-muted: 110 125 114; /* #6E7D72 */
+
+  --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.35), 0 2px 6px -1px rgba(0, 0, 0, 0.2);
+  --shadow-card: 0 12px 32px -4px rgba(0, 0, 0, 0.45), 0 4px 12px -2px rgba(0, 0, 0, 0.25);
+  --shadow-diffuse: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+}

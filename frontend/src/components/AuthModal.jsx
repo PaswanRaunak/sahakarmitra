@@ -124,20 +124,20 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 font-sans animate-fade-in"
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 font-sans animate-fade-in"
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
     >
 
       {/* Container Card */}
-      <div className="bg-[#faf8f5] border border-stone-200/90 rounded-3xl shadow-2xl max-w-5xl w-full overflow-hidden grid lg:grid-cols-12 relative animate-scale-in">
+      <div className="bg-surface border border-line rounded-3xl shadow-2xl max-w-5xl w-full overflow-hidden grid lg:grid-cols-12 relative animate-scale-in">
 
         {/* Close Button */}
         <button
           onClick={onClose}
           aria-label={t('closeAuth')}
-          className="absolute top-4 right-4 z-20 p-2 text-stone-400 hover:text-stone-700 hover:bg-stone-200/60 rounded-xl transition"
+          className="absolute top-4 right-4 z-20 p-2 text-ink-muted hover:text-ink-soft hover:bg-sunken/60 rounded-xl transition"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -145,10 +145,10 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
         </button>
 
         {/* ── LEFT PANEL: Brand Showcase (Dark Teal / Charcoal) ──────── */}
-        <div className="lg:col-span-5 bg-stone-900 text-white p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden hidden sm:flex">
+        <div className="lg:col-span-5 bg-banner text-white p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden hidden sm:flex">
           {/* Background Ambient Glow */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-[#a03612]/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#1b4342]/40 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none" />
+          <div className="absolute top-0 right-0 w-80 h-80 bg-accent/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-forest/40 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none" />
 
           {/* Top Brand Logo & Header */}
           <div className="space-y-6 z-10">
@@ -160,9 +160,9 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
               />
               <div>
                 <h3 className="text-xl font-bold tracking-tight text-white leading-none">
-                  Sahakar<span className="text-[#a03612]">Mitra</span>
+                  Sahakar<span className="text-accent">Mitra</span>
                 </h3>
-                <p className="text-[10px] text-stone-400 font-mono mt-0.5 uppercase tracking-wider">
+                <p className="text-[10px] text-ink-muted font-mono mt-0.5 uppercase tracking-wider">
                   Cooperative Legal AI
                 </p>
               </div>
@@ -172,15 +172,15 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
               <h2 className="text-2xl font-black text-white leading-tight tracking-tight">
                 Empowering Indian Cooperative Societies
               </h2>
-              <p className="text-xs text-stone-300 leading-relaxed font-normal">
+              <p className="text-xs text-line leading-relaxed font-normal">
                 Grounded in the Maharashtra Cooperative Societies Act, 1960. Get instant answers with verifiable section citations.
               </p>
             </div>
 
             {/* 3 Key Feature Bullets */}
             <div className="space-y-3 pt-2">
-              <div className="flex items-start gap-3 text-xs text-stone-200">
-                <div className="p-1.5 rounded-lg bg-[#a03612]/20 text-[#a03612] flex-shrink-0 mt-0.5 border border-[#a03612]/30">
+              <div className="flex items-start gap-3 text-xs text-line">
+                <div className="p-1.5 rounded-lg bg-accent/20 text-accent flex-shrink-0 mt-0.5 border border-accent/30">
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
@@ -188,8 +188,8 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                 <span>Official MCS Act 1960, AGM & Election Rules</span>
               </div>
 
-              <div className="flex items-start gap-3 text-xs text-stone-200">
-                <div className="p-1.5 rounded-lg bg-teal-500/20 text-teal-400 flex-shrink-0 mt-0.5 border border-teal-500/30">
+              <div className="flex items-start gap-3 text-xs text-line">
+                <div className="p-1.5 rounded-lg bg-forest/100/20 text-teal-400 flex-shrink-0 mt-0.5 border border-forest/40">
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
@@ -197,8 +197,8 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                 <span>Verifiable Legal Section & Excerpt Citations</span>
               </div>
 
-              <div className="flex items-start gap-3 text-xs text-stone-200">
-                <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-300 flex-shrink-0 mt-0.5 border border-amber-500/30">
+              <div className="flex items-start gap-3 text-xs text-line">
+                <div className="p-1.5 rounded-lg bg-accent-soft0/20 text-accent flex-shrink-0 mt-0.5 border border-accent/40">
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
@@ -210,7 +210,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
 
           {/* Bottom Trust Quote Badge */}
           <div className="z-10 pt-6 border-t border-white/10">
-            <p className="text-[11px] text-stone-400 italic">
+            <p className="text-[11px] text-ink-muted italic">
               "Trusted by cooperative housing societies, credit societies, and committee members across Maharashtra."
             </p>
           </div>
@@ -227,29 +227,29 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                 <img
                   src="/logo.jpg"
                   alt="SahakarMitra Logo"
-                  className="w-7 h-7 rounded-lg shadow-xs border border-stone-200 object-cover sm:hidden"
+                  className="w-7 h-7 rounded-lg shadow-xs border border-line object-cover sm:hidden"
                 />
-                <h3 className="text-lg font-black text-stone-900 tracking-tight">
+                <h3 className="text-lg font-black text-ink tracking-tight">
                   {mode === 'login' ? t('welcomeBack') : mode === 'register' ? t('createAccount') : t('resetPassword')}
                 </h3>
               </div>
 
-              <span className="text-xs font-bold text-[#a03612] bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+              <span className="text-xs font-bold text-accent bg-accent-soft px-2.5 py-1 rounded-full border border-accent/40">
                 MCS Act 1960 AI
               </span>
             </div>
 
             {/* Tab Pills */}
-            <div role="tablist" aria-label="Authentication mode" className="grid grid-cols-2 gap-2 bg-stone-200/60 p-1.5 rounded-2xl text-xs font-bold">
+            <div role="tablist" aria-label="Authentication mode" className="grid grid-cols-2 gap-2 bg-sunken/60 p-1.5 rounded-2xl text-xs font-bold">
               <button
                 type="button"
                 role="tab"
                 aria-selected={mode === 'login'}
                 onClick={() => { setMode('login'); setError(''); }}
-                className={`py-2 rounded-xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612] ${
+                className={`py-2 rounded-xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                   mode === 'login'
-                    ? 'bg-white text-[#a03612] shadow-xs'
-                    : 'text-stone-600 hover:text-stone-900'
+                    ? 'bg-elevated text-accent shadow-xs'
+                    : 'text-ink-soft hover:text-ink'
                 }`}
               >
                 {t('signIn')}
@@ -260,10 +260,10 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                 role="tab"
                 aria-selected={mode === 'register'}
                 onClick={() => { setMode('register'); setError(''); }}
-                className={`py-2 rounded-xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612] ${
+                className={`py-2 rounded-xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                   mode === 'register'
-                    ? 'bg-white text-[#a03612] shadow-xs'
-                    : 'text-stone-600 hover:text-stone-900'
+                    ? 'bg-elevated text-accent shadow-xs'
+                    : 'text-ink-soft hover:text-ink'
                 }`}
               >
                 {t('createAccount')}
@@ -271,15 +271,15 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
             </div>
 
             {/* Demo-mode honesty note, the mock auth accepts anything, so say so. */}
-            <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 font-semibold">
+            <p className="text-[11px] text-accent-strong bg-accent-soft border border-accent/40 rounded-xl px-3 py-2 font-semibold">
               {t('demoModeNote')}
             </p>
           </div>
 
           {/* Error Alert Toast */}
           {error && (
-            <div role="alert" className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl text-xs font-bold flex items-center gap-2 animate-scale-in">
-              <svg className="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <div role="alert" className="bg-error/10 border border-error/40 text-error px-4 py-3 rounded-2xl text-xs font-bold flex items-center gap-2 animate-scale-in">
+              <svg className="w-4 h-4 text-error flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span>{error}</span>
@@ -291,9 +291,9 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
             <form onSubmit={handleLoginSubmit} className="space-y-4">
 
               <div className="space-y-1">
-                <label htmlFor="auth-email" className="text-xs font-bold text-stone-700">{t('emailOrMobile')}</label>
+                <label htmlFor="auth-email" className="text-xs font-bold text-ink-soft">{t('emailOrMobile')}</label>
                 <div className="relative">
-                  <svg className="w-4 h-4 text-stone-400 absolute left-3.5 top-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <svg className="w-4 h-4 text-ink-muted absolute left-3.5 top-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                   </svg>
                   <input
@@ -305,7 +305,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="e.g. ramesh.patil@society.org"
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-stone-200/90 rounded-xl text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#a03612] shadow-xs"
+                    className="w-full pl-10 pr-4 py-2.5 bg-elevated border border-line rounded-xl text-xs text-ink placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-accent shadow-xs"
                     required
                   />
                 </div>
@@ -313,17 +313,17 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
 
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="auth-password" className="text-xs font-bold text-stone-700">{t('password')}</label>
+                  <label htmlFor="auth-password" className="text-xs font-bold text-ink-soft">{t('password')}</label>
                   <button
                     type="button"
                     onClick={() => setMode('forgotPassword')}
-                    className="text-[11px] font-bold text-[#a03612] hover:underline"
+                    className="text-[11px] font-bold text-accent hover:underline"
                   >
                     {t('forgotPassword')}
                   </button>
                 </div>
                 <div className="relative">
-                  <svg className="w-4 h-4 text-stone-400 absolute left-3.5 top-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <svg className="w-4 h-4 text-ink-muted absolute left-3.5 top-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                   <input
@@ -333,14 +333,14 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={t('passwordHint')}
-                    className="w-full pl-10 pr-10 py-2.5 bg-white border border-stone-200/90 rounded-xl text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#a03612] shadow-xs"
+                    className="w-full pl-10 pr-10 py-2.5 bg-elevated border border-line rounded-xl text-xs text-ink placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-accent shadow-xs"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label="Toggle password visibility"
-                    className="absolute right-3 top-3 text-stone-400 hover:text-stone-600"
+                    className="absolute right-3 top-3 text-ink-muted hover:text-ink-soft"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={showPassword ? "M13.875 18.825A10.05 10.05 0 0112 19c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" : "M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"} />
@@ -353,7 +353,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-[#a03612] hover:bg-[#882c0e] text-white font-bold text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
+                className="w-full py-3 bg-accent hover:bg-accent-strong text-white font-bold text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -367,29 +367,29 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                 <button
                   type="button"
                   onClick={onGuest}
-                  className="w-full py-2.5 bg-white border border-stone-300 hover:border-[#a03612] hover:text-[#a03612] text-stone-700 font-bold text-xs rounded-xl transition"
+                  className="w-full py-2.5 bg-elevated border border-line hover:border-accent hover:text-accent text-ink-soft font-bold text-xs rounded-xl transition"
                 >
                   {t('continueGuest')}
                 </button>
               )}
 
               {/* One-Click Quick Demo Logins */}
-              <div className="pt-3 border-t border-stone-200/60 space-y-2">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-stone-400 text-center">
+              <div className="pt-3 border-t border-line space-y-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-ink-muted text-center">
                   {t('demoAccounts')}
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => handleDemoLogin('anya.foger@society.org', 'Anya Foger', 'Shivaji Housing Society')}
-                    className="p-2 bg-stone-100 hover:bg-amber-50 border border-stone-200 hover:border-amber-200 rounded-xl text-[11px] text-stone-800 font-bold transition text-left truncate"
+                    className="p-2 bg-sunken hover:bg-accent-soft border border-line hover:border-accent/40 rounded-xl text-[11px] text-ink font-bold transition text-left truncate"
                   >
                     Anya Foger
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDemoLogin('ramesh.patil@society.org', 'Ramesh Patil', 'Sahakar Housing Society')}
-                    className="p-2 bg-stone-100 hover:bg-amber-50 border border-stone-200 hover:border-amber-200 rounded-xl text-[11px] text-stone-800 font-bold transition text-left truncate"
+                    className="p-2 bg-sunken hover:bg-accent-soft border border-line hover:border-accent/40 rounded-xl text-[11px] text-ink font-bold transition text-left truncate"
                   >
                     Ramesh Patil
                   </button>
@@ -405,7 +405,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label htmlFor="reg-name" className="text-xs font-bold text-stone-700">{t('fullNameLabel')}</label>
+                  <label htmlFor="reg-name" className="text-xs font-bold text-ink-soft">{t('fullNameLabel')}</label>
                   <input
                     id="reg-name"
                     type="text"
@@ -413,13 +413,13 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Priya Sharma"
-                    className="w-full px-3.5 py-2 bg-white border border-stone-200/90 rounded-xl text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#a03612] shadow-xs"
+                    className="w-full px-3.5 py-2 bg-elevated border border-line rounded-xl text-xs text-ink focus:outline-none focus:ring-2 focus:ring-accent shadow-xs"
                     required
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label htmlFor="reg-mobile" className="text-xs font-bold text-stone-700">{t('mobileLabel')}</label>
+                  <label htmlFor="reg-mobile" className="text-xs font-bold text-ink-soft">{t('mobileLabel')}</label>
                   <input
                     id="reg-mobile"
                     type="tel"
@@ -428,13 +428,13 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
                     placeholder="+91 9876543210"
-                    className="w-full px-3.5 py-2 bg-white border border-stone-200/90 rounded-xl text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#a03612] shadow-xs"
+                    className="w-full px-3.5 py-2 bg-elevated border border-line rounded-xl text-xs text-ink focus:outline-none focus:ring-2 focus:ring-accent shadow-xs"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="reg-email" className="text-xs font-bold text-stone-700">{t('emailLabel')}</label>
+                <label htmlFor="reg-email" className="text-xs font-bold text-ink-soft">{t('emailLabel')}</label>
                 <input
                   id="reg-email"
                   type="email"
@@ -443,26 +443,26 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="e.g. priya.sharma@society.org"
-                  className="w-full px-3.5 py-2 bg-white border border-stone-200/90 rounded-xl text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#a03612] shadow-xs"
+                  className="w-full px-3.5 py-2 bg-elevated border border-line rounded-xl text-xs text-ink focus:outline-none focus:ring-2 focus:ring-accent shadow-xs"
                   required
                 />
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="reg-society" className="text-xs font-bold text-stone-700">{t('societyLabel')}</label>
+                <label htmlFor="reg-society" className="text-xs font-bold text-ink-soft">{t('societyLabel')}</label>
                 <input
                   id="reg-society"
                   type="text"
                   value={societyName}
                   onChange={(e) => setSocietyName(e.target.value)}
                   placeholder="e.g. Om Shanti Housing Society"
-                  className="w-full px-3.5 py-2 bg-white border border-stone-200/90 rounded-xl text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#a03612] shadow-xs"
+                  className="w-full px-3.5 py-2 bg-elevated border border-line rounded-xl text-xs text-ink focus:outline-none focus:ring-2 focus:ring-accent shadow-xs"
                   required
                 />
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="reg-password" className="text-xs font-bold text-stone-700">{t('createPassword')}</label>
+                <label htmlFor="reg-password" className="text-xs font-bold text-ink-soft">{t('createPassword')}</label>
                 <input
                   id="reg-password"
                   type="password"
@@ -470,7 +470,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={t('passwordHint')}
-                  className="w-full px-3.5 py-2 bg-white border border-stone-200/90 rounded-xl text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#a03612] shadow-xs"
+                  className="w-full px-3.5 py-2 bg-elevated border border-line rounded-xl text-xs text-ink focus:outline-none focus:ring-2 focus:ring-accent shadow-xs"
                   required
                 />
               </div>
@@ -481,9 +481,9 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                   id="agreed"
                   checked={agreed}
                   onChange={(e) => setAgreed(e.target.checked)}
-                  className="rounded border-stone-300 text-[#a03612] focus:ring-[#a03612]"
+                  className="rounded border-line text-accent focus:ring-accent"
                 />
-                <label htmlFor="agreed" className="text-[11px] text-stone-600">
+                <label htmlFor="agreed" className="text-[11px] text-ink-soft">
                   {t('terms')}
                 </label>
               </div>
@@ -492,7 +492,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-[#a03612] hover:bg-[#882c0e] text-white font-bold text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
+                className="w-full py-3 bg-accent hover:bg-accent-strong text-white font-bold text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -509,12 +509,12 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
             <div className="space-y-4">
               {!forgotSent ? (
                 <form onSubmit={handleForgotSubmit} className="space-y-4">
-                  <p className="text-xs text-stone-600">
+                  <p className="text-xs text-ink-soft">
                     {t('forgotIntro')}
                   </p>
 
                   <div className="space-y-1">
-                    <label htmlFor="forgot-email" className="text-xs font-bold text-stone-700">{t('registeredEmail')}</label>
+                    <label htmlFor="forgot-email" className="text-xs font-bold text-ink-soft">{t('registeredEmail')}</label>
                     <input
                       id="forgot-email"
                       type="email"
@@ -523,7 +523,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="e.g. ramesh.patil@society.org"
-                      className="w-full px-4 py-2.5 bg-white border border-stone-200/90 rounded-xl text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#a03612] shadow-xs"
+                      className="w-full px-4 py-2.5 bg-elevated border border-line rounded-xl text-xs text-ink focus:outline-none focus:ring-2 focus:ring-accent shadow-xs"
                       required
                     />
                   </div>
@@ -531,7 +531,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3 bg-[#a03612] hover:bg-[#882c0e] text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2"
+                    className="w-full py-3 bg-accent hover:bg-accent-strong text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2"
                   >
                     {loading ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -543,26 +543,26 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
                   <button
                     type="button"
                     onClick={() => setMode('login')}
-                    className="w-full text-center text-xs font-bold text-stone-600 hover:text-stone-900"
+                    className="w-full text-center text-xs font-bold text-ink-soft hover:text-ink"
                   >
                     {t('backToSignIn')}
                   </button>
                 </form>
               ) : (
                 <div className="text-center py-6 space-y-4 animate-scale-in">
-                  <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+                  <div className="w-12 h-12 rounded-full bg-success/15 text-success flex items-center justify-center mx-auto">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <h4 className="text-base font-bold text-stone-900">{t('resetSent')}</h4>
-                  <p className="text-xs text-stone-600">
-                    {t('resetSentBody')} <span className="font-bold text-stone-900">{email}</span>. {t('resetSentDemo')}
+                  <h4 className="text-base font-bold text-ink">{t('resetSent')}</h4>
+                  <p className="text-xs text-ink-soft">
+                    {t('resetSentBody')} <span className="font-bold text-ink">{email}</span>. {t('resetSentDemo')}
                   </p>
                   <button
                     type="button"
                     onClick={() => setMode('login')}
-                    className="px-6 py-2.5 bg-[#a03612] text-white text-xs font-bold rounded-xl shadow-sm hover:bg-[#882c0e]"
+                    className="px-6 py-2.5 bg-accent text-white text-xs font-bold rounded-xl shadow-sm hover:bg-accent-strong"
                   >
                     {t('returnSignIn')}
                   </button>
@@ -572,7 +572,7 @@ export default function AuthModal({ initialMode = 'login', onClose, onSuccess, o
           )}
 
           {/* Footer Note */}
-          <p className="text-[10px] text-stone-400 text-center pt-2 border-t border-stone-200/60">
+          <p className="text-[10px] text-ink-muted text-center pt-2 border-t border-line">
             Protected by SahakarMitra Cooperative AI Security & Privacy Policy.
           </p>
 

@@ -82,11 +82,22 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`Testing ${dataset.length} question(s) through /api/chat (concurrency ${CONCURRENCY})...`);
+  // The dataset is language-indexed (variants structure): the citation gate
+  // validates the ENGLISH variant per entry (production retrieval always
+  // embeds English - non-English queries are translated first in chat.js).
+  const tests = [];
+  for (const entry of dataset) {
+    const variants = entry.variants || {};
+    const en = variants.en || Object.values(variants)[0];
+    if (en?.question && en?.reference_answer) {
+      tests.push({ ...entry, question: en.question });
+    }
+  }
+  console.log(`Testing ${tests.length} question(s) through /api/chat (concurrency ${CONCURRENCY})...`);
 
-  const results = await mapWithConcurrency(dataset, CONCURRENCY, async (entry) => {
+  const results = await mapWithConcurrency(tests, CONCURRENCY, async (entry) => {
     try {
-      const resp = await chat(entry.question_en, 'en');
+      const resp = await chat(entry.question, 'en');
       const citedSections = (resp.sources || []).map((s) => s.section);
       const citedNumbers = citedSections.map(extractSectionNumber).filter(Boolean);
       const expectedNumber = extractSectionNumber(entry.expected_section);
@@ -95,7 +106,7 @@ async function main() {
       return {
         id: entry.id,
         category: entry.category,
-        question: entry.question_en,
+        question: entry.question,
         expected_section: entry.expected_section,
         expected_number: expectedNumber,
         cited_sections: citedSections,
@@ -110,7 +121,7 @@ async function main() {
       return {
         id: entry.id,
         category: entry.category,
-        question: entry.question_en,
+        question: entry.question,
         expected_section: entry.expected_section,
         expected_number: extractSectionNumber(entry.expected_section),
         cited_sections: [],

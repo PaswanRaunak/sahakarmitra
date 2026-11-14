@@ -300,7 +300,7 @@ export default function ChatWindow({
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      className="flex-1 flex flex-col min-h-0 bg-[#faf8f5] relative"
+      className="flex-1 flex flex-col min-h-0 bg-surface relative"
     >
       {/* Hidden File Inputs */}
       <input
@@ -322,9 +322,9 @@ export default function ChatWindow({
 
       {/* Drag & Drop Overlay */}
       {isDragging && (
-        <div className="absolute inset-0 z-40 bg-[#1e4e4d]/85 backdrop-blur-md flex flex-col items-center justify-center border-4 border-dashed border-amber-300 rounded-2xl m-3 text-white transition-opacity animate-fade-in">
-          <div className="p-4 bg-amber-400/20 rounded-full mb-3 animate-bounce">
-            <svg className="w-12 h-12 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="absolute inset-0 z-40 bg-forest/90 backdrop-blur-md flex flex-col items-center justify-center border-4 border-dashed border-accent/50 rounded-2xl m-3 text-white transition-opacity animate-fade-in">
+          <div className="p-4 bg-accent/20 rounded-full mb-3 animate-bounce">
+            <svg className="w-12 h-12 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
           </div>
@@ -343,13 +343,13 @@ export default function ChatWindow({
               <img
                 src="/logo.jpg"
                 alt="SahakarMitra Logo"
-                className="w-20 h-20 rounded-3xl shadow-xl border-2 border-amber-200/80 object-cover mx-auto animate-float"
+                className="w-20 h-20 rounded-3xl shadow-xl border-2 border-accent/40 object-cover mx-auto animate-float"
               />
 
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-ink tracking-tight">
                 {t('chatWelcomeTitle')}
               </h2>
-              <p className="text-xs sm:text-sm text-stone-600 font-normal leading-relaxed">
+              <p className="text-xs sm:text-sm text-ink-soft font-normal leading-relaxed">
                 {t('chatWelcomeSubtitle')}
               </p>
 
@@ -381,20 +381,20 @@ export default function ChatWindow({
 
           {/* Loading Indicator */}
           {loading && !messages.some((m) => m.streaming) && (
-            <div role="status" className="flex items-center gap-3 text-stone-600 bg-white border border-stone-200/90 p-4 rounded-2xl w-fit text-xs shadow-soft animate-pulse-glow">
+            <div role="status" className="flex items-center gap-3 text-ink-soft bg-elevated border border-line p-4 rounded-2xl w-fit text-xs shadow-soft animate-pulse-glow">
               <div className="flex items-center gap-1">
-                <span className="w-2 h-2 bg-[#a03612] rounded-full animate-bounce"></span>
-                <span className="w-2 h-2 bg-[#a03612] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                <span className="w-2 h-2 bg-[#a03612] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                <span className="w-2 h-2 bg-accent rounded-full animate-bounce"></span>
+                <span className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                <span className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
               </div>
-              <span className="font-medium text-stone-700">{t('chatLoading')}</span>
+              <span className="font-medium text-ink-soft">{t('chatLoading')}</span>
             </div>
           )}
 
           {/* Follow-up suggestions */}
           {showFollowUps && (
             <div className="space-y-2 animate-fade-in">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">
                 {t('followUpsHeading')}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -403,7 +403,7 @@ export default function ChatWindow({
                     key={q}
                     type="button"
                     onClick={() => { onSend(q, []); setIsNearBottom(true); }}
-                    className="px-3.5 py-2 bg-white hover:bg-amber-50 border border-stone-200/90 hover:border-amber-200 rounded-full text-xs font-semibold text-stone-700 hover:text-[#a03612] shadow-soft transition text-left"
+                    className="px-3.5 py-2 bg-elevated hover:bg-accent-soft border border-line hover:border-accent/40 rounded-full text-xs font-semibold text-ink-soft hover:text-accent shadow-soft transition text-left"
                   >
                     {q}
                   </button>
@@ -413,7 +413,7 @@ export default function ChatWindow({
                 <button
                   type="button"
                   onClick={() => onConnectExpert && onConnectExpert()}
-                  className="px-3.5 py-2 bg-[#a03612]/10 hover:bg-[#a03612] hover:text-white border border-[#a03612]/40 rounded-full text-xs font-bold text-[#a03612] shadow-soft transition flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                  className="px-3.5 py-2 bg-accent/10 hover:bg-accent hover:text-white border border-accent/40 rounded-full text-xs font-bold text-accent shadow-soft transition flex items-center gap-1.5 active:scale-95 cursor-pointer"
                 >
                   <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -435,9 +435,9 @@ export default function ChatWindow({
             setHasNewContent(false);
             scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
           }}
-          className="absolute bottom-24 right-6 sm:right-8 z-20 px-4 py-2.5 bg-white text-[#a03612] border border-amber-200/90 shadow-lg rounded-full text-xs font-extrabold hover:bg-amber-50 active:scale-95 transition-[background-color,transform] duration-200 flex items-center gap-1.5 cursor-pointer animate-slide-up"
+          className="absolute bottom-24 right-6 sm:right-8 z-20 px-4 py-2.5 bg-elevated text-accent border border-accent/40 shadow-lg rounded-full text-xs font-extrabold hover:bg-accent-soft active:scale-95 transition-[background-color,transform] duration-200 flex items-center gap-1.5 cursor-pointer animate-slide-up"
         >
-          <svg className="w-3.5 h-3.5 text-[#a03612] animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3.5 h-3.5 text-accent animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
           <span>{t('scrollToBottom')}</span>
@@ -445,57 +445,57 @@ export default function ChatWindow({
       )}
 
       {/* ── Bottom Pill Input Area with Attachments ────────────────── */}
-      <div className="p-4 sm:p-6 flex-shrink-0 bg-[#faf8f5]">
+      <div className="p-4 sm:p-6 flex-shrink-0 bg-surface">
         <div className="max-w-3xl mx-auto space-y-2">
 
           {/* File Error Notification */}
           {fileError && (
-            <div role="alert" className="flex items-center justify-between px-4 py-2 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs animate-fade-in">
+            <div role="alert" className="flex items-center justify-between px-4 py-2 bg-error/10 border border-error/40 text-error rounded-2xl text-xs animate-fade-in">
               <span>{fileError}</span>
-              <button type="button" onClick={() => setFileError(null)} aria-label="Dismiss error" className="font-bold ml-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">×</button>
+              <button type="button" onClick={() => setFileError(null)} aria-label="Dismiss error" className="font-bold ml-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error">×</button>
             </div>
           )}
 
           {/* Speech support notice */}
           {speechNotice && (
-            <div role="status" className="px-4 py-2 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl text-xs animate-fade-in">
+            <div role="status" className="px-4 py-2 bg-accent-soft border border-accent/40 text-amber-900 rounded-2xl text-xs animate-fade-in">
               {speechNotice}
             </div>
           )}
 
           {/* Staged Attachments Preview Tray */}
           {attachments.length > 0 && (
-            <div className="flex flex-wrap gap-2 p-3 bg-stone-100/90 border border-stone-200 rounded-2xl animate-slide-up shadow-inner">
+            <div className="flex flex-wrap gap-2 p-3 bg-sunken/90 border border-line rounded-2xl animate-slide-up shadow-inner">
               {attachments.map((att) => (
                 <div
                   key={att.id}
-                  className="group relative flex items-center gap-2 p-1.5 bg-white border border-stone-200/90 rounded-xl shadow-xs hover:border-stone-400 transition"
+                  className="group relative flex items-center gap-2 p-1.5 bg-elevated border border-line rounded-xl shadow-xs hover:border-ink-muted transition"
                 >
                   {att.isImage ? (
                     <button
                       type="button"
                       onClick={() => setPreviewImage(att)}
                       aria-label={`${t('previewImage')}: ${att.name}`}
-                      className="cursor-pointer flex items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
+                      className="cursor-pointer flex items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                     >
                       <img
                         src={att.data}
                         alt={att.name}
-                        className="w-9 h-9 object-cover rounded-lg border border-stone-200"
+                        className="w-9 h-9 object-cover rounded-lg border border-line"
                       />
                       <span className="truncate max-w-[120px] pr-1 text-left">
-                        <span className="text-[11px] font-semibold text-stone-800 block truncate">{att.name}</span>
-                        <span className="text-[9px] text-stone-500 block tabular-nums">{formatBytes(att.size)}</span>
+                        <span className="text-[11px] font-semibold text-ink block truncate">{att.name}</span>
+                        <span className="text-[9px] text-ink-muted block tabular-nums">{formatBytes(att.size)}</span>
                       </span>
                     </button>
                   ) : (
                     <div className="flex items-center gap-2 pr-1">
-                      <div className="w-8 h-8 rounded-lg bg-amber-100 text-[#a03612] font-bold text-[9px] flex items-center justify-center uppercase tracking-tight">
+                      <div className="w-8 h-8 rounded-lg bg-accent-soft text-accent font-bold text-[9px] flex items-center justify-center uppercase tracking-tight">
                         {att.name?.split('.').pop() || 'DOC'}
                       </div>
                       <div className="truncate max-w-[130px]">
-                        <p className="text-[11px] font-semibold text-stone-800 truncate">{att.name}</p>
-                        <p className="text-[9px] text-stone-500">{formatBytes(att.size)}</p>
+                        <p className="text-[11px] font-semibold text-ink truncate">{att.name}</p>
+                        <p className="text-[9px] text-ink-muted">{formatBytes(att.size)}</p>
                       </div>
                     </div>
                   )}
@@ -505,7 +505,7 @@ export default function ChatWindow({
                     type="button"
                     onClick={() => removeAttachment(att.id)}
                     aria-label={`${t('removeAttachment')}: ${att.name}`}
-                    className="w-5 h-5 flex items-center justify-center rounded-full bg-stone-200 hover:bg-rose-500 hover:text-white text-stone-600 transition text-xs font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+                    className="w-5 h-5 flex items-center justify-center rounded-full bg-sunken hover:bg-error/100 hover:text-white text-ink-soft transition text-xs font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error"
                   >
                     ×
                   </button>
@@ -516,23 +516,23 @@ export default function ChatWindow({
 
           {/* Animated Listening Indicator Notification Banner */}
           {isListening && (
-            <div className="flex items-center justify-between px-4 py-2.5 bg-amber-500/10 border border-amber-500/30 text-[#a03612] rounded-2xl text-xs font-bold shadow-soft animate-slide-up backdrop-blur-xs">
+            <div className="flex items-center justify-between px-4 py-2.5 bg-accent-soft0/10 border border-accent/40 text-accent rounded-2xl text-xs font-bold shadow-soft animate-slide-up backdrop-blur-xs">
               <div className="flex items-center gap-3">
                 {/* Animated Sound Wave Equalizer Bars */}
                 <div className="flex items-end gap-1 h-5 px-1">
-                  <span className="w-1 h-5 bg-[#a03612] rounded-full origin-bottom animate-audio-bar-1"></span>
-                  <span className="w-1 h-5 bg-[#a03612] rounded-full origin-bottom animate-audio-bar-2"></span>
-                  <span className="w-1 h-5 bg-[#a03612] rounded-full origin-bottom animate-audio-bar-3"></span>
-                  <span className="w-1 h-5 bg-[#a03612] rounded-full origin-bottom animate-audio-bar-4"></span>
-                  <span className="w-1 h-5 bg-[#a03612] rounded-full origin-bottom animate-audio-bar-5"></span>
+                  <span className="w-1 h-5 bg-accent rounded-full origin-bottom animate-audio-bar-1"></span>
+                  <span className="w-1 h-5 bg-accent rounded-full origin-bottom animate-audio-bar-2"></span>
+                  <span className="w-1 h-5 bg-accent rounded-full origin-bottom animate-audio-bar-3"></span>
+                  <span className="w-1 h-5 bg-accent rounded-full origin-bottom animate-audio-bar-4"></span>
+                  <span className="w-1 h-5 bg-accent rounded-full origin-bottom animate-audio-bar-5"></span>
                 </div>
-                <span className="font-bold text-stone-900 tracking-tight">{t('listening')}</span>
+                <span className="font-bold text-ink tracking-tight">{t('listening')}</span>
               </div>
 
                 <button
                   type="button"
                   onClick={toggleListening}
-                  className="px-2.5 py-1 bg-[#a03612] text-white text-[11px] font-bold rounded-lg hover:bg-[#882c0e] transition-colors shadow-xs flex items-center gap-1 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  className="px-2.5 py-1 bg-accent text-white text-[11px] font-bold rounded-lg hover:bg-accent-strong transition-colors shadow-xs flex items-center gap-1 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 >
                 <span>{t('stopListening')}</span>
                 <span>×</span>
@@ -550,7 +550,7 @@ export default function ChatWindow({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 title={t('attachFile')}
-                className="p-2 text-stone-400 hover:text-[#1e4e4d] hover:bg-stone-100 rounded-full transition"
+                className="p-2 text-ink-muted hover:text-forest hover:bg-sunken rounded-full transition"
                 aria-label={t('attachFile')}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -563,7 +563,7 @@ export default function ChatWindow({
                 type="button"
                 onClick={() => imageInputRef.current?.click()}
                 title={t('attachScreenshot')}
-                className="p-2 text-stone-400 hover:text-[#a03612] hover:bg-amber-50 rounded-full transition"
+                className="p-2 text-ink-muted hover:text-accent hover:bg-accent-soft rounded-full transition"
                 aria-label={t('attachScreenshot')}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -581,7 +581,7 @@ export default function ChatWindow({
               onKeyDown={handleKeyDown}
               placeholder={attachments.length > 0 ? (language === 'hi' ? 'संलग्न फ़ाइल के बारे में पूछें…' : language === 'mr' ? 'संलग्न फाइलबाबत विचारा…' : 'Ask a question about the attached file…') : t('chatPlaceholder')}
               aria-label={t('chatPlaceholder')}
-              className="w-full pl-24 pr-24 sm:pr-28 py-4 bg-white border border-stone-200 rounded-3xl text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#a03612] focus:border-transparent shadow-card transition duration-200 resize-none leading-relaxed"
+              className="w-full pl-24 pr-24 sm:pr-28 py-4 bg-elevated border border-line rounded-3xl text-xs sm:text-sm text-ink placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent shadow-card transition duration-200 resize-none leading-relaxed"
             />
 
             {/* Right Side Action Buttons: Microphone (Before) + Send Button */}
@@ -590,7 +590,7 @@ export default function ChatWindow({
               {/* Animated Voice Microphone Button (Positioned on the right right before Send) */}
               <div className="relative flex items-center justify-center">
                 {isListening && (
-                  <span className="absolute inset-0 rounded-full bg-[#a03612] animate-mic-ring"></span>
+                  <span className="absolute inset-0 rounded-full bg-accent animate-mic-ring"></span>
                 )}
                 <button
                   type="button"
@@ -598,8 +598,8 @@ export default function ChatWindow({
                   title={isListening ? t('stopListening') : t('voiceInput')}
                   className={`relative p-2.5 rounded-full transition-colors duration-200 active:scale-90 flex items-center justify-center ${
                     isListening
-                      ? 'text-white bg-[#a03612] shadow-md scale-105'
-                      : 'text-stone-400 hover:text-[#a03612] hover:bg-amber-50/80'
+                      ? 'text-white bg-accent shadow-md scale-105'
+                      : 'text-ink-muted hover:text-accent hover:bg-accent-soft'
                   }`}
                   aria-label={isListening ? t('stopListening') : t('voiceInput')}
                 >
@@ -615,7 +615,7 @@ export default function ChatWindow({
                 disabled={loading || (!input.trim() && attachments.length === 0)}
                 aria-label={loading ? t('chatLoading') : 'Send message'}
                 title={loading ? t('chatLoading') : 'Send message'}
-                className="w-9 h-9 bg-gradient-to-tr from-[#d89780] to-[#b34420] hover:from-[#b34420] hover:to-[#882c0e] text-white rounded-full transition shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612] focus-visible:ring-offset-2"
+                className="w-9 h-9 bg-gradient-to-tr from-accent to-accent-strong hover:from-accent-strong hover:to-accent text-white rounded-full transition shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
               >
                 {loading ? (
                   <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />
@@ -630,7 +630,7 @@ export default function ChatWindow({
 
           </form>
 
-          <p className="text-center text-[11px] text-stone-400 font-normal">
+          <p className="text-center text-[11px] text-ink-muted font-normal">
             {t('pasteScreenshotHint')} • {t('chatDisclaimer')}
           </p>
 

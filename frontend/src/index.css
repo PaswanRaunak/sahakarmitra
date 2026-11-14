@@ -4,25 +4,37 @@
 
 @layer base {
   :root {
-    --bg-cream: #faf8f5;
-    --primary-rust: #a03612;
-    --primary-rust-hover: #882c0e;
-    --dark-teal: #1b4342;
-    --accent-teal: #2d6a68;
-    --charcoal-dark: #1c1917;
+    color-scheme: light;
+  }
+  .dark {
+    color-scheme: dark;
   }
 
   html {
-    color-scheme: light;
+    scroll-behavior: smooth;
   }
 
   body {
-    background-color: var(--bg-cream);
-    color: var(--charcoal-dark);
+    background-color: rgb(var(--c-surface));
+    color: rgb(var(--c-ink));
     font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3 {
+    font-optical-sizing: auto;
+  }
+  h1 {
+    letter-spacing: -0.02em;
+  }
+  h2 {
+    letter-spacing: -0.01em;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 }
 
@@ -35,6 +47,34 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ── Reduced transparency: frost surfaces down to near-solid ── */
+@media (prefers-reduced-transparency: reduce) {
+  .backdrop-blur-xl,
+  .backdrop-blur-md,
+  .backdrop-blur-sm {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .bg-surface\/90,
+  .bg-elevated\/85 {
+    background-color: rgb(var(--c-surface)) !important;
+  }
+  .glass-card {
+    background: rgb(var(--c-elevated));
+  }
+}
+
+/* ── Increased contrast: defined borders, stronger text ── */
+@media (prefers-contrast: more) {
+  .border-line {
+    border-color: rgb(var(--c-ink-soft)) !important;
+  }
+  .text-ink-muted,
+  .text-ink-soft {
+    color: rgb(var(--c-ink)) !important;
   }
 }
 
@@ -84,9 +124,9 @@
 }
 
 @keyframes micPulseRing {
-  0%   { transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(160, 54, 18, 0.4); }
-  70%  { transform: scale(1.25); opacity: 0.15; box-shadow: 0 0 0 14px rgba(160, 54, 18, 0); }
-  100% { transform: scale(0.95); opacity: 0; box-shadow: 0 0 0 0 rgba(160, 54, 18, 0); }
+  0%   { transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(154, 98, 16, 0.4); }
+  70%  { transform: scale(1.25); opacity: 0.15; box-shadow: 0 0 0 14px rgba(154, 98, 16, 0); }
+  100% { transform: scale(0.95); opacity: 0; box-shadow: 0 0 0 0 rgba(154, 98, 16, 0); }
 }
 
 .animate-fade-in {
@@ -125,32 +165,38 @@
 }
 
 .shadow-diffuse {
-  box-shadow: 0 20px 40px -15px rgba(28, 25, 23, 0.06);
+  box-shadow: var(--shadow-diffuse);
 }
 
 .shimmer-bg {
-  background: linear-gradient(90deg, #f5f2ec 25%, #e8e3d8 50%, #f5f2ec 75%);
+  background: linear-gradient(90deg, rgb(var(--c-sunken)) 25%, rgb(var(--c-line)) 50%, rgb(var(--c-sunken)) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.8s infinite;
 }
 
-/* ── Custom Shadows & Glassmorphism ───────────────────────── */
+/* ── Custom Shadows & Materials (tinted to surface hue) ────── */
 .shadow-soft {
-  box-shadow: 0 4px 20px -2px rgba(28, 25, 23, 0.05), 0 2px 6px -1px rgba(28, 25, 23, 0.03);
+  box-shadow: var(--shadow-soft);
 }
 
 .shadow-card {
-  box-shadow: 0 12px 32px -4px rgba(28, 25, 23, 0.08), 0 4px 12px -2px rgba(28, 25, 23, 0.04);
+  box-shadow: var(--shadow-card);
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgb(var(--c-elevated) / 0.85);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+}
+
+/* Translucent headers get Apple-style material saturation */
+.backdrop-blur-xl {
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
 }
 
 /* ── Devanagari readability (Hindi / Marathi UI) ─────────────
-   The 12px "text-xs" sizes used across the UI are too small for
+   The small "text-xs" sizes used across the UI are too small for
    Devanagari glyphs. When the app root carries the `lang-dev`
    class, bump the small text sizes and loosen the line height. */
 .lang-dev .text-xs {
@@ -179,9 +225,9 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d6d3d1;
+  background: rgb(var(--c-line));
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a29e;
+  background: rgb(var(--c-muted));
 }

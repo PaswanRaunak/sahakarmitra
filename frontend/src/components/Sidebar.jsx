@@ -92,30 +92,30 @@ export default function Sidebar({
         <div
           onClick={onClose}
           aria-hidden="true"
-          className="md:hidden fixed inset-0 z-40 bg-stone-900/50 backdrop-blur-xs transition-opacity animate-fade-in"
+          className="md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-xs transition-opacity animate-fade-in"
         />
       )}
 
       {/* Sidebar (Responsive: Original PC Design + ChatGPT-style Mobile Drawer) */}
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-40 bg-[#f5f2ec] border-r border-stone-200/80 flex flex-col transition-all duration-300 ease-in-out ${
+        className={`fixed md:static inset-y-0 left-0 z-40 bg-[#f5f2ec] border-r border-line flex flex-col transition-all duration-300 ease-in-out ${
           isCollapsed ? 'w-20' : 'w-[82vw] max-w-[320px] md:w-72 sm:md:w-80'
         } ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} ${!isOpen ? 'md:hidden' : ''}`}
       >
         {/* Top Header */}
-        <div className="p-4 space-y-3 border-b border-stone-200/80 bg-[#faf8f5] flex-shrink-0">
+        <div className="p-4 space-y-3 border-b border-line bg-surface flex-shrink-0">
           <div className="flex items-center justify-between">
             {/* Branding */}
-            <div className="flex items-center gap-2.5 text-stone-900 font-bold text-xs uppercase tracking-wider overflow-hidden">
+            <div className="flex items-center gap-2.5 text-ink font-bold text-xs uppercase tracking-wider overflow-hidden">
               <img
                 src="/logo.jpg"
                 alt="SahakarMitra Logo"
-                className="w-8 h-8 rounded-xl shadow-xs border border-stone-200 object-cover flex-shrink-0"
+                className="w-8 h-8 rounded-xl shadow-xs border border-line object-cover flex-shrink-0"
               />
               {!isCollapsed && (
                 <div className="min-w-0">
-                  <span className="text-sm font-bold text-stone-900 tracking-tight block">SahakarMitra</span>
-                  <span className="text-[10px] text-stone-400 font-medium font-mono block -mt-0.5">MSCA 1960</span>
+                  <span className="text-sm font-bold text-ink tracking-tight block">SahakarMitra</span>
+                  <span className="text-[10px] text-ink-muted font-medium font-mono block -mt-0.5">MSCA 1960</span>
                 </div>
               )}
             </div>
@@ -125,7 +125,7 @@ export default function Sidebar({
               <button
                 onClick={() => setShowSearch(!showSearch)}
                 aria-label="Search conversations"
-                className="md:hidden text-stone-500 hover:text-stone-900 p-1.5 rounded-lg hover:bg-stone-200/60 transition"
+                className="md:hidden text-ink-muted hover:text-ink p-1.5 rounded-lg hover:bg-sunken/60 transition"
                 title="Search chats"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,7 +136,7 @@ export default function Sidebar({
               <button
                 onClick={onClose}
                 aria-label={t('closeSidebar')}
-                className="md:hidden text-stone-400 hover:text-stone-700 p-1.5 rounded-lg hover:bg-stone-200/60 transition"
+                className="md:hidden text-ink-muted hover:text-ink-soft p-1.5 rounded-lg hover:bg-sunken/60 transition"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -148,7 +148,7 @@ export default function Sidebar({
           {/* PC Desktop ONLY: Top "+ New Legal Query" Button */}
           <button
             onClick={() => handleNav('chat', onNewChat)}
-            className={`hidden md:flex w-full py-2.5 px-3 bg-[#a03612] hover:bg-[#882c0e] text-white rounded-xl font-bold text-xs shadow-sm transition items-center justify-center gap-2 transform hover:-translate-y-0.5 active:translate-y-0 ${
+            className={`hidden md:flex w-full py-2.5 px-3 bg-accent hover:bg-accent-strong text-white rounded-xl font-bold text-xs shadow-sm transition items-center justify-center gap-2 transform hover:-translate-y-0.5 active:translate-y-0 ${
               isCollapsed ? 'px-2' : ''
             }`}
             title={t('newQuery')}
@@ -168,23 +168,23 @@ export default function Sidebar({
                 onChange={(e) => setSearchFilter(e.target.value)}
                 placeholder="Search conversations…"
                 aria-label="Search conversations"
-                className="w-full px-3 py-1.5 text-xs bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#a03612]"
+                className="w-full px-3 py-1.5 text-xs bg-elevated border border-line rounded-lg focus:outline-none focus:ring-1 focus:ring-accent"
               />
             </div>
           )}
         </div>
 
         {/* Main Navigation Items */}
-        <div className="p-3 border-b border-stone-200/80 space-y-1 flex-shrink-0">
+        <div className="p-3 border-b border-line space-y-1 flex-shrink-0">
           <button
             onClick={() => handleNav('dashboard')}
             className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-xs font-bold transition ${
               activeTab === 'dashboard'
-                ? 'bg-white text-[#a03612] shadow-soft border border-stone-200/80'
-                : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900'
+                ? 'bg-elevated text-accent shadow-soft border border-line'
+                : 'text-ink-soft hover:bg-sunken/60 hover:text-ink'
             }`}
           >
-            <svg className="w-4 h-4 text-[#a03612] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg className="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
             </svg>
             {!isCollapsed && <span>{t('dashboardTab')}</span>}
@@ -194,11 +194,11 @@ export default function Sidebar({
             onClick={() => handleNav('chat')}
             className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-xs font-bold transition ${
               activeTab === 'chat'
-                ? 'bg-white text-[#a03612] shadow-soft border border-stone-200/80'
-                : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900'
+                ? 'bg-elevated text-accent shadow-soft border border-line'
+                : 'text-ink-soft hover:bg-sunken/60 hover:text-ink'
             }`}
           >
-            <svg className="w-4 h-4 text-[#a03612] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg className="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
             {!isCollapsed && <span>{t('chatTab')}</span>}
@@ -208,11 +208,11 @@ export default function Sidebar({
             onClick={() => handleNav('library', () => window.history.pushState({}, '', '/library'))}
             className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-xs font-bold transition ${
               activeTab === 'library'
-                ? 'bg-white text-[#a03612] shadow-soft border border-stone-200/80'
-                : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900'
+                ? 'bg-elevated text-accent shadow-soft border border-line'
+                : 'text-ink-soft hover:bg-sunken/60 hover:text-ink'
             }`}
           >
-            <svg className="w-4 h-4 text-[#a03612] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg className="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
             {!isCollapsed && <span>{t('libraryTab') || 'Knowledge Repository'}</span>}
@@ -222,11 +222,11 @@ export default function Sidebar({
             onClick={() => handleNav('bookmarks')}
             className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-xs font-bold transition ${
               activeTab === 'bookmarks'
-                ? 'bg-white text-[#a03612] shadow-soft border border-stone-200/80'
-                : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900'
+                ? 'bg-elevated text-accent shadow-soft border border-line'
+                : 'text-ink-soft hover:bg-sunken/60 hover:text-ink'
             }`}
           >
-            <svg className="w-4 h-4 text-[#a03612] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg className="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
             </svg>
             {!isCollapsed && <span>{t('bookmarksTab') || 'Saved Sections'}</span>}
@@ -236,11 +236,11 @@ export default function Sidebar({
             onClick={() => handleNav('experts')}
             className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-xs font-bold transition ${
               activeTab === 'experts'
-                ? 'bg-white text-[#a03612] shadow-soft border border-stone-200/80'
-                : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900'
+                ? 'bg-elevated text-accent shadow-soft border border-line'
+                : 'text-ink-soft hover:bg-sunken/60 hover:text-ink'
             }`}
           >
-            <svg className="w-4 h-4 text-[#a03612] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg className="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             {!isCollapsed && <span>{t('expertsTab')}</span>}
@@ -249,7 +249,7 @@ export default function Sidebar({
 
         {/* Section Header: Recent Conversations */}
         {!isCollapsed && (
-          <div className="px-4 pt-3 pb-1 flex items-center justify-between text-[11px] font-bold text-stone-400 uppercase tracking-wider flex-shrink-0">
+          <div className="px-4 pt-3 pb-1 flex items-center justify-between text-[11px] font-bold text-ink-muted uppercase tracking-wider flex-shrink-0">
             <span>{t('recentConversations')} ({filteredChats.length})</span>
           </div>
         )}
@@ -281,15 +281,15 @@ export default function Sidebar({
                   }
                 }}
                 aria-current={isActive ? 'true' : undefined}
-                className={`group flex items-center justify-between p-2 rounded-xl text-xs font-semibold cursor-pointer transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612] ${
+                className={`group flex items-center justify-between p-2 rounded-xl text-xs font-semibold cursor-pointer transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                   isActive
-                    ? 'bg-white text-[#a03612] shadow-soft border border-stone-200/80 font-bold'
-                    : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900'
+                    ? 'bg-elevated text-accent shadow-soft border border-line font-bold'
+                    : 'text-ink-soft hover:bg-sunken/60 hover:text-ink'
                 }`}
                 title={displayTitle}
               >
                 <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                  <svg className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#a03612]' : 'text-stone-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <svg className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-accent' : 'text-ink-muted'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
                   {!isCollapsed && (
@@ -307,7 +307,7 @@ export default function Sidebar({
                       onDeleteChat(chat.id);
                     }}
                     aria-label={t('deleteChat')}
-                    className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-stone-400 hover:text-rose-600 p-1 transition rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+                    className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-ink-muted hover:text-error p-1 transition rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -324,7 +324,7 @@ export default function Sidebar({
 
           {/* SAHAKARMITRA FUNCTIONAL USER PROFILE POPOVER MENU */}
           {showUserMenu && (
-            <div className="absolute bottom-full left-3 right-3 mb-2 bg-white text-stone-900 border border-stone-200/90 rounded-2xl shadow-2xl p-2 z-50 animate-scale-in text-xs select-none">
+            <div className="absolute bottom-full left-3 right-3 mb-2 bg-elevated text-ink border border-line rounded-2xl shadow-2xl p-2 z-50 animate-scale-in text-xs select-none">
               
               {/* Menu Top: User Profile Tile */}
               <div
@@ -332,18 +332,18 @@ export default function Sidebar({
                 tabIndex={0}
                 onClick={() => handleOpenSubTab('profile')}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpenSubTab('profile'); } }}
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#faf8f5] cursor-pointer transition border border-stone-100 mb-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-surface cursor-pointer transition border border-line mb-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-full bg-[#2d6a68] text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
+                  <div className="w-8 h-8 rounded-full bg-forest-soft text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
                     {userName[0]?.toUpperCase() || 'A'}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-stone-900 text-xs truncate leading-tight">{userName}</p>
-                    <p className="text-[10px] text-stone-500 truncate leading-tight mt-0.5">{societyName}</p>
+                    <p className="font-bold text-ink text-xs truncate leading-tight">{userName}</p>
+                    <p className="text-[10px] text-ink-muted truncate leading-tight mt-0.5">{societyName}</p>
                   </div>
                 </div>
-                <svg className="w-4 h-4 text-stone-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-ink-muted flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                 </svg>
               </div>
@@ -353,9 +353,9 @@ export default function Sidebar({
                 {/* 1. Profile & Society Details */}
                 <button
                   onClick={() => handleOpenSubTab('profile')}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-stone-700 hover:text-[#a03612] hover:bg-[#faf8f5] transition text-left"
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-ink-soft hover:text-accent hover:bg-surface transition text-left"
                 >
-                  <svg className="w-4 h-4 text-[#a03612] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                   <span className="font-semibold">{t('profile') || 'Profile & Society Details'}</span>
@@ -364,9 +364,9 @@ export default function Sidebar({
                 {/* 2. Preferences & Language */}
                 <button
                   onClick={() => handleOpenSubTab('preferences')}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-stone-700 hover:text-[#a03612] hover:bg-[#faf8f5] transition text-left"
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-ink-soft hover:text-accent hover:bg-surface transition text-left"
                 >
-                  <svg className="w-4 h-4 text-[#a03612] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                   </svg>
                   <span className="font-semibold">{t('preferences') || 'Preferences & Language'}</span>
@@ -375,9 +375,9 @@ export default function Sidebar({
                 {/* 3. Security & 2FA */}
                 <button
                   onClick={() => handleOpenSubTab('security')}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-stone-700 hover:text-[#a03612] hover:bg-[#faf8f5] transition text-left"
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-ink-soft hover:text-accent hover:bg-surface transition text-left"
                 >
-                  <svg className="w-4 h-4 text-[#a03612] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                   <span className="font-semibold">{t('securityHub') || 'Security & Access'}</span>
@@ -385,30 +385,30 @@ export default function Sidebar({
               </div>
 
               {/* Divider */}
-              <div className="my-1.5 border-t border-stone-100" />
+              <div className="my-1.5 border-t border-line" />
 
               {/* Help & Logout */}
               <div className="space-y-0.5">
                 <button
                   onClick={() => { if (onOpenHelp) onOpenHelp(); setShowUserMenu(false); }}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-stone-700 hover:text-[#a03612] hover:bg-[#faf8f5] transition text-left"
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-ink-soft hover:text-accent hover:bg-surface transition text-left"
                 >
                   <div className="flex items-center gap-3">
-                    <svg className="w-4 h-4 text-stone-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-ink-muted flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                     <span className="font-semibold">Help & Legal Tour</span>
                   </div>
-                  <svg className="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-ink-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
 
                 <button
                   onClick={() => { if (onLogout) onLogout(); setShowUserMenu(false); }}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 transition text-left font-bold"
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-error hover:bg-error/10 transition text-left font-bold"
                 >
-                  <svg className="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-error flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
                   <span>{t('logout') || 'Log out'}</span>
@@ -419,12 +419,12 @@ export default function Sidebar({
           )}
 
           {/* MOBILE ONLY: Floating Action Bar */}
-          <div className="md:hidden p-3 bg-[#f5f2ec] border-t border-stone-200/80">
+          <div className="md:hidden p-3 bg-[#f5f2ec] border-t border-line">
             <div className="flex items-center justify-between gap-3">
               {/* Terracotta Pill Button */}
               <button
                 onClick={() => handleNav('chat', onNewChat)}
-                className="flex-1 py-3 px-5 bg-[#a03612] active:bg-[#882c0e] text-white rounded-full font-bold text-xs shadow-md transition flex items-center justify-center gap-2 transform active:scale-95"
+                className="flex-1 py-3 px-5 bg-accent active:bg-accent-strong text-white rounded-full font-bold text-xs shadow-md transition flex items-center justify-center gap-2 transform active:scale-95"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -437,7 +437,7 @@ export default function Sidebar({
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 aria-label={`${userName}, open profile menu`}
                 aria-expanded={showUserMenu}
-                className="w-10 h-10 rounded-full bg-[#2d6a68] text-white flex items-center justify-center font-bold text-xs shadow-sm border-2 border-white flex-shrink-0 transition active:scale-95 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
+                className="w-10 h-10 rounded-full bg-forest-soft text-white flex items-center justify-center font-bold text-xs shadow-sm border-2 border-white flex-shrink-0 transition active:scale-95 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                 title={userName}
               >
                 {userName[0]?.toUpperCase() || 'A'}
@@ -446,10 +446,10 @@ export default function Sidebar({
           </div>
 
           {/* PC DESKTOP ONLY: Collapse Toggle & Desktop User Profile Card */}
-          <div className="hidden md:block p-3 border-t border-stone-200/80 bg-stone-100/60 space-y-2 flex-shrink-0">
+          <div className="hidden md:block p-3 border-t border-line bg-sunken/60 space-y-2 flex-shrink-0">
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="w-full flex items-center justify-center gap-2 p-2 rounded-xl text-stone-500 hover:text-stone-900 hover:bg-stone-200/60 text-xs font-semibold transition"
+              className="w-full flex items-center justify-center gap-2 p-2 rounded-xl text-ink-muted hover:text-ink hover:bg-sunken/60 text-xs font-semibold transition"
               title={isCollapsed ? t('expandSidebar') : t('collapseSidebar')}
             >
               <svg className={`w-4 h-4 transform transition-transform ${isCollapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -466,22 +466,22 @@ export default function Sidebar({
                 aria-expanded={showUserMenu}
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowUserMenu(!showUserMenu); } }}
-                className={`flex items-center gap-2.5 p-2 rounded-xl bg-white border border-stone-200/80 shadow-xs cursor-pointer hover:bg-stone-50 transition active:scale-98 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612] ${
-                  showUserMenu ? 'ring-2 ring-[#a03612]/30 border-[#a03612]' : ''
+                className={`flex items-center gap-2.5 p-2 rounded-xl bg-elevated border border-line shadow-xs cursor-pointer hover:bg-sunken transition active:scale-98 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                  showUserMenu ? 'ring-2 ring-accent/30 border-accent' : ''
                 }`}
               >
-                <div className="w-8 h-8 rounded-full bg-[#2d6a68] text-white flex items-center justify-center font-bold text-xs shadow-xs flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-forest-soft text-white flex items-center justify-center font-bold text-xs shadow-xs flex-shrink-0">
                   {userName[0]?.toUpperCase() || 'A'}
                 </div>
                 <div className="min-w-0 flex-1 text-xs">
-                  <p className="font-bold text-stone-900 truncate">
+                  <p className="font-bold text-ink truncate">
                     {userName}
                   </p>
-                  <p className="text-[10px] text-stone-500 truncate">
+                  <p className="text-[10px] text-ink-muted truncate">
                     {societyName}
                   </p>
                 </div>
-                <svg className={`w-3.5 h-3.5 text-stone-400 transform transition-transform ${showUserMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-3.5 h-3.5 text-ink-muted transform transition-transform ${showUserMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
                 </svg>
               </div>

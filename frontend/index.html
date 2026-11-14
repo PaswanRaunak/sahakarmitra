@@ -3,17 +3,70 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#faf8f5" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F7F5EF" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0F1712" />
     <meta name="description" content="SahakarMitra - AI legal assistant for Indian cooperative housing societies, grounded in the Maharashtra Cooperative Societies Act 1960. English, Hindi, Marathi." />
     <link rel="icon" type="image/jpeg" href="/logo.jpg" />
+    <link rel="canonical" href="https://sahakarmitra.vercel.app/" />
     <meta property="og:title" content="SahakarMitra - Cooperative Legal Assistant" />
     <meta property="og:description" content="AI legal assistant for Indian cooperative housing societies, grounded in the Maharashtra Cooperative Societies Act 1960." />
     <meta property="og:image" content="/logo.jpg" />
+    <meta property="og:url" content="https://sahakarmitra.vercel.app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_IN" />
+    <meta property="og:locale:alternate" content="hi_IN" />
+    <meta property="og:locale:alternate" content="mr_IN" />
     <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="SahakarMitra - Cooperative Legal Assistant" />
+    <meta name="twitter:description" content="AI legal assistant for Indian cooperative housing societies, grounded in the Maharashtra Cooperative Societies Act 1960." />
     <title>SahakarMitra - Cooperative Legal Assistant</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400..900&display=swap" rel="stylesheet" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "SahakarMitra",
+      "alternateName": "सहकारमित्र",
+      "url": "https://sahakarmitra.vercel.app/",
+      "description": "AI-powered multilingual legal assistant for Indian cooperative housing societies, grounded in state Cooperative Societies Acts via retrieval-augmented generation.",
+      "inLanguage": ["en", "hi", "mr"],
+      "publisher": { "@type": "Organization", "name": "SahakarMitra" }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "SahakarMitra",
+      "url": "https://sahakarmitra.vercel.app/",
+      "applicationCategory": "Legal",
+      "operatingSystem": "Web",
+      "browserRequirements": "Requires JavaScript",
+      "description": "Multilingual AI legal assistant for Indian cooperative societies. Answers are retrieved from verified statutory text (Maharashtra, Gujarat, Karnataka and Multi-State Cooperative Societies Acts) and cite the exact section and Act name.",
+      "inLanguage": ["en", "hi", "mr"],
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "INR" },
+      "featureList": [
+        "Citation-grounded legal answers",
+        "Parent-child retrieval over state Cooperative Societies Acts",
+        "English, Hindi and Marathi with language style mirroring",
+        "Multi-state jurisdiction scoping",
+        "PDF and screenshot (OCR) statutory review",
+        "Voice input and read-aloud"
+      ]
+    }
+    </script>
+    <script>
+      // Apply saved theme before first paint to avoid a light-mode flash
+      (function () {
+        try {
+          var t = localStorage.getItem('sahakar_theme');
+          if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          if (t === 'dark') document.documentElement.classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -38,7 +38,7 @@ function renderFormattedContent(text, isUser = false) {
 
     // 1. Horizontal Rule (--- or ___ or ***)
     if (/^(---|___|\*\*\*)$/.test(firstLine)) {
-      return <hr key={bIdx} className="my-4 border-t border-stone-200" />;
+      return <hr key={bIdx} className="my-4 border-t border-line" />;
     }
 
     // 2. Headings (# Heading, ## Heading, ### Heading, #### Heading)
@@ -49,20 +49,20 @@ function renderFormattedContent(text, isUser = false) {
 
       if (level <= 2) {
         return (
-          <h2 key={bIdx} className="text-base sm:text-lg font-black text-stone-900 mt-5 mb-2.5 pb-1 border-b border-amber-200/60 flex items-center gap-2">
-            <span className="w-2 h-4 bg-[#a03612] rounded-full inline-block"></span>
+          <h2 key={bIdx} className="text-base sm:text-lg font-black text-ink mt-5 mb-2.5 pb-1 border-b border-accent/30 flex items-center gap-2">
+            <span className="w-2 h-4 bg-accent rounded-full inline-block"></span>
             <span>{parseInlineFormatting(title)}</span>
           </h2>
         );
       } else if (level === 3) {
         return (
-          <h3 key={bIdx} className="text-sm sm:text-base font-bold text-[#a03612] mt-4 mb-2 flex items-center gap-2">
+          <h3 key={bIdx} className="text-sm sm:text-base font-bold text-accent mt-4 mb-2 flex items-center gap-2">
             <span>{parseInlineFormatting(title)}</span>
           </h3>
         );
       } else {
         return (
-          <h4 key={bIdx} className="text-xs sm:text-sm font-bold text-stone-800 mt-3 mb-1.5 uppercase tracking-wider">
+          <h4 key={bIdx} className="text-xs sm:text-sm font-bold text-ink mt-3 mb-1.5 uppercase tracking-wider">
             {parseInlineFormatting(title)}
           </h4>
         );
@@ -79,12 +79,12 @@ function renderFormattedContent(text, isUser = false) {
       const dataRows = rows.slice(2).filter(row => row.length > 0);
 
       return (
-        <div key={bIdx} className="my-4 overflow-x-auto rounded-xl border border-stone-200/90 shadow-xs bg-white">
+        <div key={bIdx} className="my-4 overflow-x-auto rounded-xl border border-line shadow-xs bg-elevated">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-amber-50/90 border-b border-stone-200 text-stone-900 font-bold">
+              <tr className="bg-accent-soft/90 border-b border-line text-ink font-bold">
                 {headerRow.map((cell, cIdx) => (
-                  <th key={cIdx} className="px-3 py-2 border-r last:border-r-0 border-stone-200/70">
+                  <th key={cIdx} className="px-3 py-2 border-r last:border-r-0 border-line">
                     {parseInlineFormatting(cell)}
                   </th>
                 ))}
@@ -92,9 +92,9 @@ function renderFormattedContent(text, isUser = false) {
             </thead>
             <tbody>
               {dataRows.map((row, rIdx) => (
-                <tr key={rIdx} className="border-b last:border-b-0 border-stone-100 hover:bg-stone-50/80 transition">
+                <tr key={rIdx} className="border-b last:border-b-0 border-line hover:bg-sunken/80 transition">
                   {row.map((cell, cIdx) => (
-                    <td key={cIdx} className="px-3 py-2 border-r last:border-r-0 border-stone-100 text-stone-700 leading-relaxed">
+                    <td key={cIdx} className="px-3 py-2 border-r last:border-r-0 border-line text-ink-soft leading-relaxed">
                       {parseInlineFormatting(cell)}
                     </td>
                   ))}
@@ -110,7 +110,7 @@ function renderFormattedContent(text, isUser = false) {
     if (lines.every(l => l.trim().startsWith('>'))) {
       const quoteText = lines.map(l => l.replace(/^>\s*/, '')).join(' ');
       return (
-        <blockquote key={bIdx} className="my-3 pl-4 py-2 border-l-4 border-[#a03612] bg-amber-50/50 rounded-r-xl text-xs sm:text-sm text-stone-800 italic">
+        <blockquote key={bIdx} className="my-3 pl-4 py-2 border-l-4 border-accent bg-accent-soft/50 rounded-r-xl text-xs sm:text-sm text-ink italic">
           {parseInlineFormatting(quoteText)}
         </blockquote>
       );
@@ -165,8 +165,8 @@ function renderFormattedContent(text, isUser = false) {
             return (
               <ol key={iIdx} className="space-y-2.5 my-2.5 pl-1">
                 {item.items.map((it, idx) => (
-                  <li key={idx} className={`flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed ${isUser ? 'text-white font-medium' : 'text-stone-800'}`}>
-                    <span className={`w-5 h-5 rounded-full font-bold text-[11px] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs border ${isUser ? 'bg-white/20 text-white border-white/30' : 'bg-amber-100/90 text-[#a03612] border-amber-200/60'}`}>
+                  <li key={idx} className={`flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed ${isUser ? 'text-white font-medium' : 'text-ink'}`}>
+                    <span className={`w-5 h-5 rounded-full font-bold text-[11px] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs border ${isUser ? 'bg-elevated/20 text-white border-white/30' : 'bg-accent-soft text-accent border-accent/30'}`}>
                       {it.num}
                     </span>
                     <span className="flex-1">{parseInlineFormatting(it.content, isUser)}</span>
@@ -180,8 +180,8 @@ function renderFormattedContent(text, isUser = false) {
             return (
               <ul key={iIdx} className="space-y-2 my-2 pl-1">
                 {item.items.map((it, idx) => (
-                  <li key={idx} className={`flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed ${isUser ? 'text-white font-medium' : 'text-stone-800'}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-2 ${isUser ? 'bg-amber-300' : 'bg-[#a03612]'}`}></span>
+                  <li key={idx} className={`flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed ${isUser ? 'text-white font-medium' : 'text-ink'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-2 ${isUser ? 'bg-amber-300' : 'bg-accent'}`}></span>
                     <span className="flex-1">{parseInlineFormatting(it.content, isUser)}</span>
                   </li>
                 ))}
@@ -191,14 +191,14 @@ function renderFormattedContent(text, isUser = false) {
 
           if (item.type === 'heading') {
             return (
-              <h4 key={iIdx} className={`text-xs sm:text-sm font-bold mt-3 mb-1 uppercase tracking-wider ${isUser ? 'text-amber-200' : 'text-[#a03612]'}`}>
+              <h4 key={iIdx} className={`text-xs sm:text-sm font-bold mt-3 mb-1 uppercase tracking-wider ${isUser ? 'text-accent-soft' : 'text-accent'}`}>
                 {parseInlineFormatting(item.title, isUser)}
               </h4>
             );
           }
 
           return (
-            <p key={iIdx} className={`text-xs sm:text-sm leading-relaxed ${isUser ? 'text-white font-medium' : 'text-stone-800'}`}>
+            <p key={iIdx} className={`text-xs sm:text-sm leading-relaxed ${isUser ? 'text-white font-medium' : 'text-ink'}`}>
               {parseInlineFormatting(item.content, isUser)}
             </p>
           );
@@ -225,12 +225,12 @@ function parseInlineFormatting(str, isUser = false) {
             key={idx}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border shadow-xs flex items-center gap-1 ${
               isUser
-                ? 'bg-white/20 text-white border-white/30'
+                ? 'bg-elevated/20 text-white border-white/30'
                 : idx === 0
-                ? 'bg-amber-100/90 text-[#a03612] border-amber-300/80'
+                ? 'bg-accent-soft text-accent border-accent/50'
                 : idx === 1
-                ? 'bg-teal-50 text-[#2d6a68] border-teal-200'
-                : 'bg-stone-100 text-stone-700 border-stone-200'
+                ? 'bg-forest/10 text-forest-soft border-forest/40'
+                : 'bg-sunken text-ink-soft border-line'
             }`}
           >
             {tag}
@@ -245,11 +245,11 @@ function parseInlineFormatting(str, isUser = false) {
 
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className={`font-bold ${isUser ? 'text-white' : 'text-stone-900'}`}>{part.slice(2, -2)}</strong>;
+      return <strong key={i} className={`font-bold ${isUser ? 'text-white' : 'text-ink'}`}>{part.slice(2, -2)}</strong>;
     }
 
     if (part.startsWith('`') && part.endsWith('`')) {
-      return <code key={i} className="bg-stone-100 text-[#a03612] px-1.5 py-0.5 rounded font-mono text-[11px] border border-stone-200">{part.slice(1, -1)}</code>;
+      return <code key={i} className="bg-sunken text-accent px-1.5 py-0.5 rounded font-mono text-[11px] border border-line">{part.slice(1, -1)}</code>;
     }
 
     // Highlight (Section X) legal tags
@@ -259,8 +259,8 @@ function parseInlineFormatting(str, isUser = false) {
     return sectionParts.map((secPart, j) => {
       if (/^\(Section[s]?\s+[0-9A-Z\s,()&a-z-]+\)$/i.test(secPart)) {
         return (
-          <span key={j} className="inline-flex items-center gap-1 font-semibold text-[#2d6a68] bg-teal-50 px-2 py-0.5 mx-0.5 rounded-md border border-teal-200/80 text-[11px] font-mono shadow-xs">
-            <svg className="w-3 h-3 text-[#2d6a68]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <span key={j} className="inline-flex items-center gap-1 font-semibold text-forest-soft bg-forest/10 px-2 py-0.5 mx-0.5 rounded-md border border-forest/40 text-[11px] font-mono shadow-xs">
+            <svg className="w-3 h-3 text-forest-soft" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <span>{secPart}</span>
@@ -371,15 +371,15 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
         <div
           className={`max-w-[92%] sm:max-w-[85%] rounded-2xl px-5 py-4 shadow-soft ${
             isUser
-              ? 'bg-[#a03612] text-white rounded-tr-none shadow-md'
+              ? 'bg-accent text-white rounded-tr-none shadow-md'
               : isError
-              ? 'bg-rose-50 border border-rose-200 text-rose-800 rounded-tl-none'
-              : 'bg-white border border-stone-200/90 text-stone-800 rounded-tl-none'
+              ? 'bg-error/10 border border-error/40 text-error rounded-tl-none'
+              : 'bg-elevated border border-line text-ink rounded-tl-none'
           }`}
         >
           {/* Timestamp */}
           {formatTime(message.ts) && (
-            <div className={`text-[10px] mb-1.5 font-semibold ${isUser ? 'text-amber-100/90' : 'text-stone-400'}`}>
+            <div className={`text-[10px] mb-1.5 font-semibold ${isUser ? 'text-accent-soft' : 'text-ink-muted'}`}>
               {formatTime(message.ts)}
             </div>
           )}
@@ -397,7 +397,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
                         type="button"
                         onClick={() => setPreviewImage(att)}
                         aria-label={`${t('previewImage') || 'Preview'}: ${att.name || 'Screenshot'}`}
-                        className="group relative cursor-pointer overflow-hidden rounded-xl border border-white/20 shadow-md bg-black/20 hover:border-amber-300/80 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+                        className="group relative cursor-pointer overflow-hidden rounded-xl border border-white/20 shadow-md bg-black/20 hover:border-accent/50 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
                       >
                         <img
                           src={att.data}
@@ -406,7 +406,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
                         />
                         <span className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-2 opacity-90 group-hover:opacity-100">
                           <span className="text-[10px] font-medium text-white truncate max-w-[130px] flex items-center gap-1">
-                            <svg className="w-3 h-3 text-amber-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <svg className="w-3 h-3 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
@@ -420,9 +420,9 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
                   return (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-white text-xs shadow-xs"
+                      className="flex items-center gap-2 bg-elevated/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-white text-xs shadow-xs"
                     >
-                      <svg className="w-4 h-4 text-amber-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                       <span className="font-semibold truncate max-w-[160px]">{att.name}</span>
@@ -436,23 +436,23 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
 
           {/* Message Text with Rich HTML Formatting */}
           {message.text && (
-            <div className={`max-w-none ${isUser ? 'text-white font-medium' : 'text-stone-800'}`}>
+            <div className={`max-w-none ${isUser ? 'text-white font-medium' : 'text-ink'}`}>
               {renderFormattedContent(message.text, isUser)}
             </div>
           )}
 
           {/* Streaming indicator */}
           {message.streaming && (
-            <div role="status" className="flex items-center gap-1.5 mt-2 text-xs font-semibold text-[#a03612] animate-pulse">
-              <div className="w-2 h-2 rounded-full bg-[#a03612] animate-ping" />
+            <div role="status" className="flex items-center gap-1.5 mt-2 text-xs font-semibold text-accent animate-pulse">
+              <div className="w-2 h-2 rounded-full bg-accent animate-ping" />
               <span>{t('chatLoading')}</span>
             </div>
           )}
 
           {/* Citations section */}
           {!isUser && Array.isArray(message.sources) && message.sources.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-stone-200/80 space-y-2">
-              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#a03612]">
+            <div className="mt-4 pt-3 border-t border-line space-y-2">
+              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-accent">
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
@@ -469,11 +469,11 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
 
           {/* Error actions: Retry */}
           {isError && onRetry && (message.retryText || (Array.isArray(message.retryAttachments) && message.retryAttachments.length > 0)) && (
-            <div className="mt-3 pt-2 border-t border-rose-200/80 flex items-center justify-between">
-              <span className="text-[11px] text-rose-700 font-medium">Failed to reach AI service</span>
+            <div className="mt-3 pt-2 border-t border-error/40 flex items-center justify-between">
+              <span className="text-[11px] text-error font-medium">Failed to reach AI service</span>
               <button
                 onClick={() => onRetry(message)}
-                className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center gap-1"
+                className="px-3 py-1 bg-error hover:bg-error text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center gap-1"
               >
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -485,7 +485,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
 
           {/* Bot Action Bar: Sleek Icon Buttons for Read Aloud, Copy, Regenerate, Feedback */}
           {!isUser && !isError && !message.streaming && (
-            <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500 font-medium">
+            <div className="mt-3 pt-2.5 border-t border-line flex items-center justify-between text-xs text-ink-muted font-medium">
               <div className="flex items-center gap-1.5">
                 {/* Audio Read Aloud Button */}
                 <button
@@ -493,8 +493,8 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
                   onClick={handleToggleSpeech}
                   className={`p-1.5 rounded-lg transition-colors flex items-center gap-1 ${
                     isPlayingSpeech
-                      ? 'text-[#a03612] bg-amber-50 font-bold animate-pulse'
-                      : 'text-stone-400 hover:text-stone-800 hover:bg-stone-100'
+                      ? 'text-accent bg-accent-soft font-bold animate-pulse'
+                      : 'text-ink-muted hover:text-ink hover:bg-sunken'
                   }`}
                   title={isPlayingSpeech ? t('stopSpeech') : t('readAloud')}
                   aria-label={t('readAloud')}
@@ -515,8 +515,8 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
                   onClick={handleCopy}
                   className={`p-1.5 rounded-lg transition-colors flex items-center gap-1 ${
                     copied
-                      ? 'text-emerald-600 bg-emerald-50 font-bold'
-                      : 'text-stone-400 hover:text-stone-800 hover:bg-stone-100'
+                      ? 'text-success bg-success/10 font-bold'
+                      : 'text-ink-muted hover:text-ink hover:bg-sunken'
                   }`}
                   title={t('copyAnswer')}
                   aria-label={t('copyAnswer')}
@@ -532,7 +532,7 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
                   <button
                     type="button"
                     onClick={() => onRegenerate(message)}
-                    className="p-1.5 text-stone-400 hover:text-stone-800 hover:bg-stone-100 rounded-lg transition-colors"
+                    className="p-1.5 text-ink-muted hover:text-ink hover:bg-sunken rounded-lg transition-colors"
                     title={t('regenerate')}
                     aria-label={t('regenerate')}
                   >
@@ -544,21 +544,21 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
               </div>
 
               {speechNotice && (
-                <span role="status" className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1">
+                <span role="status" className="text-[10px] text-accent-strong bg-accent-soft border border-accent/40 rounded-lg px-2 py-1">
                   {t('speechNotSupported')}
                 </span>
               )}
 
               {/* Thumbs Up / Down Feedback */}
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-stone-400 hidden sm:inline">{t('wasHelpful')}</span>
+                <span className="text-[10px] text-ink-muted hidden sm:inline">{t('wasHelpful')}</span>
                 <button
                   type="button"
                   onClick={() => handleFeedback('up')}
                   className={`p-1.5 rounded-lg transition-colors ${
                     feedback === 'up'
-                      ? 'text-emerald-600 bg-emerald-50 font-bold'
-                      : 'text-stone-400 hover:text-stone-800 hover:bg-stone-100'
+                      ? 'text-success bg-success/10 font-bold'
+                      : 'text-ink-muted hover:text-ink hover:bg-sunken'
                   }`}
                   title="Helpful"
                   aria-label="Helpful"
@@ -572,8 +572,8 @@ export default function MessageBubble({ message, language = 'en', onRetry, onReg
                   onClick={() => handleFeedback('down')}
                   className={`p-1.5 rounded-lg transition-colors ${
                     feedback === 'down'
-                      ? 'text-rose-600 bg-rose-50 font-bold'
-                      : 'text-stone-400 hover:text-stone-800 hover:bg-stone-100'
+                      ? 'text-error bg-error/10 font-bold'
+                      : 'text-ink-muted hover:text-ink hover:bg-sunken'
                   }`}
                   title="Not helpful"
                   aria-label="Not helpful"

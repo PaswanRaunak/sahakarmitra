@@ -19,7 +19,7 @@ export default function LanguageSelector({ value, onChange }) {
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="bg-white text-gov-blue px-3 py-1.5 rounded-md text-sm font-medium
+      className="bg-elevated text-gov-blue px-3 py-1.5 rounded-md text-sm font-medium
                  border border-white/30 focus:outline-none focus:ring-2 focus:ring-gov-orange"
       aria-label="Select response language"
     >

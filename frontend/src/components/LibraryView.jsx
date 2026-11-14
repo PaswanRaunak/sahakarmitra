@@ -216,24 +216,24 @@ export default function LibraryView({
   }, [filteredDocuments, selectedCategory, selectedStateFilter, searchQuery, showBookmarksOnly]);
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-y-auto bg-[#faf8f5] p-4 sm:p-6 md:p-8">
+    <div className="flex-1 flex flex-col h-full overflow-y-auto bg-surface p-4 sm:p-6 md:p-8">
       {/* Header Banner */}
       <div className="max-w-6xl mx-auto w-full space-y-6">
         
         {/* Title & Description */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200/80 pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line pb-5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="p-2 rounded-xl bg-[#a03612]/10 text-[#a03612]">
+              <span className="p-2 rounded-xl bg-accent/10 text-accent">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </span>
-              <h1 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
+              <h1 className="text-xl sm:text-2xl font-bold text-ink tracking-tight">
                 {showBookmarksOnly ? (t('myBookmarks') || 'My Bookmarked Sections') : (t('knowledgeRepoTitle') || 'Knowledge Repository')}
               </h1>
             </div>
-            <p className="text-xs sm:text-sm text-stone-500 mt-1">
+            <p className="text-xs sm:text-sm text-ink-muted mt-1">
               {showBookmarksOnly
                 ? (t('bookmarksSubtitle') || 'Access your saved statutory sections and citations anytime.')
                 : (t('knowledgeRepoSubtitle') || 'Browse and search ingested legal sections from the Maharashtra Cooperative Societies Act, 1960.')}
@@ -246,8 +246,8 @@ export default function LibraryView({
               onClick={() => setShowBookmarksOnly(false)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                 !showBookmarksOnly
-                  ? 'bg-[#a03612] text-white shadow-xs'
-                  : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-100'
+                  ? 'bg-accent text-white shadow-xs'
+                  : 'bg-elevated text-ink-soft border border-line hover:bg-sunken'
               }`}
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -260,8 +260,8 @@ export default function LibraryView({
               onClick={() => setShowBookmarksOnly(true)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                 showBookmarksOnly
-                  ? 'bg-[#a03612] text-white shadow-xs'
-                  : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-100'
+                  ? 'bg-accent text-white shadow-xs'
+                  : 'bg-elevated text-ink-soft border border-line hover:bg-sunken'
               }`}
             >
               <svg className="w-3.5 h-3.5" fill={showBookmarksOnly ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
@@ -275,7 +275,7 @@ export default function LibraryView({
         {/* Search Bar & Category Filters */}
         <div className="space-y-4">
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-muted">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -285,14 +285,14 @@ export default function LibraryView({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('searchLibraryPlaceholder') || 'Search by section title, section number (e.g. Section 81A), or legal keyword...'}
-              className="w-full pl-10 pr-10 py-3 bg-white border border-stone-200/90 rounded-xl text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#a03612]/30 focus:border-[#a03612] transition shadow-xs"
+              className="w-full pl-10 pr-10 py-3 bg-elevated border border-line rounded-xl text-xs sm:text-sm text-ink placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition shadow-xs"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
                 aria-label="Clear search"
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-stone-400 hover:text-stone-700 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-ink-muted hover:text-ink-soft rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -303,7 +303,7 @@ export default function LibraryView({
 
           {/* State Filter Tabs */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-            <span className="text-xs font-bold text-stone-500 mr-1 flex items-center gap-1">
+            <span className="text-xs font-bold text-ink-muted mr-1 flex items-center gap-1">
               <span>📍</span>
               <span className="hidden sm:inline">{t('stateSelectorLabel') || 'Jurisdiction'}:</span>
             </span>
@@ -319,13 +319,13 @@ export default function LibraryView({
                   onClick={() => setSelectedStateFilter(st.key)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition flex items-center gap-1.5 ${
                     isActive
-                      ? 'bg-[#a03612] text-white shadow-xs'
-                      : 'bg-white text-stone-700 border border-stone-200 hover:bg-stone-100 hover:border-stone-300'
+                      ? 'bg-accent text-white shadow-xs'
+                      : 'bg-elevated text-ink-soft border border-line hover:bg-sunken hover:border-line'
                   }`}
                 >
                   <span>{st.label}</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                    isActive ? 'bg-[#882c0e] text-white' : 'bg-stone-100 text-stone-600'
+                    isActive ? 'bg-accent-strong text-white' : 'bg-sunken text-ink-soft'
                   }`}>
                     {count}
                   </span>
@@ -349,12 +349,12 @@ export default function LibraryView({
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition flex items-center gap-1.5 ${
                     isActive
                       ? 'bg-stone-900 text-white shadow-xs'
-                      : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-100'
+                      : 'bg-elevated text-ink-soft border border-line hover:bg-sunken'
                   }`}
                 >
                   <span>{cat.label}</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                    isActive ? 'bg-stone-800 text-stone-200' : 'bg-stone-100 text-stone-500'
+                    isActive ? 'bg-stone-800 text-line' : 'bg-sunken text-ink-muted'
                   }`}>
                     {count}
                   </span>
@@ -368,7 +368,7 @@ export default function LibraryView({
         {loading && (
           <div role="status" aria-label="Loading sections" className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="border border-stone-200/90 rounded-2xl bg-white overflow-hidden shadow-soft">
+              <div key={i} className="border border-line rounded-2xl bg-elevated overflow-hidden shadow-soft">
                 <div className="h-16 shimmer-bg" />
                 <div className="p-4 space-y-2.5">
                   <div className="h-3 w-2/3 rounded shimmer-bg" />
@@ -382,18 +382,18 @@ export default function LibraryView({
 
         {/* Empty Search / Filter Results */}
         {!loading && filteredDocuments.length === 0 && (
-          <div className="py-16 text-center bg-white border border-stone-200/80 rounded-2xl p-8 space-y-3 shadow-xs">
-            <div className="w-12 h-12 rounded-full bg-stone-100 text-stone-400 flex items-center justify-center mx-auto">
+          <div className="py-16 text-center bg-elevated border border-line rounded-2xl p-8 space-y-3 shadow-xs">
+            <div className="w-12 h-12 rounded-full bg-sunken text-ink-muted flex items-center justify-center mx-auto">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
-            <h3 className="text-sm font-bold text-stone-900">
+            <h3 className="text-sm font-bold text-ink">
               {showBookmarksOnly
                 ? (t('noBookmarksYet') || 'No Bookmarked Sections Saved')
                 : (t('noResultsFound') || 'No Legal Sections Match Your Criteria')}
             </h3>
-            <p className="text-xs text-stone-500 max-w-md mx-auto">
+            <p className="text-xs text-ink-muted max-w-md mx-auto">
               {showBookmarksOnly
                 ? 'Click the bookmark icon on any section entry to save it to your personal legal reference list.'
                 : 'Try adjusting your search keywords or switching category filters.'}
@@ -401,7 +401,7 @@ export default function LibraryView({
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="mt-2 px-3 py-1.5 bg-[#a03612] text-white rounded-lg text-xs font-bold hover:bg-[#882c0e] transition"
+                className="mt-2 px-3 py-1.5 bg-accent text-white rounded-lg text-xs font-bold hover:bg-accent-strong transition"
               >
                 Clear Search Query
               </button>
@@ -414,9 +414,9 @@ export default function LibraryView({
           <div className="space-y-8">
             {Object.entries(groupedDocuments).map(([category, categoryDocs]) => (
               <div key={category} className="space-y-3">
-                <div className="flex items-center gap-2 border-b border-stone-200/80 pb-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#a03612]" />
-                  <h2 className="text-base font-bold text-stone-900 tracking-tight">
+                <div className="flex items-center gap-2 border-b border-line pb-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-accent" />
+                  <h2 className="text-base font-bold text-ink tracking-tight">
                     {getCategoryLabel(category)} ({categoryDocs.length})
                   </h2>
                 </div>
@@ -488,28 +488,28 @@ function SectionCard({
   const cleanTitle = (currentTitle || '').replace(/—/g, ':');
 
   return (
-    <div className="border border-stone-200/90 rounded-2xl bg-white overflow-hidden shadow-soft hover:shadow-md transition duration-200 flex flex-col justify-between">
+    <div className="border border-line rounded-2xl bg-elevated overflow-hidden shadow-soft hover:shadow-md transition duration-200 flex flex-col justify-between">
       
       {/* Card Header: Act Name + State + Exact Section Number */}
-      <div className="p-4 bg-stone-50/80 border-b border-stone-200/80 flex items-start justify-between gap-3">
+      <div className="p-4 bg-sunken/80 border-b border-line flex items-start justify-between gap-3">
         <div className="space-y-1 min-w-0 flex-1">
           {/* Act Badge, State & Category */}
           <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
-            <span className="px-2 py-0.5 rounded-md bg-amber-100 text-[#a03612] font-bold">
+            <span className="px-2 py-0.5 rounded-md bg-accent-soft text-accent font-bold">
               📍 {state}
             </span>
-            <span className="px-2 py-0.5 rounded-md bg-[#a03612]/10 text-[#a03612] font-bold tracking-tight">
+            <span className="px-2 py-0.5 rounded-md bg-accent/10 text-accent font-bold tracking-tight">
               {currentActName}
             </span>
             {categoryLabel && (
-              <span className="px-2 py-0.5 rounded-md bg-stone-200 text-stone-700 font-semibold">
+              <span className="px-2 py-0.5 rounded-md bg-sunken text-ink-soft font-semibold">
                 {categoryLabel}
               </span>
             )}
           </div>
 
           {/* Section Number + Heading */}
-          <h3 className="text-sm font-bold text-stone-900 leading-snug break-words">
+          <h3 className="text-sm font-bold text-ink leading-snug break-words">
             {cleanTitle}
           </h3>
         </div>
@@ -523,8 +523,8 @@ function SectionCard({
               title={showOriginal ? 'Show Translated text' : 'Show Original English statutory text'}
               className={`px-2 py-1 rounded-lg text-[10px] font-bold transition border ${
                 showOriginal
-                  ? 'bg-stone-800 text-white border-stone-800'
-                  : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-100'
+                  ? 'bg-stone-800 text-white border-line'
+                  : 'bg-elevated text-ink-soft border-line hover:bg-sunken'
               }`}
             >
               {showOriginal ? 'EN' : (language === 'hi' ? 'हिंदी' : 'मराठी')}
@@ -537,8 +537,8 @@ function SectionCard({
             title={isBookmarked ? (t('removeBookmark') || 'Remove Bookmark') : (t('bookmarkSection') || 'Bookmark Section')}
             className={`p-2 rounded-xl transition flex-shrink-0 ${
               isBookmarked
-                ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 border border-amber-300'
-                : 'bg-white text-stone-400 hover:text-stone-700 hover:bg-stone-100 border border-stone-200'
+                ? 'bg-accent-soft text-accent-strong hover:bg-amber-200 border border-accent/50'
+                : 'bg-elevated text-ink-muted hover:text-ink-soft hover:bg-sunken border border-line'
             }`}
           >
             <svg className="w-4 h-4" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
@@ -549,21 +549,21 @@ function SectionCard({
       </div>
 
       {/* Verbatim Full Text */}
-      <div className="p-4 text-xs text-stone-700 leading-relaxed font-sans flex-1 bg-white space-y-2">
-        <div className="bg-stone-50 p-3 rounded-xl border border-stone-100/90 font-serif whitespace-pre-wrap leading-relaxed text-stone-800">
+      <div className="p-4 text-xs text-ink-soft leading-relaxed font-sans flex-1 bg-elevated space-y-2">
+        <div className="bg-sunken p-3 rounded-xl border border-line/90 font-serif whitespace-pre-wrap leading-relaxed text-ink">
           {currentText}
         </div>
       </div>
 
       {/* Bottom Action Footer */}
-      <div className="px-4 py-3 bg-stone-50/60 border-t border-stone-200/80 flex items-center justify-between gap-2 text-xs">
+      <div className="px-4 py-3 bg-sunken/60 border-t border-line flex items-center justify-between gap-2 text-xs">
         {/* Copy Citation Button */}
         <button
           onClick={onCopyCitation}
           className={`px-3 py-1.5 rounded-xl font-bold text-[11px] transition flex items-center gap-1.5 shadow-2xs ${
             isCopied
               ? 'bg-emerald-600 text-white'
-              : 'bg-white text-stone-700 border border-stone-200 hover:bg-stone-100 hover:border-stone-300'
+              : 'bg-elevated text-ink-soft border border-line hover:bg-sunken hover:border-line'
           }`}
           title={`Copy citation: "${secNum}, ${currentActName}"`}
         >
@@ -576,7 +576,7 @@ function SectionCard({
             </>
           ) : (
             <>
-              <svg className="w-3.5 h-3.5 text-[#a03612]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
               </svg>
               <span>{t('copyCitation') || 'Copy Citation'}</span>
@@ -585,8 +585,8 @@ function SectionCard({
         </button>
 
         {/* Source file tag */}
-        <span className="text-[10px] text-stone-400 font-mono flex items-center gap-1">
-          <svg className="w-3 h-3 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <span className="text-[10px] text-ink-muted font-mono flex items-center gap-1">
+          <svg className="w-3 h-3 text-ink-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           <span>{doc.source_file || 'ChromaDB'}</span>

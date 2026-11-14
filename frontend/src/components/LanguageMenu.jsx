@@ -66,10 +66,10 @@ export default function LanguageMenu({ current = 'en', onChange, className = '',
         <div
           role="listbox"
           aria-label="Languages"
-          className={`absolute top-full mt-2 w-56 max-h-96 overflow-y-auto bg-white border border-stone-200/90 rounded-2xl shadow-2xl py-2 z-50 animate-scale-in ${align === 'right' ? 'right-0' : 'left-0'}`}
+          className={`absolute top-full mt-2 w-56 max-h-96 overflow-y-auto bg-elevated border border-line rounded-2xl shadow-2xl py-2 z-50 animate-scale-in ${align === 'right' ? 'right-0' : 'left-0'}`}
         >
           {!languages ? (
-            <div className="px-4 py-2 text-xs text-stone-400">Loading…</div>
+            <div className="px-4 py-2 text-xs text-ink-muted">Loading…</div>
           ) : (
             languages.map((l) => {
               const isCurrent = l.code === current;
@@ -81,8 +81,8 @@ export default function LanguageMenu({ current = 'en', onChange, className = '',
                     role="option"
                     aria-selected={isCurrent}
                     onClick={() => { onChange(l.code); setOpen(false); }}
-                    className={`w-full text-left px-4 py-2 text-xs font-semibold flex items-center justify-between transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612] ${
-                      isCurrent ? 'bg-amber-50 text-[#a03612]' : 'text-stone-700 hover:bg-stone-50'
+                    className={`w-full text-left px-4 py-2 text-xs font-semibold flex items-center justify-between transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                      isCurrent ? 'bg-accent-soft text-accent' : 'text-ink-soft hover:bg-sunken'
                     }`}
                   >
                     <span>{labelFor(l)}</span>
@@ -98,10 +98,10 @@ export default function LanguageMenu({ current = 'en', onChange, className = '',
                 <div
                   key={l.code}
                   title="Coming soon (pending validation)"
-                  className="px-4 py-2 text-xs text-stone-300 flex items-center justify-between cursor-not-allowed select-none"
+                  className="px-4 py-2 text-xs text-line flex items-center justify-between cursor-not-allowed select-none"
                 >
                   <span>{labelFor(l)}</span>
-                  <span className="text-[9px] font-semibold text-stone-300 uppercase tracking-wide">Coming soon</span>
+                  <span className="text-[9px] font-semibold text-line uppercase tracking-wide">Coming soon</span>
                 </div>
               );
             })

@@ -10,7 +10,7 @@ const EXPERTS_DATA = [
     location: 'Fort, Mumbai / Pune',
     rating: 4.9,
     reviewsCount: 142,
-    avatarBg: 'from-amber-600 to-[#a03612]',
+    avatarBg: 'from-forest-soft to-forest',
     avatarInitials: 'RD',
     availability: 'Available Today (2 Slots)',
     availabilityStatus: 'online',
@@ -60,7 +60,7 @@ const EXPERTS_DATA = [
     location: 'Vashi, Navi Mumbai',
     rating: 4.9,
     reviewsCount: 115,
-    avatarBg: 'from-[#1b4342] to-[#2d6a68]',
+    avatarBg: 'from-forest to-forest-soft',
     avatarInitials: 'VJ',
     availability: 'Available Today',
     availabilityStatus: 'online',
@@ -135,7 +135,7 @@ const EXPERTS_DATA = [
     location: 'Andheri West, Mumbai',
     rating: 4.8,
     reviewsCount: 74,
-    avatarBg: 'from-amber-700 to-[#882c0e]',
+    avatarBg: 'from-accent-strong to-forest',
     avatarInitials: 'MI',
     availability: 'Available Tomorrow',
     availabilityStatus: 'away',
@@ -231,31 +231,31 @@ export default function ExpertsView({ language = 'en' }) {
   }, [profileModalExpert, bookingModalExpert]);
 
   return (
-    <div className="h-full overflow-y-auto bg-[#faf8f5] p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="h-full overflow-y-auto bg-surface p-4 sm:p-6 lg:p-8 space-y-6">
       
       {/* Header & Hero Section */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200/90 shadow-soft space-y-4">
+      <div className="bg-elevated rounded-3xl p-6 sm:p-8 border border-line shadow-soft space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs font-bold text-[#a03612] uppercase tracking-wider mb-1">
-              <span className="w-2 h-2 rounded-full bg-[#a03612] animate-ping"></span>
+            <div className="flex items-center gap-2 text-xs font-bold text-accent uppercase tracking-wider mb-1">
+              <span className="w-2 h-2 rounded-full bg-accent animate-ping"></span>
               <span>Human Assistance & Legal Counsel</span>
             </div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-stone-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-ink tracking-tight">
               {t('expertsHeading')}
             </h1>
-            <p className="text-xs sm:text-sm text-stone-600 max-w-3xl mt-1">
+            <p className="text-xs sm:text-sm text-ink-soft max-w-3xl mt-1">
               {t('expertsSubheading')}
             </p>
           </div>
 
-          <div className="flex items-center gap-3 bg-stone-100/80 p-3 rounded-2xl border border-stone-200/70 text-xs">
-            <div className="w-10 h-10 rounded-xl bg-[#a03612] text-white flex items-center justify-center font-bold text-base flex-shrink-0">
+          <div className="flex items-center gap-3 bg-sunken/80 p-3 rounded-2xl border border-line text-xs">
+            <div className="w-10 h-10 rounded-xl bg-accent text-white flex items-center justify-center font-bold text-base flex-shrink-0">
               ✓
             </div>
             <div>
-              <p className="font-bold text-stone-900">Verified Legal Counsel</p>
-              <p className="text-[11px] text-stone-500">Maharashtra Bar & ICAI Empanelled</p>
+              <p className="font-bold text-ink">Verified Legal Counsel</p>
+              <p className="text-[11px] text-ink-muted">Maharashtra Bar & ICAI Empanelled</p>
             </div>
           </div>
         </div>
@@ -263,7 +263,7 @@ export default function ExpertsView({ language = 'en' }) {
         {/* Search Input & Filtering */}
         <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
           <div className="relative flex-1 w-full">
-            <svg className="w-4 h-4 absolute left-3.5 top-3.5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 absolute left-3.5 top-3.5 text-ink-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
@@ -271,14 +271,14 @@ export default function ExpertsView({ language = 'en' }) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('searchExpertsPlaceholder')}
-              className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200/90 rounded-2xl text-xs sm:text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#a03612] focus:bg-white transition"
+              className="w-full pl-10 pr-4 py-2.5 bg-sunken border border-line rounded-2xl text-xs sm:text-sm text-ink placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-accent focus:bg-elevated transition"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
                 aria-label="Clear expert search"
-                className="absolute right-3 top-2.5 text-stone-400 hover:text-stone-700 text-xs font-bold rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
+                className="absolute right-3 top-2.5 text-ink-muted hover:text-ink-soft text-xs font-bold rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 ✕
               </button>
@@ -294,8 +294,8 @@ export default function ExpertsView({ language = 'en' }) {
               onClick={() => setSelectedTag(tag)}
               className={`px-3.5 py-1.5 rounded-xl font-medium whitespace-nowrap transition-colors duration-200 ${
                 selectedTag === tag
-                  ? 'bg-[#a03612] text-white font-bold shadow-xs scale-105'
-                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200/80 hover:text-stone-900'
+                  ? 'bg-accent text-white font-bold shadow-xs scale-105'
+                  : 'bg-sunken text-ink-soft hover:bg-sunken/80 hover:text-ink'
               }`}
             >
               {tag === 'All' ? t('allExpertise') : tag}
@@ -306,25 +306,25 @@ export default function ExpertsView({ language = 'en' }) {
 
       {/* Expert Cards Grid */}
       {filteredExperts.length === 0 ? (
-        <div className="bg-white rounded-3xl p-12 text-center border border-stone-200 shadow-soft space-y-3">
-          <div className="w-12 h-12 rounded-full bg-stone-100 text-stone-400 flex items-center justify-center mx-auto">
+        <div className="bg-elevated rounded-3xl p-12 text-center border border-line shadow-soft space-y-3">
+          <div className="w-12 h-12 rounded-full bg-sunken text-ink-muted flex items-center justify-center mx-auto">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <h3 className="text-base font-bold text-stone-800">No matching experts found</h3>
-          <p className="text-xs text-stone-500 max-w-sm mx-auto">
+          <h3 className="text-base font-bold text-ink">No matching experts found</h3>
+          <p className="text-xs text-ink-muted max-w-sm mx-auto">
             Try adjusting your search terms or clearing the specialization filters.
           </p>
           <button
             onClick={() => { setSearchQuery(''); setSelectedTag('All'); }}
-            className="px-4 py-2 bg-[#a03612] text-white text-xs font-bold rounded-xl hover:bg-[#882c0e] transition"
+            className="px-4 py-2 bg-accent text-white text-xs font-bold rounded-xl hover:bg-accent-strong transition"
           >
             Reset Filters
           </button>
         </div>
       ) : (
-        <div className="divide-y divide-stone-200/70 border-t border-stone-200/70">
+        <div className="divide-y divide-line border-t border-line">
           {filteredExperts.map((expert, idx) => (
             <div
               key={expert.id}
@@ -342,24 +342,24 @@ export default function ExpertsView({ language = 'en' }) {
                     aria-label={expert.availability}
                     className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${
                       expert.availabilityStatus === 'online'
-                        ? 'bg-emerald-500'
+                        ? 'bg-success/100'
                         : expert.availabilityStatus === 'away'
-                        ? 'bg-amber-500'
+                        ? 'bg-accent-soft0'
                         : 'bg-stone-400'
                     }`}
                   ></span>
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <h3 className="text-sm font-bold text-stone-900 truncate">{expert.name}</h3>
-                    <span className="text-[#2d6a68] font-bold text-xs" title={t('verifiedExpert')} aria-label={t('verifiedExpert')}>✓</span>
+                    <h3 className="text-sm font-bold text-ink truncate">{expert.name}</h3>
+                    <span className="text-forest-soft font-bold text-xs" title={t('verifiedExpert')} aria-label={t('verifiedExpert')}>✓</span>
                   </div>
-                  <p className="text-[11px] text-stone-500 font-medium truncate">{expert.designation}</p>
-                  <p className="text-[11px] text-stone-600 mt-1 tabular-nums">
+                  <p className="text-[11px] text-ink-muted font-medium truncate">{expert.designation}</p>
+                  <p className="text-[11px] text-ink-soft mt-1 tabular-nums">
                     <span className="text-amber-500 font-bold">★ {expert.rating}</span>
-                    <span className="text-stone-400"> ({expert.reviewsCount})</span>
-                    <span className="text-stone-400 mx-1.5">·</span>
-                    <span className="font-semibold text-stone-700">{expert.experience} {t('yearsExp')}</span>
+                    <span className="text-ink-muted"> ({expert.reviewsCount})</span>
+                    <span className="text-ink-muted mx-1.5">·</span>
+                    <span className="font-semibold text-ink-soft">{expert.experience} {t('yearsExp')}</span>
                   </p>
                 </div>
               </div>
@@ -368,30 +368,30 @@ export default function ExpertsView({ language = 'en' }) {
               <div className="md:col-span-4 min-w-0">
                 <div className="flex flex-wrap gap-1.5">
                   {expert.expertise.slice(0, 3).map((exp, eidx) => (
-                    <span key={eidx} className="px-2.5 py-1 bg-stone-100 text-stone-700 rounded-lg text-[10px] font-semibold">
+                    <span key={eidx} className="px-2.5 py-1 bg-sunken text-ink-soft rounded-lg text-[10px] font-semibold">
                       {exp}
                     </span>
                   ))}
                 </div>
-                <p className="text-[11px] text-stone-500 mt-2 truncate">
-                  <span className="font-medium text-stone-400">{t('languagesSpoken')}: </span>
-                  <span className="font-semibold text-stone-700">{expert.languages.join(', ')}</span>
+                <p className="text-[11px] text-ink-muted mt-2 truncate">
+                  <span className="font-medium text-ink-muted">{t('languagesSpoken')}: </span>
+                  <span className="font-semibold text-ink-soft">{expert.languages.join(', ')}</span>
                 </p>
               </div>
 
               {/* Rate + actions */}
               <div className="md:col-span-4 flex md:flex-col md:items-end gap-3 md:gap-2">
-                <p className="text-sm font-extrabold text-[#a03612] tabular-nums md:order-1">{expert.fee}</p>
+                <p className="text-sm font-extrabold text-accent tabular-nums md:order-1">{expert.fee}</p>
                 <div className="flex items-center gap-2 md:order-2">
                   <button
                     onClick={() => setProfileModalExpert(expert)}
-                    className="flex-1 py-2 px-3 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 rounded-xl text-xs font-bold transition-colors shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612]"
+                    className="flex-1 py-2 px-3 bg-elevated hover:bg-sunken text-ink-soft border border-line rounded-xl text-xs font-bold transition-colors shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   >
                     {t('viewProfile')}
                   </button>
                   <button
                     onClick={() => handleOpenBooking(expert)}
-                    className="flex-1 py-2 px-3 bg-[#a03612] hover:bg-[#882c0e] text-white rounded-xl text-xs font-bold transition-colors shadow-xs active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a03612] focus-visible:ring-offset-2"
+                    className="flex-1 py-2 px-3 bg-accent hover:bg-accent-strong text-white rounded-xl text-xs font-bold transition-colors shadow-xs active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                   >
                     {t('bookConsultation')}
                   </button>
@@ -409,58 +409,58 @@ export default function ExpertsView({ language = 'en' }) {
           aria-modal="true"
           aria-label={`Profile: ${profileModalExpert.name}`}
           onClick={(e) => { if (e.target === e.currentTarget) setProfileModalExpert(null); }}
-          className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in overscroll-contain">
-          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-stone-200 shadow-2xl p-6 sm:p-8 space-y-6 animate-scale-in">
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in overscroll-contain">
+          <div className="bg-elevated rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-line shadow-2xl p-6 sm:p-8 space-y-6 animate-scale-in">
             
             {/* Modal Header */}
-            <div className="flex items-start justify-between gap-4 border-b border-stone-100 pb-5">
+            <div className="flex items-start justify-between gap-4 border-b border-line pb-5">
               <div className="flex items-center gap-4">
                 <div className={`w-16 h-16 rounded-2xl bg-gradient-to-tr ${profileModalExpert.avatarBg} text-white font-black text-xl flex items-center justify-center shadow-md`}>
                   {profileModalExpert.avatarInitials}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-lg sm:text-xl font-bold text-stone-900">{profileModalExpert.name}</h2>
-                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-full">Empanelled</span>
+                    <h2 className="text-lg sm:text-xl font-bold text-ink">{profileModalExpert.name}</h2>
+                    <span className="px-2 py-0.5 bg-success/15 text-success text-[10px] font-bold rounded-full">Empanelled</span>
                   </div>
-                  <p className="text-xs text-stone-500 font-medium">{profileModalExpert.designation}</p>
-                  <p className="text-[11px] text-stone-400">{profileModalExpert.location}</p>
+                  <p className="text-xs text-ink-muted font-medium">{profileModalExpert.designation}</p>
+                  <p className="text-[11px] text-ink-muted">{profileModalExpert.location}</p>
                 </div>
               </div>
 
               <button
                 onClick={() => setProfileModalExpert(null)}
-                className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 flex items-center justify-center font-bold text-sm"
+                className="w-8 h-8 rounded-full bg-sunken hover:bg-sunken text-ink-soft flex items-center justify-center font-bold text-sm"
               >
                 ✕
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="space-y-4 text-xs sm:text-sm text-stone-700">
+            <div className="space-y-4 text-xs sm:text-sm text-ink-soft">
               <div>
-                <h4 className="font-bold text-stone-900 uppercase tracking-wider text-[11px] mb-1">About & Experience</h4>
-                <p className="leading-relaxed text-stone-600">{profileModalExpert.bio}</p>
+                <h4 className="font-bold text-ink uppercase tracking-wider text-[11px] mb-1">About & Experience</h4>
+                <p className="leading-relaxed text-ink-soft">{profileModalExpert.bio}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 bg-stone-50 p-4 rounded-2xl border border-stone-200/70">
+              <div className="grid grid-cols-2 gap-4 bg-sunken p-4 rounded-2xl border border-line">
                 <div>
-                  <p className="text-[10px] text-stone-400 font-bold uppercase">Education & Bar Certs</p>
-                  <p className="font-semibold text-stone-800 mt-0.5">{profileModalExpert.education}</p>
-                  <p className="text-[11px] text-stone-500">Reg: {profileModalExpert.barRegistration}</p>
+                  <p className="text-[10px] text-ink-muted font-bold uppercase">Education & Bar Certs</p>
+                  <p className="font-semibold text-ink mt-0.5">{profileModalExpert.education}</p>
+                  <p className="text-[11px] text-ink-muted">Reg: {profileModalExpert.barRegistration}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-stone-400 font-bold uppercase">Consultation Fee</p>
-                  <p className="font-extrabold text-[#a03612] text-sm mt-0.5">{profileModalExpert.fee}</p>
-                  <p className="text-[11px] text-stone-500">Direct 1-on-1 Consultation</p>
+                  <p className="text-[10px] text-ink-muted font-bold uppercase">Consultation Fee</p>
+                  <p className="font-extrabold text-accent text-sm mt-0.5">{profileModalExpert.fee}</p>
+                  <p className="text-[11px] text-ink-muted">Direct 1-on-1 Consultation</p>
                 </div>
               </div>
 
               <div>
-                <h4 className="font-bold text-stone-900 uppercase tracking-wider text-[11px] mb-2">Specializations & Practice Areas</h4>
+                <h4 className="font-bold text-ink uppercase tracking-wider text-[11px] mb-2">Specializations & Practice Areas</h4>
                 <div className="flex flex-wrap gap-2">
                   {profileModalExpert.expertise.map((exp, idx) => (
-                    <span key={idx} className="px-3 py-1 bg-amber-50 text-[#a03612] border border-amber-200/80 rounded-xl text-xs font-semibold">
+                    <span key={idx} className="px-3 py-1 bg-accent-soft text-accent border border-accent/40 rounded-xl text-xs font-semibold">
                       ✓ {exp}
                     </span>
                   ))}
@@ -468,16 +468,16 @@ export default function ExpertsView({ language = 'en' }) {
               </div>
 
               <div>
-                <h4 className="font-bold text-stone-900 uppercase tracking-wider text-[11px] mb-1">Languages Spoken</h4>
-                <p className="font-medium text-stone-800">{profileModalExpert.languages.join(', ')}</p>
+                <h4 className="font-bold text-ink uppercase tracking-wider text-[11px] mb-1">Languages Spoken</h4>
+                <p className="font-medium text-ink">{profileModalExpert.languages.join(', ')}</p>
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="pt-4 border-t border-stone-100 flex items-center justify-end gap-3">
+            <div className="pt-4 border-t border-line flex items-center justify-end gap-3">
               <button
                 onClick={() => setProfileModalExpert(null)}
-                className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition"
+                className="px-4 py-2 bg-sunken hover:bg-sunken text-ink-soft rounded-xl text-xs font-bold transition"
               >
                 Close
               </button>
@@ -487,7 +487,7 @@ export default function ExpertsView({ language = 'en' }) {
                   setProfileModalExpert(null);
                   handleOpenBooking(exp);
                 }}
-                className="px-5 py-2 bg-[#a03612] hover:bg-[#882c0e] text-white rounded-xl text-xs font-bold transition shadow-xs"
+                className="px-5 py-2 bg-accent hover:bg-accent-strong text-white rounded-xl text-xs font-bold transition shadow-xs"
               >
                 {t('bookConsultation')}
               </button>
@@ -504,26 +504,26 @@ export default function ExpertsView({ language = 'en' }) {
           aria-modal="true"
           aria-label={`Book consultation: ${bookingModalExpert.name}`}
           onClick={(e) => { if (e.target === e.currentTarget) setBookingModalExpert(null); }}
-          className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in overscroll-contain">
-          <div className="bg-white rounded-3xl max-w-lg w-full border border-stone-200 shadow-2xl p-6 sm:p-8 space-y-5 animate-scale-in relative">
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in overscroll-contain">
+          <div className="bg-elevated rounded-3xl max-w-lg w-full border border-line shadow-2xl p-6 sm:p-8 space-y-5 animate-scale-in relative">
             
             <button
               onClick={() => setBookingModalExpert(null)}
-              className="absolute right-5 top-5 w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 flex items-center justify-center font-bold text-sm"
+              className="absolute right-5 top-5 w-8 h-8 rounded-full bg-sunken hover:bg-sunken text-ink-soft flex items-center justify-center font-bold text-sm"
             >
               ✕
             </button>
 
             {bookingSubmitted ? (
               <div className="py-8 text-center space-y-4 animate-scale-in">
-                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-2xl font-bold">
+                <div className="w-16 h-16 rounded-full bg-success/15 text-success flex items-center justify-center mx-auto text-2xl font-bold">
                   ✓
                 </div>
-                <h3 className="text-xl font-bold text-stone-900">{t('bookingSuccessTitle')}</h3>
-                <p className="text-xs text-stone-600 max-w-sm mx-auto leading-relaxed">
+                <h3 className="text-xl font-bold text-ink">{t('bookingSuccessTitle')}</h3>
+                <p className="text-xs text-ink-soft max-w-sm mx-auto leading-relaxed">
                   {t('bookingSuccessDesc')}
                 </p>
-                <div className="p-4 bg-stone-50 rounded-2xl text-left border border-stone-200 text-xs space-y-1">
+                <div className="p-4 bg-sunken rounded-2xl text-left border border-line text-xs space-y-1">
                   <p><span className="font-bold">Expert:</span> {bookingModalExpert.name}</p>
                   <p><span className="font-bold">Date & Time:</span> {bookingForm.date} at {bookingForm.time}</p>
                   <p><span className="font-bold">Mode:</span> {bookingForm.mode}</p>
@@ -532,28 +532,28 @@ export default function ExpertsView({ language = 'en' }) {
             ) : (
               <form onSubmit={handleBookingSubmit} className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-bold text-stone-900">{t('bookConsultation')}</h3>
-                  <p className="text-xs text-stone-500">with <span className="font-bold text-stone-800">{bookingModalExpert.name}</span></p>
+                  <h3 className="text-lg font-bold text-ink">{t('bookConsultation')}</h3>
+                  <p className="text-xs text-ink-muted">with <span className="font-bold text-ink">{bookingModalExpert.name}</span></p>
                 </div>
 
                 {/* Date & Time Picker */}
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="block font-bold text-stone-700 mb-1">Preferred Date</label>
+                    <label className="block font-bold text-ink-soft mb-1">Preferred Date</label>
                     <input
                       type="date"
                       required
                       value={bookingForm.date}
                       onChange={(e) => setBookingForm({ ...bookingForm, date: e.target.value })}
-                      className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#a03612]"
+                      className="w-full p-2.5 bg-sunken border border-line rounded-xl text-ink focus:outline-none focus:ring-2 focus:ring-accent"
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-stone-700 mb-1">Time Slot</label>
+                    <label className="block font-bold text-ink-soft mb-1">Time Slot</label>
                     <select
                       value={bookingForm.time}
                       onChange={(e) => setBookingForm({ ...bookingForm, time: e.target.value })}
-                      className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#a03612]"
+                      className="w-full p-2.5 bg-sunken border border-line rounded-xl text-ink focus:outline-none focus:ring-2 focus:ring-accent"
                     >
                       <option>10:30 AM</option>
                       <option>02:00 PM</option>
@@ -565,7 +565,7 @@ export default function ExpertsView({ language = 'en' }) {
 
                 {/* Mode Selection */}
                 <div className="text-xs">
-                  <label className="block font-bold text-stone-700 mb-1">Consultation Mode</label>
+                  <label className="block font-bold text-ink-soft mb-1">Consultation Mode</label>
                   <div className="grid grid-cols-3 gap-2">
                     {bookingModalExpert.modes.map((mode) => (
                       <button
@@ -574,8 +574,8 @@ export default function ExpertsView({ language = 'en' }) {
                         onClick={() => setBookingForm({ ...bookingForm, mode })}
                         className={`py-2 px-2 text-center rounded-xl font-semibold border text-[11px] transition ${
                           bookingForm.mode === mode
-                            ? 'bg-[#a03612] text-white border-[#a03612]'
-                            : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
+                            ? 'bg-accent text-white border-accent'
+                            : 'bg-sunken text-ink-soft border-line hover:bg-sunken'
                         }`}
                       >
                         {mode}
@@ -586,14 +586,14 @@ export default function ExpertsView({ language = 'en' }) {
 
                 {/* Topic / Issue Description */}
                 <div className="text-xs space-y-1">
-                  <label className="block font-bold text-stone-700">Legal Topic / Issue Summary</label>
+                  <label className="block font-bold text-ink-soft">Legal Topic / Issue Summary</label>
                   <textarea
                     rows={3}
                     required
                     placeholder="Describe your society dispute, MCS Act section inquiry, or audit query..."
                     value={bookingForm.notes}
                     onChange={(e) => setBookingForm({ ...bookingForm, notes: e.target.value })}
-                    className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#a03612] resize-none"
+                    className="w-full p-3 bg-sunken border border-line rounded-xl text-ink placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-accent resize-none"
                   />
                 </div>
 
@@ -601,13 +601,13 @@ export default function ExpertsView({ language = 'en' }) {
                   <button
                     type="button"
                     onClick={() => setBookingModalExpert(null)}
-                    className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition"
+                    className="px-4 py-2 bg-sunken hover:bg-sunken text-ink-soft rounded-xl text-xs font-bold transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 bg-[#a03612] hover:bg-[#882c0e] text-white rounded-xl text-xs font-bold transition shadow-xs"
+                    className="px-5 py-2 bg-accent hover:bg-accent-strong text-white rounded-xl text-xs font-bold transition shadow-xs"
                   >
                     Confirm & Submit
                   </button>

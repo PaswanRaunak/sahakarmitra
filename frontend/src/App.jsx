@@ -215,6 +215,22 @@ export default function App() {
     document.documentElement.lang = language;
   }, [language]);
 
+  // Theme (dark/light): persisted, defaults to the OS preference
+  const [theme, setTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sahakar_theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+    } catch {}
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    try {
+      localStorage.setItem('sahakar_theme', theme);
+    } catch {}
+  }, [theme]);
+  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
+
   const handleUpdateUser = (updatedUser) => {
     setCurrentUser(updatedUser);
     if (updatedUser.preferredLang) {
@@ -528,12 +544,12 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-    <div className={`min-h-screen bg-[#faf8f5] text-[#1c1917] flex flex-col font-sans ${isDevanagari ? 'lang-dev' : ''}`}>
+    <div className={`min-h-screen bg-surface text-ink flex flex-col font-sans ${isDevanagari ? 'lang-dev' : ''}`}>
 
       {/* Skip link, first focusable element on the page */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-white focus:text-[#a03612] focus:border focus:border-[#a03612] focus:px-4 focus:py-2 focus:rounded-xl focus:text-xs focus:font-bold focus:shadow-md"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-elevated focus:text-accent focus:border focus:border-accent focus:px-4 focus:py-2 focus:rounded-xl focus:text-xs focus:font-bold focus:shadow-md"
       >
         Skip to content
       </a>
@@ -552,12 +568,14 @@ export default function App() {
 
       {/* VIEW 2: AI COOPERATIVE DASHBOARD WORKSPACE */}
       {currentView === 'dashboard' && (
-        <div className="h-[100dvh] flex flex-col bg-[#faf8f5] overflow-hidden">
+        <div className="h-[100dvh] flex flex-col bg-surface overflow-hidden">
 
           {/* Header */}
           <DashboardHeader
             language={language}
             setLanguage={setLanguage}
+            theme={theme}
+            onToggleTheme={toggleTheme}
             selectedState={selectedState}
             onOpenStatePicker={() => setShowStateModal(true)}
             user={currentUser}
@@ -572,14 +590,14 @@ export default function App() {
 
           {/* Non-blocking Geolocation Suggestion Banner */}
           {showGeoBanner && detectedState && (
-            <div className="bg-gradient-to-r from-amber-500/10 via-amber-100/80 to-amber-500/10 border-b border-amber-200 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs text-stone-800 z-20 animate-fade-in">
+            <div className="bg-gradient-to-r from-amber-500/10 via-amber-100/80 to-amber-500/10 border-b border-accent/40 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs text-ink z-20 animate-fade-in">
               <div className="flex items-center gap-2">
-                <span className="p-1 rounded-lg bg-amber-200/80 text-[#a03612]">📍</span>
+                <span className="p-1 rounded-lg bg-amber-200/80 text-accent">📍</span>
                 <span>
                   {t('geoBannerText', { state: detectedState }) ||
                     `Based on your location, we've set your region to ${detectedState}.`}
                 </span>
-                <span className="hidden md:inline text-[10px] text-stone-500 font-mono">
+                <span className="hidden md:inline text-[10px] text-ink-muted font-mono">
                   (Privacy protected: no IP logging)
                 </span>
               </div>
@@ -587,14 +605,14 @@ export default function App() {
                 <button
                   type="button"
                   onClick={handleConfirmGeoState}
-                  className="px-3 py-1 bg-[#a03612] hover:bg-[#882e0f] text-white text-xs font-bold rounded-lg transition shadow-xs"
+                  className="px-3 py-1 bg-accent hover:bg-[#882e0f] text-white text-xs font-bold rounded-lg transition shadow-xs"
                 >
                   {t('confirmRegion') || 'Confirm'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowStateModal(true)}
-                  className="px-3 py-1 bg-white hover:bg-stone-100 border border-stone-200 text-stone-700 text-xs font-bold rounded-lg transition shadow-xs"
+                  className="px-3 py-1 bg-elevated hover:bg-sunken border border-line text-ink-soft text-xs font-bold rounded-lg transition shadow-xs"
                 >
                   {t('changeRegion') || 'Change'}
                 </button>
@@ -602,7 +620,7 @@ export default function App() {
                   type="button"
                   onClick={handleDismissGeoBanner}
                   aria-label="Dismiss banner"
-                  className="p-1 text-stone-400 hover:text-stone-700 rounded transition ml-1"
+                  className="p-1 text-ink-muted hover:text-ink-soft rounded transition ml-1"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -637,7 +655,7 @@ export default function App() {
 
 
             {/* Main Workspace Area */}
-            <div id="main-content" className="flex-1 flex flex-col min-w-0 bg-[#faf8f5]">
+            <div id="main-content" className="flex-1 flex flex-col min-w-0 bg-surface">
 
               {activeTab === 'dashboard' ? (
                 <ErrorBoundary compact name="Dashboard Overview" onOpenHome={() => setActiveTab('chat')}>
